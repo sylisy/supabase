@@ -36,6 +36,9 @@ const DiskManagementPanelForm = dynamic(() =>
     (mod) => mod.DiskManagementPanelForm
   )
 )
+const JitDbAccessConfiguration = dynamic(
+  () => import('components/interfaces/Settings/Database/JitDatabaseAccess/JitDbAccessConfiguration')
+)
 
 const ProjectSettings: NextPageWithLayout = () => {
   const isAws = useIsAwsCloudProvider()
@@ -63,6 +66,7 @@ const ProjectSettings: NextPageWithLayout = () => {
               </PageSectionContent>
             </PageSection>
             <SSLConfiguration />
+            <JitDbAccessConfiguration />
             {showNewDiskManagementUI ? (
               // This form is hidden if Disk and Compute form is enabled, new form is on ./settings/compute-and-disk
               <DiskManagementPanelForm />
