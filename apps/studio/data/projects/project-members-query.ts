@@ -28,10 +28,14 @@ export type ProjectMembersError = ResponseError
 
 export const useProjectMembersQuery = <TData = ProjectMembersData>(
   { projectRef }: ProjectMembersVariables,
-  { enabled = true, ...options }: UseQueryOptions<ProjectMembersData, ProjectMembersError, TData> = {}
+  {
+    enabled = true,
+    ...options
+  }: UseQueryOptions<ProjectMembersData, ProjectMembersError, TData> = {}
 ) =>
-  useQuery<ProjectMembersData, ProjectMembersError, TData>(
-    projectKeys.projectmembers(projectRef),
-    ({ signal }) => getProjectMembers({ projectRef }, signal),
-    { enabled: enabled && typeof projectRef !== 'undefined', ...options }
-  )
+  useQuery<ProjectMembersData, ProjectMembersError, TData>({
+    queryKey: projectKeys.projectmembers(projectRef),
+    queryFn: ({ signal }) => getProjectMembers({ projectRef }, signal),
+    enabled: enabled && typeof projectRef !== 'undefined',
+    ...options,
+  })

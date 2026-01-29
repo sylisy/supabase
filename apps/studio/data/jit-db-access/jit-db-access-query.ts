@@ -32,6 +32,14 @@ export async function getJitDbAccessConfiguration(
     }
   }
 
+  // Check if the API returned state: 'unavailable' directly
+  if (data && data.state === 'unavailable') {
+    return {
+      ...data,
+      isUnavailable: true,
+    }
+  }
+
   return data
 }
 

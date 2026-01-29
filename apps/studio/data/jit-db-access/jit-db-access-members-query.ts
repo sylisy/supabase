@@ -27,10 +27,15 @@ export type JitDbAccessMembersError = unknown
 
 export const useJitDbAccessMembersQuery = <TData = JitDbAccessMembersData>(
   { projectRef }: JitDbAccessMembersVariables,
-  { enabled = true, ...options }: UseQueryOptions<JitDbAccessMembersData, JitDbAccessMembersError, TData> = {}
+  {
+    enabled = true,
+    ...options
+  }: UseQueryOptions<JitDbAccessMembersData, JitDbAccessMembersError, TData> = {}
 ) =>
-  useQuery<JitDbAccessMembersData, JitDbAccessMembersError, TData>(
-    jitDbAccessKeys.members(projectRef),
-    ({ signal }) => getJitDbAccessMembers({ projectRef }, signal),
-    { enabled: enabled && typeof projectRef !== 'undefined', refetchOnWindowFocus: false, ...options }
-  )
+  useQuery<JitDbAccessMembersData, JitDbAccessMembersError, TData>({
+    queryKey: jitDbAccessKeys.members(projectRef),
+    queryFn: ({ signal }) => getJitDbAccessMembers({ projectRef }, signal),
+    enabled: enabled && typeof projectRef !== 'undefined',
+    refetchOnWindowFocus: false,
+    ...options,
+  })
