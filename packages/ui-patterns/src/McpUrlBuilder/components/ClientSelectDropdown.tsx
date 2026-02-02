@@ -3,18 +3,19 @@
 import { Bot, Check, ChevronDown } from 'lucide-react'
 import { useState } from 'react'
 import {
-    Button,
-    CommandEmpty_Shadcn_,
-    CommandGroup_Shadcn_,
-    CommandInput_Shadcn_,
-    CommandItem_Shadcn_,
-    CommandList_Shadcn_,
-    Command_Shadcn_,
-    PopoverContent_Shadcn_,
-    PopoverTrigger_Shadcn_,
-    Popover_Shadcn_,
-    cn,
+  Button,
+  CommandEmpty_Shadcn_,
+  CommandGroup_Shadcn_,
+  CommandInput_Shadcn_,
+  CommandItem_Shadcn_,
+  CommandList_Shadcn_,
+  Command_Shadcn_,
+  PopoverContent_Shadcn_,
+  PopoverTrigger_Shadcn_,
+  Popover_Shadcn_,
+  cn,
 } from 'ui'
+
 import type { McpClient } from '../types'
 import { ConnectionIcon } from './ConnectionIcon'
 
@@ -22,7 +23,6 @@ interface ClientSelectDropdownProps {
   basePath: string
   theme?: 'light' | 'dark'
   label?: string
-  className?: string
   clients: McpClient[]
   selectedClient: McpClient
   onClientChange: (clientKey: string) => void
@@ -32,13 +32,11 @@ export const ClientSelectDropdown = ({
   basePath,
   theme = 'light',
   label = 'Client',
-  className,
   clients,
   selectedClient,
   onClientChange,
 }: ClientSelectDropdownProps) => {
   const [open, setOpen] = useState(false)
-  const hasLabel = Boolean(label)
 
   function onSelectClient(key: string) {
     onClientChange(key)
@@ -47,20 +45,15 @@ export const ClientSelectDropdown = ({
 
   return (
     <Popover_Shadcn_ open={open} onOpenChange={setOpen} modal={false}>
-      <div className={cn('flex w-full', className)}>
-        {hasLabel && (
-          <span className="flex items-center text-foreground-lighter px-3 rounded-lg rounded-r-none text-xs border border-button border-r-0">
-            {label}
-          </span>
-        )}
+      <div className="flex">
+        <span className="flex items-center text-foreground-lighter px-3 rounded-lg rounded-r-none text-xs border border-button border-r-0">
+          {label}
+        </span>
         <PopoverTrigger_Shadcn_ asChild>
           <Button
             size="small"
             type="default"
-            className={cn(
-              'gap-0 w-full justify-between',
-              hasLabel ? 'rounded-l-none' : 'rounded-lg'
-            )}
+            className="gap-0 rounded-l-none"
             iconRight={
               <ChevronDown
                 strokeWidth={1.5}
@@ -85,11 +78,7 @@ export const ClientSelectDropdown = ({
           </Button>
         </PopoverTrigger_Shadcn_>
       </div>
-      <PopoverContent_Shadcn_
-        className="mt-0 p-0 w-[var(--radix-popover-trigger-width)] max-w-none"
-        side="bottom"
-        align="start"
-      >
+      <PopoverContent_Shadcn_ className="mt-0 p-0 max-w-48" side="bottom" align="start">
         <Command_Shadcn_>
           <CommandInput_Shadcn_ placeholder="Search..." />
           <CommandList_Shadcn_>
