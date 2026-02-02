@@ -1,18 +1,18 @@
 import { useQueryClient } from '@tanstack/react-query'
+import { useParams } from 'common'
 import { useTheme } from 'next-themes'
-import { useCallback, useEffect, useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import ReactFlow, { Background, ReactFlowProvider, useReactFlow } from 'reactflow'
 
+import { getStatusName } from '../Pipeline.utils'
+import { PrimaryDatabaseNode, ReadReplicaNode, ReplicationNode } from './Nodes'
+import { getDagreGraphLayout } from './ReplicationDiagram.utils'
 import { useReadReplicasQuery } from '@/data/read-replicas/replicas-query'
 import { useReplicationDestinationsQuery } from '@/data/replication/destinations-query'
 import { replicationKeys } from '@/data/replication/keys'
 import { ReplicationPipelineStatusResponse } from '@/data/replication/pipeline-status-query'
 import { useReplicationPipelinesQuery } from '@/data/replication/pipelines-query'
 import { timeout } from '@/lib/helpers'
-import { useParams } from 'common'
-import { getStatusName } from '../Pipeline.utils'
-import { PrimaryDatabaseNode, ReadReplicaNode, ReplicationNode } from './Nodes'
-import { getDagreGraphLayout } from './ReplicationDiagram.utils'
 
 export const ReplicationDiagram = () => {
   return (
@@ -109,7 +109,7 @@ const ReplicationDiagramContent = () => {
   const backgroundPatternColor =
     resolvedTheme === 'dark' ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.4)'
 
-  const setReactFlow = useCallback(async () => {
+  const setReactFlow = async () => {
     const graph = getDagreGraphLayout(nodes, edges)
     reactFlow.setNodes(graph.nodes)
     reactFlow.setEdges(graph.edges)
@@ -117,11 +117,11 @@ const ReplicationDiagramContent = () => {
     // [Joshen] Odd fix to ensure that react flow snaps back to center when adding nodes
     await timeout(1)
     reactFlow.fitView({ maxZoom: 0.9, minZoom: 0.9 })
-  }, [edges, nodes, reactFlow])
+  }
 
   useEffect(() => {
     if (nodes.length > 0 && isSuccessDestinations && isSuccessReplicas) setReactFlow()
-  }, [isSuccessDestinations, isSuccessReplicas, nodes.length, setReactFlow])
+  }, [nodes, isSuccessDestinations, isSuccessReplicas])
 
   return (
     <div className="nowheel relative min-h-[350px]">
