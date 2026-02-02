@@ -10,10 +10,7 @@ import type { ConnectState } from './Connect.types'
 describe('connect.schema:structure', () => {
   test('should have all required modes', () => {
     const modeIds = connectSchema.modes.map((m) => m.id)
-    expect(modeIds).toContain('framework')
-    expect(modeIds).toContain('direct')
-    expect(modeIds).toContain('orm')
-    expect(modeIds).toContain('mcp')
+    expect(modeIds).toEqual(['framework'])
   })
 
   test('each mode should have required properties', () => {
@@ -34,23 +31,19 @@ describe('connect.schema:structure', () => {
     expect(frameworkMode?.fields).toContain('frameworkUi')
   })
 
-  test('direct mode should have correct fields', () => {
+  test('direct mode should be removed', () => {
     const directMode = connectSchema.modes.find((m) => m.id === 'direct')
-    expect(directMode?.fields).toContain('connectionMethod')
-    expect(directMode?.fields).toContain('useSharedPooler')
-    expect(directMode?.fields).toContain('connectionType')
+    expect(directMode).toBeUndefined()
   })
 
-  test('orm mode should have correct fields', () => {
+  test('orm mode should be removed', () => {
     const ormMode = connectSchema.modes.find((m) => m.id === 'orm')
-    expect(ormMode?.fields).toContain('orm')
+    expect(ormMode).toBeUndefined()
   })
 
-  test('mcp mode should have correct fields', () => {
+  test('mcp mode should be removed', () => {
     const mcpMode = connectSchema.modes.find((m) => m.id === 'mcp')
-    expect(mcpMode?.fields).toContain('mcpClient')
-    expect(mcpMode?.fields).toContain('mcpReadonly')
-    expect(mcpMode?.fields).toContain('mcpFeatures')
+    expect(mcpMode).toBeUndefined()
   })
 
   test('all mode fields should exist in fields definition', () => {
@@ -89,37 +82,29 @@ describe('connect.schema:fields', () => {
     expect(field.dependsOn).toEqual({ framework: ['nextjs', 'react'] })
   })
 
-  test('connectionMethod field should have radio-list type', () => {
+  test('connectionMethod field should be removed', () => {
     const field = connectSchema.fields.connectionMethod
-    expect(field.type).toBe('radio-list')
-    expect(field.options).toEqual({ source: 'connectionMethods' })
-    expect(field.defaultValue).toBe('direct')
+    expect(field).toBeUndefined()
   })
 
-  test('useSharedPooler field should depend on transaction connection method', () => {
+  test('useSharedPooler field should be removed', () => {
     const field = connectSchema.fields.useSharedPooler
-    expect(field.type).toBe('switch')
-    expect(field.dependsOn).toEqual({ connectionMethod: ['transaction'] })
+    expect(field).toBeUndefined()
   })
 
-  test('orm field should have radio-list type', () => {
+  test('orm field should be removed', () => {
     const field = connectSchema.fields.orm
-    expect(field.type).toBe('radio-list')
-    expect(field.options).toEqual({ source: 'orms' })
-    expect(field.defaultValue).toBe('prisma')
+    expect(field).toBeUndefined()
   })
 
-  test('mcpClient field should have select type', () => {
+  test('mcpClient field should be removed', () => {
     const field = connectSchema.fields.mcpClient
-    expect(field.type).toBe('select')
-    expect(field.options).toEqual({ source: 'mcpClients' })
-    expect(field.defaultValue).toBe('cursor')
+    expect(field).toBeUndefined()
   })
 
-  test('mcpFeatures field should have multi-select type', () => {
+  test('mcpFeatures field should be removed', () => {
     const field = connectSchema.fields.mcpFeatures
-    expect(field.type).toBe('multi-select')
-    expect(field.options).toEqual({ source: 'mcpFeatures' })
+    expect(field).toBeUndefined()
   })
 })
 
@@ -198,101 +183,35 @@ describe('connect.schema:steps resolution', () => {
   })
 
   describe('direct mode steps', () => {
-    test('should resolve connection step for default direct mode', () => {
+    test('should not resolve steps for direct mode', () => {
       const state: ConnectState = { mode: 'direct' }
       const steps = resolveSteps(connectSchema, state)
 
-      expect(steps.find((s) => s.id === 'connection')).toBeDefined()
-    })
-
-    test('should resolve install and files steps for nodejs connection type', () => {
-      const state: ConnectState = { mode: 'direct', connectionType: 'nodejs' }
-      const steps = resolveSteps(connectSchema, state)
-
-      expect(steps.find((s) => s.id === 'direct-install')).toBeDefined()
-      expect(steps.find((s) => s.id === 'direct-files')).toBeDefined()
-    })
-
-    test('should resolve install and files steps for golang connection type', () => {
-      const state: ConnectState = { mode: 'direct', connectionType: 'golang' }
-      const steps = resolveSteps(connectSchema, state)
-
-      expect(steps.find((s) => s.id === 'direct-install')).toBeDefined()
-      expect(steps.find((s) => s.id === 'direct-files')).toBeDefined()
-    })
-
-    test('should resolve install and files steps for python connection type', () => {
-      const state: ConnectState = { mode: 'direct', connectionType: 'python' }
-      const steps = resolveSteps(connectSchema, state)
-
-      expect(steps.find((s) => s.id === 'direct-install')).toBeDefined()
-    })
-
-    test('should resolve install and files steps for dotnet connection type', () => {
-      const state: ConnectState = { mode: 'direct', connectionType: 'dotnet' }
-      const steps = resolveSteps(connectSchema, state)
-
-      expect(steps.find((s) => s.id === 'direct-install')).toBeDefined()
+      expect(steps.length).toBe(0)
     })
   })
 
   describe('orm mode steps', () => {
-    test('should resolve install and configure steps for prisma', () => {
+    test('should not resolve steps for orm mode', () => {
       const state: ConnectState = { mode: 'orm', orm: 'prisma' }
       const steps = resolveSteps(connectSchema, state)
 
-      expect(steps.find((s) => s.id === 'install')).toBeDefined()
-      expect(steps.find((s) => s.id === 'configure')).toBeDefined()
-      expect(steps.find((s) => s.id === 'install-skills')).toBeDefined()
-    })
-
-    test('should resolve install and configure steps for drizzle', () => {
-      const state: ConnectState = { mode: 'orm', orm: 'drizzle' }
-      const steps = resolveSteps(connectSchema, state)
-
-      expect(steps.find((s) => s.id === 'install')).toBeDefined()
-      expect(steps.find((s) => s.id === 'configure')).toBeDefined()
+      expect(steps.length).toBe(0)
     })
   })
 
   describe('mcp mode steps', () => {
-    test('should resolve configure step for cursor client', () => {
+    test('should not resolve steps for mcp mode', () => {
       const state: ConnectState = { mode: 'mcp', mcpClient: 'cursor' }
       const steps = resolveSteps(connectSchema, state)
 
-      expect(steps.find((s) => s.id === 'configure-mcp')).toBeDefined()
-      expect(steps.find((s) => s.id === 'install-skills')).toBeDefined()
-    })
-
-    test('should resolve codex-specific steps for codex client', () => {
-      const state: ConnectState = { mode: 'mcp', mcpClient: 'codex' }
-      const steps = resolveSteps(connectSchema, state)
-
-      expect(steps.find((s) => s.id === 'codex-add-server')).toBeDefined()
-      expect(steps.find((s) => s.id === 'codex-enable-remote')).toBeDefined()
-      expect(steps.find((s) => s.id === 'codex-authenticate')).toBeDefined()
-      expect(steps.find((s) => s.id === 'codex-verify')).toBeDefined()
-    })
-
-    test('should resolve claude-code-specific steps for claude-code client', () => {
-      const state: ConnectState = { mode: 'mcp', mcpClient: 'claude-code' }
-      const steps = resolveSteps(connectSchema, state)
-
-      expect(steps.find((s) => s.id === 'claude-add-server')).toBeDefined()
-      expect(steps.find((s) => s.id === 'claude-authenticate')).toBeDefined()
-    })
-
-    test('should resolve default mcp steps for other clients', () => {
-      const state: ConnectState = { mode: 'mcp', mcpClient: 'unknown-client' }
-      const steps = resolveSteps(connectSchema, state)
-
-      expect(steps.find((s) => s.id === 'configure-mcp')).toBeDefined()
+      expect(steps.length).toBe(0)
     })
   })
 
   describe('skills install step', () => {
     test('should include skills install step in all modes', () => {
-      const modes: ConnectState['mode'][] = ['framework', 'direct', 'orm', 'mcp']
+      const modes: ConnectState['mode'][] = ['framework']
 
       modes.forEach((mode) => {
         const state: ConnectState = { mode }
@@ -336,12 +255,11 @@ describe('connect.schema:step content paths', () => {
     expect(exploreStep?.content).toBe('steps/shadcn/explore')
   })
 
-  test('direct connection step should have valid content path', () => {
+  test('direct connection step should not be resolved', () => {
     const state: ConnectState = { mode: 'direct' }
     const steps = resolveSteps(connectSchema, state)
-    const connectionStep = steps.find((s) => s.id === 'connection')
 
-    expect(connectionStep?.content).toBe('steps/direct-connection')
+    expect(steps.length).toBe(0)
   })
 
   test('skills install step should have valid content path', () => {
@@ -352,50 +270,31 @@ describe('connect.schema:step content paths', () => {
     expect(skillsStep?.content).toBe('steps/skills-install')
   })
 
-  test('orm configure step should use template content path', () => {
-    // The ORM configure step uses a template {{orm}} that gets resolved
-    // by the dynamic import system, not the resolver
+  test('orm configure step should not be resolved', () => {
     const state: ConnectState = { mode: 'orm', orm: 'prisma' }
     const steps = resolveSteps(connectSchema, state)
-    const configureStep = steps.find((s) => s.id === 'configure')
 
-    // The content path uses template syntax for the component loader
-    expect(configureStep?.content).toBe('{{orm}}')
+    expect(steps.length).toBe(0)
   })
 
-  test('mcp cursor configure step should have valid content path', () => {
+  test('mcp cursor configure step should not be resolved', () => {
     const state: ConnectState = { mode: 'mcp', mcpClient: 'cursor' }
     const steps = resolveSteps(connectSchema, state)
-    const configureStep = steps.find((s) => s.id === 'configure-mcp')
 
-    expect(configureStep?.content).toBe('steps/mcp/cursor')
+    expect(steps.length).toBe(0)
   })
 
-  test('codex steps should have valid content paths', () => {
+  test('codex steps should not be resolved', () => {
     const state: ConnectState = { mode: 'mcp', mcpClient: 'codex' }
     const steps = resolveSteps(connectSchema, state)
 
-    expect(steps.find((s) => s.id === 'codex-add-server')?.content).toBe(
-      'steps/mcp/codex/add-server'
-    )
-    expect(steps.find((s) => s.id === 'codex-enable-remote')?.content).toBe(
-      'steps/mcp/codex/enable-remote'
-    )
-    expect(steps.find((s) => s.id === 'codex-authenticate')?.content).toBe(
-      'steps/mcp/codex/authenticate'
-    )
-    expect(steps.find((s) => s.id === 'codex-verify')?.content).toBe('steps/mcp/codex/verify')
+    expect(steps.length).toBe(0)
   })
 
-  test('claude-code steps should have valid content paths', () => {
+  test('claude-code steps should not be resolved', () => {
     const state: ConnectState = { mode: 'mcp', mcpClient: 'claude-code' }
     const steps = resolveSteps(connectSchema, state)
 
-    expect(steps.find((s) => s.id === 'claude-add-server')?.content).toBe(
-      'steps/mcp/claude-code/add-server'
-    )
-    expect(steps.find((s) => s.id === 'claude-authenticate')?.content).toBe(
-      'steps/mcp/claude-code/authenticate'
-    )
+    expect(steps.length).toBe(0)
   })
 })

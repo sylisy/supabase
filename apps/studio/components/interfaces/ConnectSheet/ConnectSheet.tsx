@@ -23,25 +23,17 @@ export const ConnectSheet = ({ open, onOpenChange, connectTab }: ConnectSheetPro
   const {
     projectConnectionShowAppFrameworks: showAppFrameworks,
     projectConnectionShowMobileFrameworks: showMobileFrameworks,
-    projectConnectionShowOrms: showOrms,
   } = useIsFeatureEnabled([
     'project_connection:show_app_frameworks',
     'project_connection:show_mobile_frameworks',
-    'project_connection:show_orms',
   ])
 
   // Filter available modes based on feature flags
   const availableModeIds = useMemo(() => {
-    const modes: string[] = []
     const showFrameworks = showAppFrameworks || showMobileFrameworks
 
-    if (showFrameworks) modes.push('framework')
-    modes.push('direct')
-    if (showOrms) modes.push('orm')
-    modes.push('mcp')
-
-    return modes
-  }, [showAppFrameworks, showMobileFrameworks, showOrms])
+    return showFrameworks ? ['framework'] : []
+  }, [showAppFrameworks, showMobileFrameworks])
 
   const { state, updateField, setMode, activeFields, resolvedSteps, getFieldOptions, schema } =
     useConnectState()
@@ -90,10 +82,7 @@ export const ConnectSheet = ({ open, onOpenChange, connectTab }: ConnectSheetPro
   useEffect(() => {
     if (!open) return
     if (typeof connectTab === 'string') {
-      if (connectTab === 'mcp') setMode('mcp')
-      else if (connectTab === 'orms') setMode('orm')
-      else if (connectTab === 'direct') setMode('direct')
-      else if (connectTab === 'frameworks' || connectTab === 'mobiles') setMode('framework')
+      if (connectTab === 'frameworks' || connectTab === 'mobiles') setMode('framework')
     }
   }, [connectTab, open, setMode])
 
@@ -123,7 +112,9 @@ export const ConnectSheet = ({ open, onOpenChange, connectTab }: ConnectSheetPro
         <div className="flex flex-1 flex-col overflow-y-auto">
           {/* Configuration Section */}
           <div className="space-y-6 border-b p-8 shrink-0">
-            <ModeSelector modes={availableModes} selected={state.mode} onChange={setMode} />
+            {availableModes.length > 1 && (
+              <ModeSelector modes={availableModes} selected={state.mode} onChange={setMode} />
+            )}
             <div className="border-t pt-8">
               <ConnectConfigSection
                 activeFields={activeFields}
