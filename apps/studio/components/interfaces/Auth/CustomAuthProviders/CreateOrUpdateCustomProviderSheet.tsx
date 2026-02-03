@@ -3,19 +3,17 @@ import { X } from 'lucide-react'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
-import * as z from 'zod'
-
 import {
   Button,
   FormControl_Shadcn_,
   FormField_Shadcn_,
   Form_Shadcn_,
   Input_Shadcn_,
-  Select_Shadcn_,
   SelectContent_Shadcn_,
   SelectItem_Shadcn_,
   SelectTrigger_Shadcn_,
   SelectValue_Shadcn_,
+  Select_Shadcn_,
   Sheet,
   SheetClose,
   SheetContent,
@@ -26,6 +24,8 @@ import {
   cn,
 } from 'ui'
 import { FormItemLayout } from 'ui-patterns/form/FormItemLayout/FormItemLayout'
+import * as z from 'zod'
+
 import type { CustomProvider } from './customProviders.types'
 
 interface CreateOrUpdateCustomProviderSheetProps {
@@ -156,99 +156,91 @@ export const CreateOrUpdateCustomProviderSheet = ({
             </SheetTitle>
           </div>
         </SheetHeader>
-        <SheetSection className="overflow-auto flex-grow px-0">
-          <Form_Shadcn_ {...form}>
-            <form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)} id={FORM_ID}>
-              <div className="px-5 space-y-4">
-                <FormField_Shadcn_
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItemLayout
-                      label="Name"
-                      description="Human friendly display name"
-                    >
-                      <FormControl_Shadcn_>
-                        <Input_Shadcn_ {...field} placeholder="Provider name" />
-                      </FormControl_Shadcn_>
-                    </FormItemLayout>
-                  )}
-                />
+        <Form_Shadcn_ {...form}>
+          <form className="flex-grow" onSubmit={form.handleSubmit(onSubmit)} id={FORM_ID}>
+            <SheetSection className="overflow-auto flex-grow px-5 space-y-4">
+              <FormField_Shadcn_
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItemLayout label="Name" description="Human friendly display name">
+                    <FormControl_Shadcn_>
+                      <Input_Shadcn_ {...field} placeholder="Provider name" />
+                    </FormControl_Shadcn_>
+                  </FormItemLayout>
+                )}
+              />
 
-                <FormField_Shadcn_
-                  control={form.control}
-                  name="identifier"
-                  render={({ field }) => (
-                    <FormItemLayout
-                      label="Identifier"
-                      description="Human-readable identifier (used in API: custom:{identifier})"
-                    >
-                      <FormControl_Shadcn_>
-                        <Input_Shadcn_
-                          {...field}
-                          placeholder="identifier_text"
-                          disabled={isEditMode}
-                        />
-                      </FormControl_Shadcn_>
-                    </FormItemLayout>
-                  )}
-                />
+              <FormField_Shadcn_
+                control={form.control}
+                name="identifier"
+                render={({ field }) => (
+                  <FormItemLayout
+                    label="Identifier"
+                    description="Human-readable identifier (used in API: custom:{identifier})"
+                  >
+                    <FormControl_Shadcn_>
+                      <Input_Shadcn_
+                        {...field}
+                        placeholder="identifier_text"
+                        disabled={isEditMode}
+                      />
+                    </FormControl_Shadcn_>
+                  </FormItemLayout>
+                )}
+              />
 
-                <FormField_Shadcn_
-                  control={form.control}
-                  name="provider_type"
-                  render={({ field }) => (
-                    <FormItemLayout label="Type">
-                      <FormControl_Shadcn_>
-                        <Select_Shadcn_
-                          value={field.value}
-                          onValueChange={field.onChange}
-                          disabled={isEditMode}
-                        >
-                          <SelectTrigger_Shadcn_>
-                            <SelectValue_Shadcn_ placeholder="Select provider type" />
-                          </SelectTrigger_Shadcn_>
-                          <SelectContent_Shadcn_>
-                            <SelectItem_Shadcn_ value="oidc">OIDC</SelectItem_Shadcn_>
-                            <SelectItem_Shadcn_ value="oauth2">OAuth2</SelectItem_Shadcn_>
-                          </SelectContent_Shadcn_>
-                        </Select_Shadcn_>
-                      </FormControl_Shadcn_>
-                    </FormItemLayout>
-                  )}
-                />
+              <FormField_Shadcn_
+                control={form.control}
+                name="provider_type"
+                render={({ field }) => (
+                  <FormItemLayout label="Type">
+                    <FormControl_Shadcn_>
+                      <Select_Shadcn_
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        disabled={isEditMode}
+                      >
+                        <SelectTrigger_Shadcn_>
+                          <SelectValue_Shadcn_ placeholder="Select provider type" />
+                        </SelectTrigger_Shadcn_>
+                        <SelectContent_Shadcn_>
+                          <SelectItem_Shadcn_ value="oidc">OIDC</SelectItem_Shadcn_>
+                          <SelectItem_Shadcn_ value="oauth2">OAuth2</SelectItem_Shadcn_>
+                        </SelectContent_Shadcn_>
+                      </Select_Shadcn_>
+                    </FormControl_Shadcn_>
+                  </FormItemLayout>
+                )}
+              />
+            </SheetSection>
+            <SheetSection className="overflow-auto flex-grow px-5 space-y-6 border-t">
+              <FormField_Shadcn_
+                control={form.control}
+                name="client_id"
+                render={({ field }) => (
+                  <FormItemLayout label="Client ID">
+                    <FormControl_Shadcn_>
+                      <Input_Shadcn_ {...field} placeholder="Client ID" />
+                    </FormControl_Shadcn_>
+                  </FormItemLayout>
+                )}
+              />
 
-                <FormField_Shadcn_
-                  control={form.control}
-                  name="client_id"
-                  render={({ field }) => (
-                    <FormItemLayout label="Client ID">
-                      <FormControl_Shadcn_>
-                        <Input_Shadcn_ {...field} placeholder="Client ID" />
-                      </FormControl_Shadcn_>
-                    </FormItemLayout>
-                  )}
-                />
-
-                <FormField_Shadcn_
-                  control={form.control}
-                  name="client_secret"
-                  render={({ field }) => (
-                    <FormItemLayout label="Client Secret">
-                      <FormControl_Shadcn_>
-                        <Input_Shadcn_
-                          {...field}
-                          type="password"
-                          placeholder="Client secret"
-                        />
-                      </FormControl_Shadcn_>
-                    </FormItemLayout>
-                  )}
-                />
-              </div>
-            </form>
-          </Form_Shadcn_>
-        </SheetSection>
+              <FormField_Shadcn_
+                control={form.control}
+                name="client_secret"
+                render={({ field }) => (
+                  <FormItemLayout label="Client Secret">
+                    <FormControl_Shadcn_>
+                      <Input_Shadcn_ {...field} type="password" placeholder="Client secret" />
+                    </FormControl_Shadcn_>
+                  </FormItemLayout>
+                )}
+              />
+            </SheetSection>
+          </form>
+        </Form_Shadcn_>
         <SheetFooter>
           <Button type="default" onClick={onClose}>
             Cancel
