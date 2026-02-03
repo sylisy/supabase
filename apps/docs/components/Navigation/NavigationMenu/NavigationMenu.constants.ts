@@ -1470,32 +1470,33 @@ export const api: NavMenuConstant = {
       items: [],
     },
     {
-      name: 'Auto-generated Docs',
-      url: '/guides/api/rest/auto-generated-docs',
-      items: [],
-    },
-    {
       name: 'Generating TypeScript Types',
       url: '/guides/api/rest/generating-types',
       items: [],
     },
     {
-      name: 'Generating Python Types',
-      url: '/guides/api/rest/generating-python-types',
-      items: [],
+      name: 'Security',
+      url: '/guides/api',
+      items: [
+        { name: 'Securing your API', url: '/guides/api/securing-your-api' },
+        { name: 'How API Keys work', url: '/guides/api/api-keys' },
+      ],
     },
     {
       name: 'Tools',
       url: '/guides/api',
-      items: [{ name: 'SQL to REST API Translator', url: '/guides/api/sql-to-rest' }],
+      items: [
+        { name: 'Auto-generated Docs', url: '/guides/api/rest/auto-generated-docs' },
+        { name: 'SQL to REST API Translator', url: '/guides/api/sql-to-rest' },
+      ],
     },
     {
       name: 'Guides',
       url: '/guides/api',
       items: [
         { name: 'Creating API routes', url: '/guides/api/creating-routes' },
-        { name: 'How API Keys work', url: '/guides/api/api-keys' },
-        { name: 'Securing your API', url: '/guides/api/securing-your-api' },
+        { name: 'Generating TypeScript Types', url: '/guides/api/rest/generating-types' },
+        { name: 'Generating Python Types', url: '/guides/api/rest/generating-python-types' },
         { name: 'Error Codes', url: '/guides/api/rest/postgrest-error-codes' },
       ],
     },
