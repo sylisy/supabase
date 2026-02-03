@@ -109,7 +109,9 @@ export default function IndexPage() {
         className="container relative mx-auto px-4 lg:px-12 pt-16 md:pt-24 lg:pt-32 lg:pb-16"
       >
         <div className="text-center mb-8 lg:mb-16">
-          <h2 className="text-foreground text-3xl" id="how-compute-pricing-works">How compute pricing works</h2>
+          <h2 className="text-foreground text-3xl" id="how-compute-pricing-works">
+            How compute pricing works
+          </h2>
           <p className="text-foreground-light mt-4 text-lg mb-4">
             Choose a plan, add projects, and see your total cost
           </p>
@@ -117,7 +119,8 @@ export default function IndexPage() {
             <span className="py-1 px-3 bg-surface-100 flex items-center gap-1 border rounded-full text-xs text-foreground-lighter">
               What is &ldquo;compute&rdquo;?
               <InfoTooltip side="bottom" className="max-w-[280px]">
-                Think of compute as the computer your database runs on. As your app grows, you scale CPU and memory to handle more traffic and data.
+                Think of compute as the computer your database runs on. As your app grows, you scale
+                CPU and memory to handle more traffic and data.
               </InfoTooltip>
             </span>
           </div>
