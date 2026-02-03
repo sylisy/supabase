@@ -61,7 +61,7 @@ async function fetchDiscussions(
   const query = `
     query troubleshootDiscussions($cursor: String, $owner: String!, $repo: String!, $categoryId: ID!) {
       repository(owner: $owner, name: $repo) {
-        discussions(first: 50, after: $cursor, categoryId: $categoryId, orderBy: { field: CREATED_AT, direction: DESC }) {
+        discussions(first: 10, after: $cursor, categoryId: $categoryId, orderBy: { field: CREATED_AT, direction: DESC }) {
           totalCount
           pageInfo {
             hasPreviousPage
@@ -212,7 +212,7 @@ export async function fetchChangelogPage({ next, restPage = 1 }: FetchChangelogP
           url: item.html_url ?? '',
         }
       } catch (err) {
-        console.error(`Problem processing discussion MDX: ${err}`)
+        console.error(`Problem processing release MDX: ${err}`)
       }
     })
   )
