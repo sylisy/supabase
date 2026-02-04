@@ -72,10 +72,11 @@ export function resolveSteps(schema: ConnectSchema, state: ConnectState): Resolv
   const steps = resolveStepTree(schema.steps, state)
   if (steps.length === 0) return []
   const stateKeys = Object.keys(schema.fields)
+  const resolutionKeys = stateKeys.length > 0 ? stateKeys : Object.keys(state)
 
   return steps
     .map((step) => {
-      const content = resolveConditional<string | null>(step.content, state, stateKeys)
+      const content = resolveConditional<string | null>(step.content, state, resolutionKeys)
       return {
         id: step.id,
         title: step.title,
