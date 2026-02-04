@@ -1,11 +1,11 @@
 import { PermissionAction } from '@supabase/shared-types/out/constants'
 import { useParams } from 'common'
-import { DatabaseSelector } from 'components/ui/DatabaseSelector'
 import { getKeys, useAPIKeysQuery } from 'data/api-keys/api-keys-query'
 import { useProjectSettingsV2Query } from 'data/config/project-settings-v2-query'
 import { useAsyncCheckPermissions } from 'hooks/misc/useCheckPermissions'
 import { useIsFeatureEnabled } from 'hooks/misc/useIsFeatureEnabled'
-import { useEffect, useMemo } from 'react'
+import { parseAsBoolean, parseAsString, useQueryState } from 'nuqs'
+import { useMemo } from 'react'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, cn } from 'ui'
 
 import type { ProjectKeys } from './Connect.types'
@@ -13,13 +13,20 @@ import { ConnectConfigSection, ModeSelector } from './ConnectConfigSection'
 import { ConnectStepsSection } from './ConnectStepsSection'
 import { useConnectState } from './useConnectState'
 
-interface ConnectSheetProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  connectTab?: string | null
-}
+export const ConnectSheet = () => {
+  const [showConnect, setShowConnect] = useQueryState(
+    'showConnect',
+    parseAsBoolean.withDefault(false)
+  )
+  const [connectTab, setConnectTab] = useQueryState('connectTab', parseAsString)
 
-export const ConnectSheet = ({ open, onOpenChange, connectTab }: ConnectSheetProps) => {
+  const handleOpenChange = (sheetOpen: boolean) => {
+    if (!sheetOpen) {
+      setConnectTab(null)
+    }
+    setShowConnect(sheetOpen)
+  }
+
   const {
     projectConnectionShowAppFrameworks: showAppFrameworks,
     projectConnectionShowMobileFrameworks: showMobileFrameworks,
@@ -27,6 +34,11 @@ export const ConnectSheet = ({ open, onOpenChange, connectTab }: ConnectSheetPro
     'project_connection:show_app_frameworks',
     'project_connection:show_mobile_frameworks',
   ])
+
+  const handleSourceChange = (databaseId: string) => {
+    // Database selection is handled by the DatabaseSelector's internal state
+    // We just need to trigger a re-render of connection strings
+  }
 
   // Filter available modes based on feature flags
   const availableModeIds = useMemo(() => {
@@ -74,37 +86,14 @@ export const ConnectSheet = ({ open, onOpenChange, connectTab }: ConnectSheetPro
     publishableKey?.api_key,
   ])
 
-  const handleSourceChange = (databaseId: string) => {
-    // Database selection is handled by the DatabaseSelector's internal state
-    // We just need to trigger a re-render of connection strings
-  }
-
-  useEffect(() => {
-    if (!open) return
-    if (typeof connectTab === 'string') {
-      if (connectTab === 'frameworks' || connectTab === 'mobiles') setMode('framework')
-    }
-  }, [connectTab, open, setMode])
-
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
+    <Sheet open={showConnect} onOpenChange={handleOpenChange}>
       <SheetContent size="lg" className="flex flex-col gap-0 p-0 space-y-0" tabIndex={undefined}>
         <SheetHeader className={cn('text-left border-b shrink-0 py-6 px-8')}>
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <SheetTitle>Connect to your project</SheetTitle>
               <SheetDescription>Choose how you want to use Supabase</SheetDescription>
-            </div>
-            <div className="w-full lg:w-auto">
-              <DatabaseSelector
-                align="end"
-                buttonProps={{
-                  size: 'small',
-                  className: 'w-full lg:w-auto justify-between pr-2.5 [&_svg]:h-4',
-                }}
-                className="w-full [&>span]:w-1/2 [&>span]:md:w-auto"
-                onSelectId={handleSourceChange}
-              />
             </div>
           </div>
         </SheetHeader>
