@@ -112,7 +112,7 @@ const NewPricingComputeSection = () => {
             <span translate="no">$10</span>/month for Micro).
           </p>
 
-           <NewComputePricingCalculator activePlan={activePlan} />
+          <NewComputePricingCalculator activePlan={activePlan} />
         </div>
       </div>
       <hr className="border-0 border-t" />
