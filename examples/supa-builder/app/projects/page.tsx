@@ -41,12 +41,12 @@ export default async function ProjectsPage() {
 
   const projects = result.data || []
 
-  // Get user role directly from user_roles table
+  // Get user role and organization from user_roles table
   const { data: userRole } = await supabase
     .from('user_roles')
-    .select('role')
+    .select('role, organization_id')
     .eq('user_id', user.id)
-    .single()
+    .maybeSingle()  // Changed from .single() to handle edge cases
 
   const isAdmin = userRole?.role === 'admin'
 

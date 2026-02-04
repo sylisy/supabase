@@ -112,7 +112,8 @@ export function SqlEditor({
 
       const { sql: generatedSql } = await response.json()
       setSql(generatedSql)
-      runQuery({ projectRef, query: generatedSql, readOnly: true })
+      // Allow write operations in natural language mode (DDL, DML)
+      runQuery({ projectRef, query: generatedSql, readOnly: false })
     } catch (error: any) {
       console.error(error)
       setAiError(error.message)
@@ -123,9 +124,10 @@ export function SqlEditor({
 
   const handleRunQuery = useCallback(() => {
     if (sql) {
-      runQuery({ projectRef, query: sql, readOnly: true })
+      // Use the readOnly prop to determine if queries should be read-only
+      runQuery({ projectRef, query: sql, readOnly: readOnly })
     }
-  }, [sql, projectRef, runQuery])
+  }, [sql, projectRef, runQuery, readOnly])
 
   useEffect(() => {
     setIsSqlVisible(!hideSql)
@@ -133,9 +135,9 @@ export function SqlEditor({
 
   useEffect(() => {
     if (runAutomatically && initialSql) {
-      runQuery({ projectRef, query: initialSql, readOnly: true })
+      runQuery({ projectRef, query: initialSql, readOnly: readOnly })
     }
-  }, [runAutomatically, initialSql, projectRef, runQuery])
+  }, [runAutomatically, initialSql, projectRef, runQuery, readOnly])
 
   useEffect(() => {
     if (refetch && refetch > 0) {

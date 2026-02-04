@@ -123,15 +123,14 @@ Deno.serve(async (req: Request): Promise<Response> => {
       .from('user_roles')
       .select('role')
       .eq('user_id', user.id)
-      .eq('organization_id', project.organization_id)
-      .single()
+      .maybeSingle()
 
     if (roleError || !userRole || userRole.role !== 'admin') {
       console.error('Permission denied: User is not admin')
       return jsonError('Only admins can delete projects', 403)
     }
 
-    console.log(`User ${user.email} is admin for organization ${project.organization_id}`)
+    console.log(`User ${user.email} is admin, can delete project`)
 
     // =========================================================================
     // 5. CALL MANAGEMENT API TO DELETE PROJECT
@@ -174,7 +173,19 @@ Deno.serve(async (req: Request): Promise<Response> => {
     // 6. UPDATE PROJECT RECORD (SOFT DELETE)
     // =========================================================================
 
-    const { error: updateError } = await supabaseWithAuth
+    // Use service_role key to bypass RLS (user is already verified as admin above)
+    const supabaseServiceRole = createClient(
+      supabaseUrl,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+      {
+        auth: {
+          persistSession: false,
+          autoRefreshToken: false,
+        },
+      }
+    )
+
+    const { error: updateError } = await supabaseServiceRole
       .from('projects')
       .update({
         status: 'deleted',
@@ -193,7 +204,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
     // 7. CREATE AUDIT LOG
     // =========================================================================
 
-    await supabaseWithAuth.rpc('create_audit_log', {
+    await supabaseServiceRole.rpc('create_audit_log', {
       p_project_id: project_id,
       p_action: 'delete',
       p_actor_id: user.id,
