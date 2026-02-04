@@ -301,41 +301,39 @@ describe('connect.resolver:getActiveFields', () => {
   })
 
   test('should return fields for the current mode', () => {
-    const schema = createSchemaWithFields(
-      {
-        mode: {
-          id: 'mode',
-          type: 'select',
-          label: 'Mode',
-          defaultValue: 'framework',
-          options: () => [
-            { value: 'framework', label: 'Framework' },
-            { value: 'direct', label: 'Direct' },
-          ],
-        },
-        framework: {
-          id: 'framework',
-          type: 'radio-grid',
-          label: 'Framework',
-          defaultValue: 'nextjs',
-          dependsOn: { mode: ['framework'] },
-        },
-        library: {
-          id: 'library',
-          type: 'select',
-          label: 'Library',
-          defaultValue: 'supabasejs',
-          dependsOn: { mode: ['framework'] },
-        },
-        connectionType: {
-          id: 'connectionType',
-          type: 'select',
-          label: 'Type',
-          defaultValue: 'uri',
-          dependsOn: { mode: ['direct'] },
-        },
-      }
-    )
+    const schema = createSchemaWithFields({
+      mode: {
+        id: 'mode',
+        type: 'select',
+        label: 'Mode',
+        defaultValue: 'framework',
+        options: () => [
+          { value: 'framework', label: 'Framework' },
+          { value: 'direct', label: 'Direct' },
+        ],
+      },
+      framework: {
+        id: 'framework',
+        type: 'radio-grid',
+        label: 'Framework',
+        defaultValue: 'nextjs',
+        dependsOn: { mode: ['framework'] },
+      },
+      library: {
+        id: 'library',
+        type: 'select',
+        label: 'Library',
+        defaultValue: 'supabasejs',
+        dependsOn: { mode: ['framework'] },
+      },
+      connectionType: {
+        id: 'connectionType',
+        type: 'select',
+        label: 'Type',
+        defaultValue: 'uri',
+        dependsOn: { mode: ['direct'] },
+      },
+    })
 
     const frameworkFields = getActiveFields(schema, { mode: 'framework' })
     expect(frameworkFields.map((f) => f.id)).toEqual(['mode', 'framework', 'library'])
@@ -345,36 +343,34 @@ describe('connect.resolver:getActiveFields', () => {
   })
 
   test('should filter fields by dependsOn conditions', () => {
-    const schema = createSchemaWithFields(
-      {
-        mode: {
-          id: 'mode',
-          type: 'select',
-          label: 'Mode',
-          defaultValue: 'framework',
-          options: () => [{ value: 'framework', label: 'Framework' }],
-        },
-        framework: {
-          id: 'framework',
-          type: 'radio-grid',
-          label: 'Framework',
-          defaultValue: 'nextjs',
-          dependsOn: { mode: ['framework'] },
-        },
-        frameworkVariant: {
-          id: 'frameworkVariant',
-          type: 'select',
-          label: 'Variant',
-          dependsOn: { mode: ['framework'], framework: ['nextjs', 'react'] },
-        },
-        frameworkUi: {
-          id: 'frameworkUi',
-          type: 'switch',
-          label: 'Shadcn',
-          dependsOn: { mode: ['framework'], framework: ['nextjs', 'react'] },
-        },
-      }
-    )
+    const schema = createSchemaWithFields({
+      mode: {
+        id: 'mode',
+        type: 'select',
+        label: 'Mode',
+        defaultValue: 'framework',
+        options: () => [{ value: 'framework', label: 'Framework' }],
+      },
+      framework: {
+        id: 'framework',
+        type: 'radio-grid',
+        label: 'Framework',
+        defaultValue: 'nextjs',
+        dependsOn: { mode: ['framework'] },
+      },
+      frameworkVariant: {
+        id: 'frameworkVariant',
+        type: 'select',
+        label: 'Variant',
+        dependsOn: { mode: ['framework'], framework: ['nextjs', 'react'] },
+      },
+      frameworkUi: {
+        id: 'frameworkUi',
+        type: 'switch',
+        label: 'Shadcn',
+        dependsOn: { mode: ['framework'], framework: ['nextjs', 'react'] },
+      },
+    })
 
     // With nextjs - should show all fields
     const nextjsFields = getActiveFields(schema, { mode: 'framework', framework: 'nextjs' })
@@ -386,30 +382,28 @@ describe('connect.resolver:getActiveFields', () => {
   })
 
   test('should handle multiple dependsOn conditions', () => {
-    const schema = createSchemaWithFields(
-      {
-        mode: {
-          id: 'mode',
-          type: 'select',
-          label: 'Mode',
-          defaultValue: 'direct',
-          options: () => [{ value: 'direct', label: 'Direct' }],
-        },
-        connectionMethod: {
-          id: 'connectionMethod',
-          type: 'radio-list',
-          label: 'Method',
-          defaultValue: 'direct',
-          dependsOn: { mode: ['direct'] },
-        },
-        useSharedPooler: {
-          id: 'useSharedPooler',
-          type: 'switch',
-          label: 'Use Shared Pooler',
-          dependsOn: { mode: ['direct'], connectionMethod: ['transaction'] },
-        },
-      }
-    )
+    const schema = createSchemaWithFields({
+      mode: {
+        id: 'mode',
+        type: 'select',
+        label: 'Mode',
+        defaultValue: 'direct',
+        options: () => [{ value: 'direct', label: 'Direct' }],
+      },
+      connectionMethod: {
+        id: 'connectionMethod',
+        type: 'radio-list',
+        label: 'Method',
+        defaultValue: 'direct',
+        dependsOn: { mode: ['direct'] },
+      },
+      useSharedPooler: {
+        id: 'useSharedPooler',
+        type: 'switch',
+        label: 'Use Shared Pooler',
+        dependsOn: { mode: ['direct'], connectionMethod: ['transaction'] },
+      },
+    })
 
     // Transaction mode - show shared pooler option
     const transactionFields = getActiveFields(schema, {
@@ -428,39 +422,35 @@ describe('connect.resolver:getActiveFields', () => {
   })
 
   test('should return only mode field when dependsOn does not match', () => {
-    const schema = createSchemaWithFields(
-      {
-        mode: {
-          id: 'mode',
-          type: 'select',
-          label: 'Mode',
-          defaultValue: 'framework',
-          options: () => [{ value: 'framework', label: 'Framework' }],
-        },
-        framework: {
-          id: 'framework',
-          type: 'radio-grid',
-          label: 'Framework',
-          dependsOn: { mode: ['framework'] },
-        },
-      }
-    )
+    const schema = createSchemaWithFields({
+      mode: {
+        id: 'mode',
+        type: 'select',
+        label: 'Mode',
+        defaultValue: 'framework',
+        options: () => [{ value: 'framework', label: 'Framework' }],
+      },
+      framework: {
+        id: 'framework',
+        type: 'radio-grid',
+        label: 'Framework',
+        dependsOn: { mode: ['framework'] },
+      },
+    })
 
     const fields = getActiveFields(schema, { mode: 'invalid' as any })
     expect(fields.map((field) => field.id)).toEqual(['mode'])
   })
 
   test('should include resolvedOptions for each field', () => {
-    const schema = createSchemaWithFields(
-      {
-        framework: {
-          id: 'framework',
-          type: 'radio-grid',
-          label: 'Framework',
-          options: () => [{ value: 'nextjs', label: 'Next.js' }],
-        },
-      }
-    )
+    const schema = createSchemaWithFields({
+      framework: {
+        id: 'framework',
+        type: 'radio-grid',
+        label: 'Framework',
+        options: () => [{ value: 'nextjs', label: 'Next.js' }],
+      },
+    })
 
     const fields = getActiveFields(schema, { mode: 'framework' })
     expect(fields[0]).toHaveProperty('resolvedOptions')
