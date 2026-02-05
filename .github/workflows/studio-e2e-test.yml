@@ -72,6 +72,16 @@ jobs:
         if: steps.filter.outputs.studio == 'true' && steps.playwright-cache.outputs.cache-hit == 'true'
         run: pnpm -C e2e/studio exec playwright install-deps chromium
 
+      - name: Cache Next.js build
+        if: steps.filter.outputs.studio == 'true'
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: apps/studio/.next/cache
+          key: nextjs-studio-${{ hashFiles('pnpm-lock.yaml') }}-${{ hashFiles('apps/studio/**', 'packages/pg-meta/**', 'apps/ui-library/**', 'apps/design-system/**') }}
+          restore-keys: |
+            nextjs-studio-${{ hashFiles('pnpm-lock.yaml') }}-
+            nextjs-studio-
+
       - name: 🚀 Run Playwright tests against Vercel Preview
         if: steps.filter.outputs.studio == 'true'
         id: playwright
