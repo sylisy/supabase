@@ -1,10 +1,9 @@
-import { QueryClient, useQuery } from '@tanstack/react-query'
-import { executeSql, ExecuteSqlError } from 'data/sql/execute-sql-query'
-import { UseCustomQueryOptions } from 'types'
+import { QueryClient, queryOptions } from '@tanstack/react-query'
 import { z } from 'zod'
 
 import { FUNCTION_PRIVILEGES_SQL } from '../sql/queries/get-function-privileges'
 import { privilegeKeys } from './keys'
+import { executeSql, ExecuteSqlError } from '@/data/sql/execute-sql-query'
 
 export type FunctionPrivilegesVariables = {
   projectRef?: string
@@ -35,6 +34,8 @@ async function getFunctionPrivileges(
   { projectRef, connectionString }: FunctionPrivilegesVariables,
   signal?: AbortSignal
 ) {
+  if (!projectRef) throw new Error('projectRef is required')
+
   const { result } = await executeSql(
     {
       projectRef,
@@ -48,19 +49,18 @@ async function getFunctionPrivileges(
   return result as FunctionPrivilegesData
 }
 
-export const useFunctionPrivilegesQuery = <TData = FunctionPrivilegesData>(
+export const functionPrivilegesQueryOptions = (
   { projectRef, connectionString }: FunctionPrivilegesVariables,
-  {
-    enabled = true,
-    ...options
-  }: UseCustomQueryOptions<FunctionPrivilegesData, FunctionPrivilegesError, TData> = {}
-) =>
-  useQuery<FunctionPrivilegesData, FunctionPrivilegesError, TData>({
+  { enabled = true } = {}
+) => {
+  return queryOptions<FunctionPrivilegesData, FunctionPrivilegesError>({
+    // Query is functionally the same if connectionString changes
+    // eslint-disable-next-line @tanstack/query/exhaustive-deps
     queryKey: privilegeKeys.functionPrivilegesList(projectRef),
     queryFn: ({ signal }) => getFunctionPrivileges({ projectRef, connectionString }, signal),
-    enabled: enabled && typeof projectRef !== 'undefined',
-    ...options,
+    enabled: enabled && !!projectRef,
   })
+}
 
 export function invalidateFunctionPrivilegesQuery(
   client: QueryClient,

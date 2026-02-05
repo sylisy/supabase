@@ -1,12 +1,13 @@
+import { useQuery } from '@tanstack/react-query'
 import { useMemo } from 'react'
 
 import type { ConnectionVars } from '@/data/common.types'
 import { useIsSchemaExposed } from '@/hooks/misc/useIsSchemaExposed'
-import { API_ACCESS_ROLES, type ApiAccessRole } from '@/lib/data-api-types'
+import type { ApiAccessRole } from '@/lib/data-api-types'
 import type { Prettify } from '@/lib/type-helpers'
 import type { UseCustomQueryOptions } from '@/types'
 import {
-  useFunctionPrivilegesQuery,
+  functionPrivilegesQueryOptions,
   type FunctionPrivilegesData,
   type FunctionPrivilegesError,
 } from './function-privileges-query'
@@ -111,10 +112,9 @@ export const useFunctionApiAccessQuery = (
   {
     enabled = true,
     ...options
-  }: { enabled?: boolean } & Omit<
-    UseCustomQueryOptions<FunctionPrivilegesData, FunctionPrivilegesError>,
-    'enabled'
-  > = {}
+  }: Omit<UseCustomQueryOptions<FunctionPrivilegesData, FunctionPrivilegesError>, 'enabled'> & {
+    enabled?: boolean
+  } = {}
 ): UseFunctionApiAccessQueryReturn => {
   const uniqueFunctionIds = useMemo(() => {
     return new Set(functionIds.filter((id) => typeof id === 'number' && id > 0))
@@ -125,10 +125,10 @@ export const useFunctionApiAccessQuery = (
   const isSchemaExposed = schemaExposureStatus.isSuccess && schemaExposureStatus.data === true
 
   const enablePrivilegesQuery = enabled && hasFunctions
-  const privilegeStatus = useFunctionPrivilegesQuery(
-    { projectRef, connectionString },
-    { enabled: enablePrivilegesQuery, ...options }
-  )
+  const privilegeStatus = useQuery({
+    ...functionPrivilegesQueryOptions({ projectRef, connectionString }, { enabled: enablePrivilegesQuery }),
+    ...options,
+  })
 
   const result: UseFunctionApiAccessQueryReturn = useMemo(() => {
     const isPending =
