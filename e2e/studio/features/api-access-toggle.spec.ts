@@ -1,14 +1,12 @@
 import { expect, Page } from '@playwright/test'
 
+import { releaseFileOnceCleanup, withFileOnceSetup } from '../utils/once-per-file.js'
+import { runSQL } from '../utils/sql-helpers.js'
+import { openTableContextMenu, deleteTable } from '../utils/table-helpers.js'
 import { test } from '../utils/test.js'
 import { toUrl } from '../utils/to-url.js'
-import {
-  createApiResponseWaiter,
-  waitForApiResponse,
-  waitForTableToLoad,
-} from '../utils/wait-for-response.js'
+import { createApiResponseWaiter, waitForTableToLoad } from '../utils/wait-for-response.js'
 import { dismissToastsIfAny } from '../utils/dismiss-toast.js'
-import { openTableContextMenu, deleteTable } from '../utils/table-helpers.js'
 
 const TABLE_NAME_PREFIX = 'pw_api_access'
 
@@ -20,54 +18,16 @@ const API_PRIVILEGE_TYPES = ['SELECT', 'INSERT', 'UPDATE', 'DELETE']
 
 /**
  * Executes a SQL query via the SQL Editor and returns the result.
- * This is used to verify database state directly.
+ * Uses the shared runSQL utility for execution, then parses the grid results.
  */
 async function executeSql(
   page: Page,
   ref: string,
   sql: string
 ): Promise<Array<Record<string, unknown>>> {
-  // Create API response waiter for content/count which indicates project is loaded
-  const contentCountWaiter = createApiResponseWaiter(
-    page,
-    'platform/projects',
-    ref,
-    'content/count'
-  )
+  await runSQL(page, ref, sql)
 
-  // Navigate to SQL editor
-  await page.goto(toUrl(`/project/${ref}/sql/new?skip=true`))
-
-  // Wait for content/count API response to ensure project is fully loaded
-  await contentCountWaiter
-
-  await expect(page.getByText('Loading...')).not.toBeVisible({ timeout: 10000 })
-
-  // Clear and type the SQL
-  await page.locator('.view-lines').click()
-  await page.keyboard.press('ControlOrMeta+KeyA')
-  await page.keyboard.type(sql)
-
-  // Run the query
-  const sqlMutationPromise = waitForApiResponse(page, 'pg-meta', ref, 'query?key=', {
-    method: 'POST',
-  })
-  await page.getByTestId('sql-run-button').click()
-  await sqlMutationPromise
-
-  // Wait for either results grid or "Success. No rows returned" message
   const grid = page.getByRole('grid')
-  const noRowsMessage = page.getByText('Success. No rows returned')
-
-  // Wait for either element to appear
-  await expect(grid.or(noRowsMessage)).toBeVisible({ timeout: 10000 })
-
-  // If no rows returned, return empty array
-  if (await noRowsMessage.isVisible().catch(() => false)) {
-    return []
-  }
-
-  // If grid is not visible (shouldn't happen if we get here, but just in case)
   if ((await grid.count()) === 0) {
     return []
   }
@@ -193,10 +153,46 @@ function getRolePrivilegeSelector(page: Page, roleLabel: 'Anonymous (anon)' | 'A
 }
 
 test.describe('API Access Toggle', () => {
+  test.beforeAll(async ({ browser, ref }) => {
+    await withFileOnceSetup(import.meta.url, async () => {
+      const ctx = await browser.newContext()
+      const page = await ctx.newPage()
+
+      const loadPromise = waitForTableToLoad(page, ref)
+      await page.goto(toUrl(`/project/${ref}/editor?schema=public`))
+      await loadPromise
+
+      const viewButtons = page.getByRole('button', { name: /^View / })
+      const names = await Promise.all(
+        (await viewButtons.all()).map(async (btn) => {
+          const ariaLabel = await btn.getAttribute('aria-label')
+          const name = ariaLabel ? ariaLabel.replace(/^View\s+/, '').trim() : ''
+          return name
+        })
+      )
+      const tablesToDelete = names.filter((name) => name.startsWith(TABLE_NAME_PREFIX))
+
+      for (const tableName of tablesToDelete) {
+        await deleteTable(page, ref, tableName)
+        await expect
+          .poll(async () => {
+            return await page.getByLabel(`View ${tableName}`, { exact: true }).count()
+          })
+          .toBe(0)
+      }
+
+      await ctx.close()
+    })
+  })
+
   test.beforeEach(async ({ page, ref }) => {
     const loadPromise = waitForTableToLoad(page, ref)
     await page.goto(toUrl(`/project/${ref}/editor?schema=public`))
     await loadPromise
+  })
+
+  test.afterAll(async () => {
+    await releaseFileOnceCleanup(import.meta.url)
   })
 
   test('API access is default on for a new table', async ({ page, ref }) => {
@@ -245,6 +241,11 @@ test.describe('API Access Toggle', () => {
       anon: ['SELECT', 'INSERT', 'UPDATE', 'DELETE'],
       authenticated: ['SELECT', 'INSERT', 'UPDATE', 'DELETE'],
     })
+
+    const loadPromise = waitForTableToLoad(page, ref)
+    await page.goto(toUrl(`/project/${ref}/editor?schema=public`))
+    await loadPromise
+    await deleteTable(page, ref, tableName)
   })
 
   test('can toggle API access off for a new table', async ({ page, ref }) => {
@@ -295,6 +296,11 @@ test.describe('API Access Toggle', () => {
       anon: [],
       authenticated: [],
     })
+
+    const loadPromise = waitForTableToLoad(page, ref)
+    await page.goto(toUrl(`/project/${ref}/editor?schema=public`))
+    await loadPromise
+    await deleteTable(page, ref, tableName)
   })
 
   test('shows API access toggle when editing an existing table', async ({ page, ref }) => {
@@ -358,6 +364,13 @@ test.describe('API Access Toggle', () => {
     // Verify the toggle is present
     const toggle = getApiAccessToggle(page)
     await expect(toggle, 'API Access toggle should be visible in edit mode').toBeVisible()
+
+    await page.keyboard.press('Escape')
+    await page.waitForSelector('[data-testid="table-editor-side-panel"]', { state: 'detached' })
+    loadPromise = waitForTableToLoad(page, ref)
+    await page.goto(toUrl(`/project/${ref}/editor?schema=public`))
+    await loadPromise
+    await deleteTable(page, ref, tableName)
   })
 
   test('creates table with partial privileges and verifies correct grants', async ({
@@ -441,6 +454,11 @@ test.describe('API Access Toggle', () => {
       anon: ['SELECT'],
       authenticated: ['SELECT', 'INSERT'],
     })
+
+    const loadPromise = waitForTableToLoad(page, ref)
+    await page.goto(toUrl(`/project/${ref}/editor?schema=public`))
+    await loadPromise
+    await deleteTable(page, ref, tableName)
   })
 
   test('preserves API grants when editing non-privilege table properties', async ({
