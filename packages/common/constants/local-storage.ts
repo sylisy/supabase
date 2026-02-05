@@ -87,6 +87,11 @@ export const LOCAL_STORAGE_KEYS = {
 
   LAST_OPENED_SIDE_BAR: (ref: string) => `last-opened-sidebar-${ref}`,
 
+  // VSCode theme settings
+  VSCODE_THEME_ENABLED: 'supabase-vscode-theme-enabled',
+  VSCODE_THEME_PRESET: 'supabase-vscode-theme-preset',
+  VSCODE_THEME_CUSTOM: 'supabase-vscode-theme-custom',
+
   // Project sidebar hotkeys
   HOTKEY_SIDEBAR: (sidebarId: string) => `supabase-dashboard-hotkey-sidebar-${sidebarId}`,
 
@@ -143,6 +148,9 @@ const LOCAL_STORAGE_KEYS_ALLOWLIST = [
   LOCAL_STORAGE_KEYS.UI_PREVIEW_BRANCHING_2_0,
   LOCAL_STORAGE_KEYS.LINTER_SHOW_FOOTER,
   LOCAL_STORAGE_KEYS.SIDEBAR_BEHAVIOR,
+  LOCAL_STORAGE_KEYS.VSCODE_THEME_ENABLED,
+  LOCAL_STORAGE_KEYS.VSCODE_THEME_PRESET,
+  LOCAL_STORAGE_KEYS.VSCODE_THEME_CUSTOM,
 ]
 
 export function clearLocalStorage() {

@@ -2,6 +2,8 @@ import { useMonaco } from '@monaco-editor/react'
 import { useTheme } from 'next-themes'
 import { useMemo } from 'react'
 
+import { useVSCodeTheme } from 'hooks/misc/useVSCodeTheme'
+
 const getTheme = (theme: string) => {
   const isDarkMode = theme.includes('dark')
   // [TODO] Probably need better theming for light mode
@@ -30,15 +32,24 @@ const getTheme = (theme: string) => {
 export const MonacoThemeProvider = () => {
   const monaco = useMonaco()
   const { resolvedTheme } = useTheme()
+  const { isEnabled: isVSCodeThemeEnabled, monacoTheme, monacoThemeName } = useVSCodeTheme()
 
   // Define the supabase theme for Monaco before anything is rendered. Using useEffect would sometime load the theme
   // after the editor was loaded, so it looked off. useMemo will always be run before rendering
   useMemo(() => {
     if (monaco && resolvedTheme) {
-      const mode = getTheme(resolvedTheme)
-      monaco.editor.defineTheme('supabase', mode)
+      // If VSCode theme is enabled and we have a custom Monaco theme, use it
+      if (isVSCodeThemeEnabled && monacoTheme && monacoThemeName) {
+        monaco.editor.defineTheme(monacoThemeName, monacoTheme)
+        // Also define it as 'supabase' so existing editors pick it up
+        monaco.editor.defineTheme('supabase', monacoTheme)
+      } else {
+        // Use the default Supabase theme
+        const mode = getTheme(resolvedTheme)
+        monaco.editor.defineTheme('supabase', mode)
+      }
     }
-  }, [resolvedTheme, monaco])
+  }, [resolvedTheme, monaco, isVSCodeThemeEnabled, monacoTheme, monacoThemeName])
 
   return null
 }

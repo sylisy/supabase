@@ -30,6 +30,7 @@ import {
   PageSectionSummary,
   PageSectionTitle,
 } from 'ui-patterns/PageSection'
+import { VSCodeThemeSettings } from './VSCodeThemeSettings'
 
 export const ThemeSettings = () => {
   const [mounted, setMounted] = useState(false)
@@ -122,6 +123,7 @@ export const ThemeSettings = () => {
               </Select_Shadcn_>
             </FormItemLayout>
           </CardContent>
+          <VSCodeThemeSettings />
         </Card>
       </PageSectionContent>
     </PageSection>

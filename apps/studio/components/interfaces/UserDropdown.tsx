@@ -1,15 +1,17 @@
-import { Command, FlaskConical, Loader2, Settings } from 'lucide-react'
+import { Check, Code2, Command, FlaskConical, Loader2, Settings } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 
 import { ProfileImage } from 'components/ui/ProfileImage'
-import { IS_PLATFORM } from 'lib/constants'
 import { useIsFeatureEnabled } from 'hooks/misc/useIsFeatureEnabled'
+import { useVSCodeTheme } from 'hooks/misc/useVSCodeTheme'
+import { IS_PLATFORM } from 'lib/constants'
 import { useProfileNameAndPicture } from 'lib/profile'
 import { useAppStateSnapshot } from 'state/app-state'
 import {
   Button,
+  cn,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
@@ -18,6 +20,9 @@ import {
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
   Theme,
   singleThemes,
@@ -35,6 +40,15 @@ export function UserDropdown() {
   const setCommandMenuOpen = useSetCommandMenuOpen()
   const sendTelemetry = useCommandMenuOpenedTelemetry()
   const { openFeaturePreviewModal } = useFeaturePreviewModal()
+
+  const {
+    isEnabled: isVSCodeThemeEnabled,
+    currentPresetId,
+    currentPreset,
+    presets: vscodePresets,
+    enablePreset: enableVSCodePreset,
+    disable: disableVSCodeTheme,
+  } = useVSCodeTheme()
 
   const handleCommandMenuOpen = () => {
     setCommandMenuOpen(true)
@@ -119,6 +133,64 @@ export function UserDropdown() {
               </DropdownMenuRadioItem>
             ))}
           </DropdownMenuRadioGroup>
+          <DropdownMenuSeparator />
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger className="flex items-center gap-2">
+              <Code2 size={14} strokeWidth={1.5} className="text-foreground-lighter" />
+              <span>VSCode Theme</span>
+              {isVSCodeThemeEnabled && currentPreset && (
+                <span className="ml-auto text-xs text-foreground-muted truncate max-w-[80px]">
+                  {currentPreset.name}
+                </span>
+              )}
+            </DropdownMenuSubTrigger>
+            <DropdownMenuSubContent className="w-48">
+              <DropdownMenuItem
+                onClick={() => disableVSCodeTheme()}
+                className="flex items-center justify-between"
+              >
+                <span>Off</span>
+                {!isVSCodeThemeEnabled && <Check size={14} className="text-brand" />}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              {vscodePresets.map((preset) => (
+                <DropdownMenuItem
+                  key={preset.id}
+                  onClick={() => enableVSCodePreset(preset.id)}
+                  className="flex items-center gap-2"
+                >
+                  <div className="flex gap-0.5 shrink-0">
+                    <div
+                      className="w-3 h-3 rounded-sm"
+                      style={{ backgroundColor: preset.preview.background }}
+                    />
+                    <div
+                      className="w-3 h-3 rounded-sm"
+                      style={{ backgroundColor: preset.preview.accent }}
+                    />
+                  </div>
+                  <span className="flex-1 truncate">{preset.name}</span>
+                  {isVSCodeThemeEnabled && currentPresetId === preset.id && (
+                    <Check size={14} className="text-brand shrink-0" />
+                  )}
+                </DropdownMenuItem>
+              ))}
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
+                <Link
+                  href="/account/me"
+                  className="text-xs text-foreground-light"
+                  onClick={() => {
+                    if (router.pathname !== '/account/me') {
+                      appStateSnapshot.setLastRouteBeforeVisitingAccountPage(router.asPath)
+                    }
+                  }}
+                >
+                  Custom theme...
+                </Link>
+              </DropdownMenuItem>
+            </DropdownMenuSubContent>
+          </DropdownMenuSub>
         </DropdownMenuGroup>
         {IS_PLATFORM && (
           <>
