@@ -1,25 +1,25 @@
-import { useEffect, useRef, useState } from 'react'
-import { Check } from 'lucide-react'
 import { PageLayout } from 'components/layouts/PageLayout/PageLayout'
 import { ScaffoldContainer, ScaffoldSection } from 'components/layouts/Scaffold'
-import { InputStep } from './steps/InputStep'
-import { SqlStep } from './steps/SqlStep'
-import { EdgeFunctionStep } from './steps/EdgeFunctionStep'
-import { EnvStep } from './steps/EnvStep'
+import { Check } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
 import type { CookbookRecipe, RecipeContext } from 'types/cookbook'
 import { cn } from 'ui'
+import { EdgeFunctionStep } from './steps/EdgeFunctionStep'
+import { EnvStep } from './steps/EnvStep'
+import { InputStep } from './steps/InputStep'
+import { SqlStep } from './steps/SqlStep'
 
-interface CookbookRecipeExecutorProps {
+interface TemplateInstallProps {
   recipe: CookbookRecipe
   projectRef: string
   connectionString?: string | null
 }
 
-export function CookbookRecipeExecutor({
+export function TemplateInstall({
   recipe,
   projectRef,
   connectionString,
-}: CookbookRecipeExecutorProps) {
+}: TemplateInstallProps) {
   const [currentStepIndex, setCurrentStepIndex] = useState(0)
   const [context, setContext] = useState<RecipeContext>({})
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set())
