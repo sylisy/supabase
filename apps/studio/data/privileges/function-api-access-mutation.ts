@@ -1,8 +1,8 @@
-import { ident } from '@supabase/pg-meta/src/pg-format'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 
 import type { ConnectionVars } from '../common.types'
+import { getFunctionGrantSql, getFunctionRevokeSql } from '../sql/queries/edit-function-permissions'
 import type { FunctionApiPrivilegesByRole } from './function-api-access-query'
 import { invalidateFunctionPrivilegesQuery } from './function-privileges-query'
 import { executeSql } from '@/data/sql/execute-sql-query'
@@ -25,15 +25,41 @@ export async function updateFunctionApiAccessPrivileges({
   roles,
 }: FunctionApiAccessPrivilegesVariables) {
   const sqlStatements: Array<string> = []
-
-  const functionRef = `${ident(functionSchema)}.${ident(functionName)}(${functionArgs})`
+  let addPublicRevokeStatement = false
 
   for (const role of API_ACCESS_ROLES) {
     if (roles[role]) {
-      sqlStatements.push(`GRANT EXECUTE ON FUNCTION ${functionRef} TO ${ident(role)};`)
+      sqlStatements.push(
+        getFunctionGrantSql({
+          functionSchema,
+          functionName,
+          functionArgs,
+          role,
+        })
+      )
     } else {
-      sqlStatements.push(`REVOKE EXECUTE ON FUNCTION ${functionRef} FROM ${ident(role)};`)
+      sqlStatements.push(
+        getFunctionRevokeSql({
+          functionSchema,
+          functionName,
+          functionArgs,
+          role,
+        })
+      )
+      addPublicRevokeStatement = true
     }
+  }
+
+  // Always revoke EXECUTE from public if any other role is revoked
+  if (addPublicRevokeStatement) {
+    sqlStatements.push(
+      getFunctionRevokeSql({
+        functionSchema,
+        functionName,
+        functionArgs,
+        role: 'public',
+      })
+    )
   }
 
   if (sqlStatements.length === 0) {
