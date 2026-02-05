@@ -35,7 +35,7 @@ interface FunctionListProps {
   deleteFunction: (fn: any) => void
   functions: DatabaseFunction[]
   functionApiAccessMap?: FunctionApiAccessMap
-  onToggleApiAccess?: (fn: DatabaseFunction, enable: boolean) => void
+  onConfigureApiAccess?: (fn: DatabaseFunction) => void
 }
 
 export function FunctionList({
@@ -49,7 +49,7 @@ export function FunctionList({
   deleteFunction = noop,
   functions,
   functionApiAccessMap,
-  onToggleApiAccess = noop,
+  onConfigureApiAccess = noop,
 }: FunctionListProps) {
   const router = useRouter()
   const { data: selectedProject } = useSelectedProjectQuery()
@@ -106,6 +106,8 @@ export function FunctionList({
     <>
       {_functions.map((x) => {
         const isApiDocumentAvailable = schema == 'public' && x.return_type !== 'trigger'
+        const apiAccessData = functionApiAccessMap?.[x.id]
+        const canConfigureApiAccess = !!apiAccessData && apiAccessData.apiAccessType !== 'none'
 
         return (
           <TableRow key={x.id}>
@@ -175,8 +177,8 @@ export function FunctionList({
                           </DropdownMenuItem>
                         )}
                         <ApiAccessMenuItem
-                          apiAccessData={functionApiAccessMap?.[x.id]}
-                          onToggle={(enable) => onToggleApiAccess(x, enable)}
+                          visible={canConfigureApiAccess}
+                          onConfigure={() => onConfigureApiAccess(x)}
                         />
                         <DropdownMenuSeparator />
                         <DropdownMenuItem className="space-x-2" onClick={() => editFunction(x)}>
@@ -253,4 +255,3 @@ export function FunctionList({
     </>
   )
 }
-

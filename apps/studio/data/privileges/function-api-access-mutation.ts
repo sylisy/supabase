@@ -1,19 +1,19 @@
+import { ident } from '@supabase/pg-meta/src/pg-format'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 
-import { executeSql } from 'data/sql/execute-sql-query'
-import { API_ACCESS_ROLES } from '@/lib/data-api-types'
-import type { UseCustomMutationOptions } from 'types'
 import type { ConnectionVars } from '../common.types'
+import type { FunctionApiPrivilegesByRole } from './function-api-access-query'
 import { invalidateFunctionPrivilegesQuery } from './function-privileges-query'
-import { ident } from '@supabase/pg-meta/src/pg-format'
-
+import { executeSql } from '@/data/sql/execute-sql-query'
+import { API_ACCESS_ROLES } from '@/lib/data-api-types'
+import type { UseCustomMutationOptions } from '@/types'
 
 export type FunctionApiAccessPrivilegesVariables = ConnectionVars & {
   functionSchema: string
   functionName: string
   functionArgs: string
-  enable: boolean
+  roles: FunctionApiPrivilegesByRole
 }
 
 export async function updateFunctionApiAccessPrivileges({
@@ -22,14 +22,14 @@ export async function updateFunctionApiAccessPrivileges({
   functionSchema,
   functionName,
   functionArgs,
-  enable,
+  roles,
 }: FunctionApiAccessPrivilegesVariables) {
-  const sqlStatements: string[] = []
+  const sqlStatements: Array<string> = []
 
   const functionRef = `${ident(functionSchema)}.${ident(functionName)}(${functionArgs})`
 
   for (const role of API_ACCESS_ROLES) {
-    if (enable) {
+    if (roles[role]) {
       sqlStatements.push(`GRANT EXECUTE ON FUNCTION ${functionRef} TO ${ident(role)};`)
     } else {
       sqlStatements.push(`REVOKE EXECUTE ON FUNCTION ${functionRef} FROM ${ident(role)};`)

@@ -42,7 +42,7 @@ export function ApiAccessCell({ apiAccessData }: { apiAccessData?: FunctionApiAc
     )
   }
 
-  const roles = []
+  const roles: Array<string> = []
   if (apiAccessData.privileges.anon) roles.push('anon')
   if (apiAccessData.privileges.authenticated) roles.push('authenticated')
 
@@ -51,7 +51,7 @@ export function ApiAccessCell({ apiAccessData }: { apiAccessData?: FunctionApiAc
       <TooltipTrigger>
         <Badge variant="default">
           <Check size={12} className="mr-1" />
-          Yes
+          {roles.join(', ')}
         </Badge>
       </TooltipTrigger>
       <TooltipContent side="top" className="max-w-xs">
@@ -62,27 +62,20 @@ export function ApiAccessCell({ apiAccessData }: { apiAccessData?: FunctionApiAc
 }
 
 export function ApiAccessMenuItem({
-  apiAccessData,
-  onToggle,
+  visible,
+  onConfigure,
 }: {
-  apiAccessData?: FunctionApiAccessData
-  onToggle: (enable: boolean) => void
+  visible: boolean
+  onConfigure: () => void
 }) {
-  if (!apiAccessData) {
+  if (!visible) {
     return null
   }
-
-  // If schema is not exposed, don't show the toggle option
-  if (apiAccessData.apiAccessType === 'none') {
-    return null
-  }
-
-  const hasAccess = apiAccessData.apiAccessType === 'access'
 
   return (
-    <DropdownMenuItem className="space-x-2" onClick={() => onToggle(!hasAccess)}>
+    <DropdownMenuItem className="space-x-2" onClick={onConfigure}>
       <Globe size={14} />
-      <p>{hasAccess ? 'Disable API access' : 'Enable API access'}</p>
+      <p>Configure API access</p>
     </DropdownMenuItem>
   )
 }

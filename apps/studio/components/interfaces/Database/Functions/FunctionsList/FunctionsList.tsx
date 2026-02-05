@@ -73,11 +73,8 @@ export function FunctionsList() {
   // Track the ID being deleted to exclude it from error checking
   const deletingFunctionIdRef = useRef<string | null>(null)
 
-  // State for API access toggle modal
-  const [apiAccessToggleState, setApiAccessToggleState] = useState<{
-    func: DatabaseFunction
-    enable: boolean
-  } | null>(null)
+  // State for API access configuration modal
+  const [apiAccessConfigFunc, setApiAccessConfigFunc] = useState<DatabaseFunction | null>(null)
 
   const createFunction = () => {
     setSelectedFunctionIdToDuplicate(null)
@@ -182,13 +179,12 @@ export function FunctionsList() {
     { enabled: Boolean(selectedSchema && schemaFunctionIds.length > 0) }
   )
 
-  // Mutation for toggling API access
+  // Mutation for updating API access
   const { mutate: updateApiAccess, isPending: isUpdatingApiAccess } =
     useFunctionApiAccessPrivilegesMutation({
       onSuccess: (_, variables) => {
-        const action = variables.enable ? 'enabled' : 'disabled'
-        toast.success(`API access ${action} for function ${variables.functionName}`)
-        setApiAccessToggleState(null)
+        toast.success(`API access updated for function ${variables.functionName}`)
+        setApiAccessConfigFunc(null)
       },
     })
 
@@ -391,7 +387,7 @@ export function FunctionsList() {
                   deleteFunction={deleteFunction}
                   functions={functions ?? []}
                   functionApiAccessMap={functionApiAccessMap}
-                  onToggleApiAccess={(func, enable) => setApiAccessToggleState({ func, enable })}
+                  onConfigureApiAccess={(func) => setApiAccessConfigFunc(func)}
                 />
               </TableBody>
             </Table>
@@ -430,22 +426,22 @@ export function FunctionsList() {
       />
 
       <ToggleFunctionApiAccessModal
-        visible={!!apiAccessToggleState}
-        func={apiAccessToggleState?.func}
-        enable={apiAccessToggleState?.enable ?? false}
+        func={apiAccessConfigFunc}
+        apiAccessData={apiAccessConfigFunc ? functionApiAccessMap?.[apiAccessConfigFunc.id] : undefined}
+        projectRef={project?.ref}
         isLoading={isUpdatingApiAccess}
-        onConfirm={() => {
-          if (!apiAccessToggleState || !project) return
+        onConfirm={(roles) => {
+          if (!apiAccessConfigFunc || !project) return
           updateApiAccess({
             projectRef: project.ref,
             connectionString: project.connectionString,
-            functionSchema: apiAccessToggleState.func.schema,
-            functionName: apiAccessToggleState.func.name,
-            functionArgs: apiAccessToggleState.func.identity_argument_types,
-            enable: apiAccessToggleState.enable,
+            functionSchema: apiAccessConfigFunc.schema,
+            functionName: apiAccessConfigFunc.name,
+            functionArgs: apiAccessConfigFunc.identity_argument_types,
+            roles,
           })
         }}
-        onCancel={() => setApiAccessToggleState(null)}
+        onCancel={() => setApiAccessConfigFunc(null)}
       />
     </>
   )

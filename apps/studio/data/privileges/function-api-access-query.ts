@@ -1,15 +1,15 @@
 import { useMemo } from 'react'
 
+import type { ConnectionVars } from '@/data/common.types'
+import { useIsSchemaExposed } from '@/hooks/misc/useIsSchemaExposed'
 import { API_ACCESS_ROLES, type ApiAccessRole } from '@/lib/data-api-types'
+import type { Prettify } from '@/lib/type-helpers'
+import type { UseCustomQueryOptions } from '@/types'
 import {
   useFunctionPrivilegesQuery,
   type FunctionPrivilegesData,
   type FunctionPrivilegesError,
 } from './function-privileges-query'
-import type { ConnectionVars } from '@/data/common.types'
-import { useIsSchemaExposed } from '@/hooks/misc/useIsSchemaExposed'
-import type { Prettify } from '@/lib/type-helpers'
-import type { UseCustomQueryOptions } from '@/types'
 
 // The contents of this array are never used, so any will allow
 // it to be used anywhere an array of any type is required.
