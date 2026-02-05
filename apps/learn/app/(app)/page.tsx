@@ -1,6 +1,6 @@
 import { WhatWillILearn } from '@/components/what-will-i-learn'
 import Link from 'next/link'
-import { Activity, BookOpen, Database, Gauge, Wrench } from 'lucide-react'
+import { BookOpen, Database } from 'lucide-react'
 import { Badge, Button, Card, CardDescription, CardHeader } from 'ui'
 
 // Horizontal grid line component
@@ -18,31 +18,6 @@ export default function Home() {
       chapters: 5,
       icon: Database,
       level: 'Beginner',
-    },
-    {
-      id: 2,
-      title: 'Project: Smart Office',
-      description: 'Build a realtime room-booking dashboard using Supabase.',
-      chapters: 15,
-      icon: Activity,
-      level: 'Intermediate',
-    },
-    {
-      id: 3,
-      title: 'Supabase Internals: Performance & Scaling',
-      description: 'Learn how to profile queries, tune indexes, and scale Postgres with Supabase.',
-      chapters: 20,
-      icon: Gauge,
-      level: 'Advanced',
-    },
-    {
-      id: 4,
-      title: 'Supabase Internals: Debugging & Operations',
-      description:
-        'Understand how to diagnose slow queries, use read replicas, and manage production workloads.',
-      chapters: 20,
-      icon: Wrench,
-      level: 'Advanced',
     },
   ]
   return (

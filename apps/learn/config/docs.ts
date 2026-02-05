@@ -7,7 +7,6 @@ export const courses: SidebarNavGroup = {
       title: 'Foundations',
       href: '/foundations',
       items: [
-        // ✅ Always visible (no requiresAuth)
         {
           title: 'Introduction',
           href: '/foundations/introduction',
@@ -40,28 +39,12 @@ export const courses: SidebarNavGroup = {
           title: 'Edge Functions',
           href: '/foundations/edge-functions',
         },
-
         {
           title: 'Vector Search',
           href: '/foundations/vector',
         },
       ],
       commandItemLabel: 'Foundations',
-    },
-    {
-      title: 'Project: Smart Office',
-      href: '/projects/smart-office',
-      commandItemLabel: 'Project: Smart Office',
-    },
-    {
-      title: 'Performance & Scaling',
-      href: '/internals/performance-scaling',
-      commandItemLabel: 'Supabase Internals: Performance & Scaling',
-    },
-    {
-      title: 'Debugging & Operations',
-      href: '/internals/debugging-operations',
-      commandItemLabel: 'Supabase Internals: Debugging & Operations',
     },
   ],
 }
