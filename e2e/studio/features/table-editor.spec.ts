@@ -2,6 +2,7 @@ import { expect, Page } from '@playwright/test'
 import fs from 'fs'
 import path from 'path'
 import { env } from '../env.config.js'
+import { dismissToastsIfAny } from '../utils/dismiss-toast.js'
 import { releaseFileOnceCleanup, withFileOnceSetup } from '../utils/once-per-file.js'
 import { resetLocalStorage } from '../utils/reset-local-storage.js'
 import { test } from '../utils/test.js'
@@ -16,14 +17,6 @@ import {
 
 const tableNamePrefix = 'pw_table'
 const columnName = 'pw_column'
-
-const dismissToastsIfAny = async (page: Page) => {
-  const closeButtons = page.getByRole('button', { name: 'Close toast' })
-  const count = await closeButtons.count()
-  for (let i = 0; i < count; i++) {
-    await closeButtons.nth(i).click()
-  }
-}
 
 const createTable = async (page: Page, ref: string, tableName: string) => {
   // Ensure no toast overlays block the dialog trigger

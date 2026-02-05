@@ -32,7 +32,7 @@ const runSQL = async (page: Page, ref: string, sql: string) => {
 
   await expect(
     page.getByText('Success. No rows returned').or(page.getByText(/^\d+ rows?$/)).first()
-  ).toBeVisible({ timeout: 10000 })
+  ).toBeVisible()
 }
 
 const createTableSQL = async (
@@ -484,6 +484,9 @@ test.describe('Queue Table Operations', () => {
 
     await expect(page.getByText('1 pending change')).toBeVisible()
 
+    await expect(
+      page.getByRole('button', { name: `View ${tableName2}`, exact: true })
+    ).toBeVisible()
     await page.getByRole('button', { name: `View ${tableName2}`, exact: true }).click()
 
     await page.getByTestId('table-editor-insert-new-row').click()
