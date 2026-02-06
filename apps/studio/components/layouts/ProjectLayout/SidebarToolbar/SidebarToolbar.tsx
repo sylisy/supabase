@@ -1,7 +1,8 @@
 import { useParams } from 'common'
 import { IS_PLATFORM } from 'lib/constants'
-import { ToolbarButton } from './ToolbarButton'
+
 import { generateToolbarItems } from './SidebarToolbar.utils'
+import { ToolbarButton } from './ToolbarButton'
 
 export const SidebarToolbar = () => {
   const { ref: projectRef } = useParams()
@@ -16,7 +17,7 @@ export const SidebarToolbar = () => {
   const enabledItems = toolbarItems.filter((item) => item.enabled)
 
   return (
-    <div className="flex flex-col w-[50px] h-full border-l">
+    <div className="flex flex-col w-[40px] h-full border-l">
       <div className="flex flex-col items-center gap-2 p-2">
         {enabledItems.map((item) => (
           <ToolbarButton key={item.key} {...item.config} />

@@ -47,12 +47,13 @@ export const ToolbarButton = ({
         id={id}
         className={cn(
           'rounded-full w-[32px] h-[32px] flex items-center justify-center p-0 text-foreground-light hover:text-foreground group',
+          'border-transparent',
           isOpen && 'bg-foreground text-background hover:text-background'
         )}
         onClick={handleClick}
         tooltip={{
           content: {
-            className: 'p-1 pl-2.5',
+            className: shouldShowShortcut ? 'p-1 pl-2.5' : 'py-1.5 px-2.5',
             side: 'left',
             text: shouldShowShortcut ? (
               <div className="flex items-center gap-2.5">

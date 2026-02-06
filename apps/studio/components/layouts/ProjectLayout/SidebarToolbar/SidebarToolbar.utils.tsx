@@ -1,6 +1,6 @@
 import { SIDEBAR_KEYS } from 'components/layouts/ProjectLayout/LayoutSidebar/LayoutSidebarProvider'
 import { SqlEditor } from 'icons'
-import { Lightbulb } from 'lucide-react'
+import { Lightbulb, HelpCircle } from 'lucide-react'
 import { AiIconAnimation, cn } from 'ui'
 
 import { AdvisorBadge } from './AdvisorBadge'
@@ -80,6 +80,26 @@ export const generateToolbarItems = (options: GenerateToolbarItemsOptions = {}):
         ),
         tooltipText: 'Advisor Center',
         badge: <AdvisorBadge projectRef={projectRef} />,
+      },
+    },
+    {
+      key: 'help',
+      label: 'Help & Support',
+      enabled: isPlatform,
+      config: {
+        id: 'help-trigger',
+        sidebarKey: SIDEBAR_KEYS.HELP_PANEL,
+        icon: (isOpen) => (
+          <HelpCircle
+            size={16}
+            strokeWidth={1.5}
+            className={cn(
+              'text-foreground-light group-hover:text-foreground',
+              isOpen && 'text-background group-hover:text-background'
+            )}
+          />
+        ),
+        tooltipText: 'Help & Support',
       },
     },
   ]
