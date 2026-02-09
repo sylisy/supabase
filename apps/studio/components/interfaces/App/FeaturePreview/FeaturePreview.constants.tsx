@@ -53,7 +53,7 @@ export const FEATURE_PREVIEWS = [
   {
     key: LOCAL_STORAGE_KEYS.UI_PREVIEW_SIDEBAR_TOOLBAR,
     name: 'Sidebar Toolbar',
-    discussionsUrl: 'https://github.com/orgs/supabase/discussions/42462',
+    discussionsUrl: undefined,
     isNew: true,
     isPlatformOnly: false,
   },

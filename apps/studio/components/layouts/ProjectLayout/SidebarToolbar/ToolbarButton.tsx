@@ -1,4 +1,4 @@
-import { LOCAL_STORAGE_KEYS } from 'common'
+import { LOCAL_STORAGE_KEYS, useBreakpoint } from 'common'
 import { ButtonTooltip } from 'components/ui/ButtonTooltip'
 import { useLocalStorageQuery } from 'hooks/misc/useLocalStorage'
 import type { ReactNode } from 'react'
@@ -25,6 +25,7 @@ export const ToolbarButton = ({
   badge,
 }: ToolbarButtonConfig) => {
   const { activeSidebar, toggleSidebar } = useSidebarManagerSnapshot()
+  const isMobile = useBreakpoint()
   const [isHotkeyEnabled] = useLocalStorageQuery(
     LOCAL_STORAGE_KEYS.HOTKEY_SIDEBAR(sidebarKey),
     true
@@ -54,7 +55,7 @@ export const ToolbarButton = ({
         tooltip={{
           content: {
             className: shouldShowShortcut ? 'p-1 pl-2.5' : 'py-1.5 px-2.5',
-            side: 'left',
+            side: isMobile ? 'top' : 'left',
             text: shouldShowShortcut ? (
               <div className="flex items-center gap-2.5">
                 <span>{tooltipText}</span>

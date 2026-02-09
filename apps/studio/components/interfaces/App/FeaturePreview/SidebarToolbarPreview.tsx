@@ -5,9 +5,9 @@ export const SidebarToolbarPreview = () => {
   return (
     <div className="flex flex-col gap-2">
       <p className="text-foreground-light text-sm mb-4">
-        Enable a dedicated vertical toolbar on the right side of the dashboard for accessing side
-        panels. This creates a consistent, repeatable pattern for opening panels while reducing
-        clutter in the top navigation bar.
+        Enable a dedicated vertical toolbar on the right side of the dashboard for a centralized
+        access to side panels. This creates a consistent, repeatable pattern for opening panels
+        while reducing clutter in the top navigation bar.
       </p>
       <Image
         src={`${BASE_PATH}/img/previews/sidebar-toolbar-preview.png`}
