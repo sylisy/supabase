@@ -36,7 +36,7 @@ export const DataApiOverviewTab = () => {
 
   return (
     <IntegrationOverviewTab>
-      <div className="px-10 max-w-4xl flex flex-col gap-8">
+      <div className="px-10 max-w-6xl flex flex-col gap-12">
         {!isProjectLoading && project?.status !== PROJECT_STATUS.ACTIVE_HEALTHY ? (
           <Alert_Shadcn_ variant="destructive">
             <AlertCircle size={16} />
