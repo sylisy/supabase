@@ -1,14 +1,15 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { ChevronLeft, ChevronRight, Info } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { ChevronLeft, ChevronRight, Info } from 'lucide-react'
-import { ScrollArea, cn } from 'ui'
+import { useEffect, useState } from 'react'
+import { cn, ScrollArea } from 'ui'
+
+import { CommandMenu } from './command-menu'
+import { ThemeSwitcherDropdown } from './theme-switcher-dropdown'
 import { courses } from '@/config/docs'
 import { useMobileMenu } from '@/hooks/use-mobile-menu'
-import { ThemeSwitcherDropdown } from './theme-switcher-dropdown'
-import { CommandMenu } from './command-menu'
 import type { SidebarNavItem } from '@/types/nav'
 
 type Panel = 'courses' | 'modules' | 'lessons'
@@ -255,7 +256,9 @@ export default function SlidingSidebarNavigation() {
                         {standalone.length > 0 && (
                           <ul className="space-y-1 mb-6">
                             {standalone.map((item) => {
-                              const isIntroduction = item.title.toLowerCase().includes('introduction')
+                              const isIntroduction = item.title
+                                .toLowerCase()
+                                .includes('introduction')
                               return (
                                 <li key={item.href}>
                                   <Link
@@ -270,7 +273,10 @@ export default function SlidingSidebarNavigation() {
                                   >
                                     <span>{item.title}</span>
                                     {isIntroduction && (
-                                      <Info className="w-5 h-5 text-foreground-muted" strokeWidth={2} />
+                                      <Info
+                                        className="w-5 h-5 text-foreground-muted"
+                                        strokeWidth={2}
+                                      />
                                     )}
                                   </Link>
                                 </li>

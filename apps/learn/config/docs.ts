@@ -255,7 +255,10 @@ export const courses: SidebarNavGroup = {
 }
 
 // Recursively extract all items with hrefs for command palette
-function extractCommandItems(items: any[], parentLabel?: string): { label: string; href: string }[] {
+function extractCommandItems(
+  items: any[],
+  parentLabel?: string
+): { label: string; href: string }[] {
   const result: { label: string; href: string }[] = []
 
   items.forEach((item) => {

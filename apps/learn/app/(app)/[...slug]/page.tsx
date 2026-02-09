@@ -5,18 +5,20 @@ import { ExploreMore } from '@/components/explore-more'
 import { Mdx } from '@/components/mdx-components'
 import { NextUp } from '@/components/next-up'
 import { DashboardTableOfContents } from '@/components/toc'
-import { getTableOfContents } from '@/lib/toc'
+import { courses } from '@/config/docs'
 import { getCurrentChapter } from '@/lib/get-current-chapter'
 import { getNextPage } from '@/lib/get-next-page'
+import { getTableOfContents } from '@/lib/toc'
 import { absoluteUrl, cn } from '@/lib/utils'
-import { courses } from '@/config/docs'
 import type { SidebarNavItem } from '@/types/nav'
+
 import '@/styles/code-block-variables.css'
 import '@/styles/mdx.css'
+
 import { allDocs } from 'contentlayer/generated'
 import type { Metadata } from 'next'
-import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import { notFound } from 'next/navigation'
 import Balancer from 'react-wrap-balancer'
 import { ScrollArea } from 'ui'
 
@@ -139,10 +141,7 @@ export default async function DocPage(props: DocPageProps) {
             {breadcrumb.map((crumb, index) => (
               <span key={index} className="flex items-center gap-3">
                 {crumb.href ? (
-                  <Link
-                    href={crumb.href}
-                    className="hover:text-foreground transition-colors"
-                  >
+                  <Link href={crumb.href} className="hover:text-foreground transition-colors">
                     {crumb.label}
                   </Link>
                 ) : (
