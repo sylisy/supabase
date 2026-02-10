@@ -63,6 +63,7 @@ const MembersView = ({ searchString }: MembersViewProps) => {
             member.username.includes(searchString) || member.primary_email?.includes(searchString)
           )
         }
+        return false
       })
   }, [members, searchString])
 

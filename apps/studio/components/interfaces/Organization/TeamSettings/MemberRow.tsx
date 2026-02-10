@@ -140,7 +140,7 @@ export const MemberRow = ({ member }: MemberRowProps) => {
                 <p className="text-foreground-light">{roleName}</p>
                 {hasProjectScopedRoles && (
                   <>
-                    {/* <span className="text-foreground-lighter">·</span> */}
+
                     <ChevronRight className="text-foreground-muted/50" size={14} />
                     {projectsApplied.length === 1 ? (
                       <span className="text-foreground-light truncate" title={projectsApplied[0]}>

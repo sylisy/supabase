@@ -182,26 +182,19 @@ export const InviteMemberButton = () => {
 
     const projectPayload =
       !values.applyToOrg && values.projectRef ? { projects: [values.projectRef] } : {}
+    const results = await Promise.allSettled(
+      toInvite.map((emailAddress) =>
+        inviteMemberAsync({
+          slug,
+          email: emailAddress,
+          roleId: Number(values.role),
+          ...projectPayload,
+        })
+      )
+    )
 
-    let successCount = 0
-    let failedEmails: string[] = []
-
-    for (const emailAddress of toInvite) {
-      try {
-        await inviteMemberAsync(
-          {
-            slug,
-            email: emailAddress,
-            roleId: Number(values.role),
-            ...projectPayload,
-          },
-          { onError: () => { } }
-        )
-        successCount++
-      } catch {
-        failedEmails.push(emailAddress)
-      }
-    }
+    const successCount = results.filter((r) => r.status === 'fulfilled').length
+    const failedEmails = toInvite.filter((_, i) => results[i].status === 'rejected')
 
     if (successCount > 0) {
       toast.success(
@@ -209,7 +202,7 @@ export const InviteMemberButton = () => {
           ? 'Successfully sent invitation to new member'
           : `Successfully sent invitations to ${successCount} new members`
       )
-      setIsOpen(!isOpen)
+      setIsOpen(false)
       form.reset({
         email: '',
         role: developerRole?.id.toString() ?? '',
