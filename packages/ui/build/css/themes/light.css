@@ -51,14 +51,14 @@
   --border-overlay: var(--colors-gray-light-500);
   --border-secondary: var(--colors-gray-light-400);
   --border-muted: var(--colors-gray-light-400);
-  --background-dash-canvas: var(--colors-gray-light-200);
-  --background-dash-sidebar: var(--colors-gray-light-100);
+  --background-dash-canvas: 0deg 100% 80%;
+  --background-dash-sidebar: 0deg 100% 85%;
   --background-button-default: var(--colors-gray-light-100);
   --background-overlay-hover: var(--colors-gray-light-300);
   --background-overlay-default: var(--colors-gray-light-100);
   --background-control: var(--colors-gray-light-300);
   --background-selection: var(--colors-gray-light-400);
-  --background-default: var(--colors-gray-light-100);
-  --background-200: var(--colors-gray-light-200);
+  --background-default: 0deg 100% 85%;
+  --background-200: 0deg 100% 80%;
   --foreground-default: var(--colors-gray-light-1200);
 }
