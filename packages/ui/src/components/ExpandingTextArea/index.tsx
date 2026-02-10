@@ -22,14 +22,11 @@ const ExpandingTextArea = forwardRef<HTMLTextAreaElement, ExpandingTextAreaProps
     const updateTextAreaHeight = (element: HTMLTextAreaElement | null) => {
       if (!element) return
 
-      // Update the height
-      if (!value) {
-        element.style.height = 'auto'
-        element.style.minHeight = '36px'
-      } else {
-        element.style.height = 'auto'
-        element.style.height = element.scrollHeight + 'px'
-      }
+      // Match single-line input height (h-10 = 40px) so we don't shrink when typing; grow only when content wraps
+      const singleLineHeightPx = 40
+      element.style.height = 'auto'
+      const contentHeight = element.scrollHeight
+      element.style.height = Math.max(singleLineHeightPx, contentHeight) + 'px'
     }
 
     useLayoutEffect(() => {
