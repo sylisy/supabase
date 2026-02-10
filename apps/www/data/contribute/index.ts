@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import type {
-  LeaderboardPeriod,
   LeaderboardRow,
+  SimilarSolvedThread,
   Thread,
   ThreadRow,
   ThreadSource,
@@ -51,6 +51,8 @@ function mapThreadRowToThread(row: Thread): ThreadRow {
     summary: row.summary,
     thread_key: row.thread_key ?? null,
     message_count: row.message_count ?? null,
+    similar_solved_threads:
+      (row.similar_solved_threads as unknown as SimilarSolvedThread[] | null) ?? null,
   }
 }
 
@@ -178,7 +180,7 @@ export async function getThreadById(id: string): Promise<ThreadRow | null> {
   const { data, error } = await supabase
     .from('v_contribute_threads')
     .select(
-      'thread_id, subject, status, author, conversation, external_activity_url, created_at, source, product_areas, stack, category, sub_category, summary, first_msg_time, message_count, thread_key'
+      'thread_id, subject, status, author, conversation, external_activity_url, created_at, source, product_areas, stack, category, sub_category, summary, first_msg_time, message_count, thread_key, similar_solved_threads'
     )
     .eq('thread_id', id)
     .single()

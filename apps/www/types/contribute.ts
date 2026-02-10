@@ -4,6 +4,27 @@ export type Thread = Tables<'contribute_threads'>
 
 export type ThreadSource = 'discord' | 'reddit' | 'github'
 
+export interface SimilarSolvedThread {
+  subject: string
+  summary: string
+  root_cause: string
+  similarity: number
+  thread_key: string
+  user_action: string
+  anti_pattern: string
+  match_reason: string
+  problem_type: string
+  product_areas: string[]
+  stack: string[]
+  solution_type: string
+  match_keywords: string[]
+  solution_steps: string[]
+  error_signature: string | null
+  proposed_solution: string
+  problem_description: string
+  external_activity_url: string
+}
+
 export interface ThreadRow {
   id: string
   title: string
@@ -21,6 +42,7 @@ export interface ThreadRow {
   summary: string | null
   thread_key: string | null
   message_count: number | null
+  similar_solved_threads: SimilarSolvedThread[] | null
 }
 
 export type LeaderboardPeriod = 'all' | 'year' | 'quarter' | 'month' | 'week' | 'today'

@@ -92,6 +92,8 @@ export type Database = {
           title: string
           topic: string | null
           topic_embedding: string | null
+          similar_solved_threads: Json | null
+          ai_suggested_reply: string | null
           topic_id: string | null
           updated_at: string | null
         }
