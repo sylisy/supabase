@@ -45,6 +45,10 @@ import { useGetRolesManagementPermissions } from './TeamSettings.utils'
 import { UserPlus } from 'lucide-react'
 import { Admonition } from 'ui-patterns'
 
+function parseEmails(value: string): string[] {
+  return value.split(',').map((e) => e.trim()).filter(Boolean)
+}
+
 export const InviteMemberButton = () => {
   const { slug } = useParams()
   const { profile } = useProfile()
@@ -97,12 +101,12 @@ export const InviteMemberButton = () => {
     .min(1, 'At least one email address is required')
     .refine(
       (val) => {
-        const emails = val.split(',').map((e) => e.trim()).filter(Boolean)
+        const emails = parseEmails(val)
         if (emails.length === 0) return false
         return emails.every((e) => z.string().email().safeParse(e).success)
       },
       (val) => {
-        const emails = val.split(',').map((e) => e.trim()).filter(Boolean)
+        const emails = parseEmails(val)
         const invalid = emails.find((e) => !z.string().email().safeParse(e).success)
         return {
           message: invalid
@@ -128,20 +132,14 @@ export const InviteMemberButton = () => {
 
   const { applyToOrg, projectRef, email } = form.watch()
 
-  const emailCount = (() => {
-    const emails = (email ?? '').split(',').map((e) => e.trim()).filter(Boolean)
-    return emails.length
-  })()
+  const emailCount = parseEmails(email ?? '').length
 
   const onInviteMember = async (values: z.infer<typeof FormSchema>) => {
     if (!slug) return console.error('Slug is required')
     if (profile?.id === undefined) return console.error('Profile ID required')
 
     const developerRole = orgScopedRoles.find((role) => role.name === 'Developer')
-    const emails = values.email
-      .split(',')
-      .map((e) => e.trim().toLowerCase())
-      .filter(Boolean)
+    const emails = parseEmails(values.email).map((e) => e.toLowerCase())
 
     const alreadyInvited: string[] = []
     const alreadyMembers: string[] = []
