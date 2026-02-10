@@ -387,6 +387,11 @@ export const InviteMemberButton = () => {
                         disabled={isInviting}
                         placeholder="name@example.com, name2@example.com"
                         className="max-h-48"
+                        data-1p-ignore // 1Password
+                        data-lpignore="true" // LastPass
+                        data-form-type="other" // Dashlane
+                        data-bwignore // Bitwarden
+
                       />
                     </FormControl_Shadcn_>
                   </FormItemLayout>
