@@ -9,7 +9,7 @@ const HorizontalGridLine = () => <div className="col-span-12 h-px bg-border/30" 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
-export default function Home() {
+const Home = () => {
   const courses = [
     {
       id: 1,
@@ -109,3 +109,5 @@ export default function Home() {
     </main>
   )
 }
+
+export { Home as default }

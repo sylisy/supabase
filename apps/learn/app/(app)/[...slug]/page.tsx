@@ -71,7 +71,7 @@ export async function generateStaticParams(): Promise<{ slug: string[] }[]> {
   }))
 }
 
-export default async function DocPage(props: DocPageProps) {
+const DocPage = async (props: DocPageProps) => {
   const params = await props.params
   const doc = await getDocFromParams({ params })
 
@@ -153,7 +153,7 @@ export default async function DocPage(props: DocPageProps) {
           </div>
           <div className="flex flex-col lg:flex-row lg:items-end justify-between mb-5">
             <div className="space-y-2">
-              <h1 className={cn('scroll-m-20 text-2xl lg:text-4xl tracking-tight')}>{doc.title}</h1>
+              <h1 className="scroll-m-20 text-3xl lg:text-4xl tracking-tight">{doc.title}</h1>
               {doc.description && (
                 <p className="text-base lg:text-lg text-foreground-light">
                   <Balancer>{doc.description}</Balancer>
@@ -197,3 +197,5 @@ export default async function DocPage(props: DocPageProps) {
     </div>
   )
 }
+
+export { DocPage as default }

@@ -6,7 +6,7 @@ import { AuthenticatedDropdownMenu, type menuItem } from 'ui-patterns'
 import { LogOut, Settings, UserIcon } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
-import NavigationItem from '@/components/side-navigation-item'
+import { NavigationItem } from '@/components/side-navigation-item'
 import { courses } from '@/config/docs'
 import { mergeInternalContentIntoSections } from '@/lib/merge-internal-content'
 import { SidebarNavItem } from '@/types/nav'
@@ -159,4 +159,4 @@ function SideNavigation({ internalPaths }: SideNavigationProps) {
   )
 }
 
-export default SideNavigation
+export { SideNavigation }

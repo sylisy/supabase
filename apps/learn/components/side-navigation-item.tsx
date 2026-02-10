@@ -23,14 +23,14 @@ interface NavigationItemProps
   isLoggedIn?: boolean
 }
 
-const NavigationItem: React.FC<NavigationItemProps> = ({
+const NavigationItem = ({
   item,
   onClick,
   level = 0,
   internalPaths,
   isLoggedIn = true,
   ...props
-}) => {
+}: NavigationItemProps) => {
   const { setOpen } = useMobileMenu()
   const pathname = usePathname()
   const [isOpen, setIsOpen] = useState(false)
@@ -179,4 +179,4 @@ const NavigationItem: React.FC<NavigationItemProps> = ({
 
 NavigationItem.displayName = 'NavigationItem'
 
-export default NavigationItem
+export { NavigationItem }

@@ -6,7 +6,7 @@ interface AppLayoutProps {
   children: React.ReactNode
 }
 
-export default function AppLayout({ children }: AppLayoutProps) {
+const AppLayout = ({ children }: AppLayoutProps) => {
   return (
     <>
       {/* main container */}
@@ -29,3 +29,5 @@ export default function AppLayout({ children }: AppLayoutProps) {
     </>
   )
 }
+
+export { AppLayout as default }

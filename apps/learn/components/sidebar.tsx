@@ -1,9 +1,9 @@
 import { Menu } from 'lucide-react'
-
-import SlidingSidebarNavigation from '@/components/sliding-sidebar-navigation'
 import { Button, SheetContent, SheetTrigger } from 'ui'
+
 import { MobileMenuSheet } from './mobile-menu-sheet'
 import { ThemeSwitcherDropdown } from './theme-switcher-dropdown'
+import { SlidingSidebarNavigation } from '@/components/sliding-sidebar-navigation'
 
 export function Sidebar() {
   return (
