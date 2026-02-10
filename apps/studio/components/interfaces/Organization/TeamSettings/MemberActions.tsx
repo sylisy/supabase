@@ -147,7 +147,7 @@ export const MemberActions = ({ member }: MemberActionsProps) => {
 
     deleteInvitation(
       { slug, id: invitedId },
-      { onSuccess: () => toast.success('Successfully revoked the invitation.') }
+      { onSuccess: () => toast.success('Successfully canceled the invitation') }
     )
   }
 
