@@ -39,13 +39,17 @@ export const SystemStatusBadge = () => {
           </Link>
         </Badge>
       </TooltipTrigger>
-      <TooltipContent side="bottom" align="start" className="w-screen max-w-[240px] p-0">
+      <TooltipContent
+        side="bottom"
+        align="start"
+        className="w-screen !max-w-[240px] bg-overlay p-0"
+      >
         {getTooltipContent({
           status,
           incident: currentIncident,
           maintenanceEvent: currentMaintenance,
         })}
-        <footer className="w-full flex flex-col items-start gap-1 p-2 bg-alternative-200 border-t">
+        <footer className="w-full flex flex-col items-start gap-1 p-2 bg-alternative border-t">
           <Button
             type="default"
             size="tiny"

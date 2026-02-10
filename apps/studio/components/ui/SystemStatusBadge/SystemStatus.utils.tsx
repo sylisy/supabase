@@ -87,7 +87,7 @@ export function getTooltipContent({ status, incident, maintenanceEvent }: Toolti
   if (status === 'incident' && incident) {
     return (
       <div className="flex flex-col gap-2 p-2">
-        <p className="text-xs text-foreground-light">We are investigating a technical issue...</p>
+        <p className="text-xs text-foreground-light">We are investigating a technical issue</p>
         <Separator />
         <div>
           <p className="text-xs text-warning">{incident.name}</p>
@@ -100,7 +100,8 @@ export function getTooltipContent({ status, incident, maintenanceEvent }: Toolti
     return (
       <div className="flex flex-col gap-2 p-2">
         <p className="text-xs text-foreground-light">
-          Scheduled maintenance is currently in progress...
+          Scheduled maintenance is currently in progress
+          <span className="inline-block w-[1.2em] text-left after:content-[''] after:animate-ellipsis after:inline-block" />
         </p>
         <div className="flex flex-col gap-0.5 text-xs text-foreground-lighter">
           <p>{maintenanceEvent.name}</p>
