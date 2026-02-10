@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js'
 import type {
   LeaderboardPeriod,
   LeaderboardRow,
+  SimilarThread,
   Thread,
   ThreadRow,
   ThreadSource,
@@ -338,4 +339,30 @@ export async function getUserActivity(author: string) {
       replyCount: replies?.length ?? 0,
     },
   }
+}
+
+export async function getSimilarThreads(threadId: string): Promise<SimilarThread[]> {
+  const supabase = createClient(supabaseUrl, supabasePublishableKey)
+
+  const { data, error } = await supabase.rpc('get_similar_threads', {
+    p_thread_id: threadId,
+  })
+
+  if (error) {
+    console.error('Error fetching similar threads:', error)
+    return []
+  }
+
+  return (data ?? []).map((row: Record<string, unknown>) => ({
+    thread_id: row.thread_id as string,
+    subject: row.subject as string,
+    summary: row.summary as string | null,
+    problem_type: row.problem_type as string | null,
+    product_areas: (row.product_areas as string[]) ?? [],
+    solution_steps: row.solution_steps as string[] | null,
+    match_reason: row.match_reason as string | null,
+    similarity_score: row.similarity_score as number,
+    external_activity_url: row.external_activity_url as string | null,
+    source: normalizeSource(row.source as string | null),
+  }))
 }

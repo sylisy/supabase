@@ -3,6 +3,7 @@ import { Suspense } from 'react'
 import { Badge } from 'ui'
 import { Conversation } from '~/components/Contribute/Conversation'
 import { HelpOnPlatformButton } from '~/components/Contribute/HelpOnPlatformButton'
+import { SimilarThreads } from '~/components/Contribute/SimilarThreads'
 import { getThreadById } from '~/data/contribute'
 import Loading from '../../app/contribute/t/[id]/loading'
 
@@ -18,6 +19,11 @@ export async function ThreadContent({ id }: { id: string }) {
       {/* Conversation Section (includes title, question, and first reply) */}
       <Suspense fallback={<Loading />}>
         <Conversation thread={thread} />
+      </Suspense>
+
+      {/* Similar Solved Threads Section */}
+      <Suspense fallback={null}>
+        <SimilarThreads threadId={id} />
       </Suspense>
 
       {/* Metadata and Actions Section */}

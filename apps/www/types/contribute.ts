@@ -29,3 +29,18 @@ export type LeaderboardRow = {
   author: string | null // sometimes author can be null
   reply_count: number // bigint comes back as number via supabase-js
 }
+
+export interface SimilarThread {
+  thread_id: string
+  subject: string
+  summary: string | null
+  problem_type: string | null
+  product_areas: string[]
+  solution_steps: string[] | null
+  match_reason: string | null
+  similarity_score: number
+  external_activity_url: string | null
+  source: ThreadSource
+}
+
+export type SimilarThreadFeedbackResponse = 'helpful' | 'not_helpful'
