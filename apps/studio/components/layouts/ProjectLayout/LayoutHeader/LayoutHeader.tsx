@@ -1,5 +1,8 @@
 import { LOCAL_STORAGE_KEYS, useParams } from 'common'
-import { useIsBranching2Enabled } from 'components/interfaces/App/FeaturePreview/FeaturePreviewContext'
+import {
+  useIsBranching2Enabled,
+  useIsSystemStatusBadgeEnabled,
+} from 'components/interfaces/App/FeaturePreview/FeaturePreviewContext'
 import { LocalDropdown } from 'components/interfaces/LocalDropdown'
 import { UserDropdown } from 'components/interfaces/UserDropdown'
 import { AdvisorButton } from 'components/layouts/AppLayout/AdvisorButton'
@@ -75,6 +78,7 @@ export const LayoutHeader = ({
   const { data: selectedOrganization } = useSelectedOrganizationQuery()
   const { setMobileMenuOpen } = useAppStateSnapshot()
   const gitlessBranching = useIsBranching2Enabled()
+  const isSystemStatusBadgeEnabled = useIsSystemStatusBadgeEnabled()
 
   const connectSheetFlag = usePHFlag<string | boolean>('connectSheet')
   const isFlagResolved = connectSheetFlag !== undefined
@@ -218,7 +222,7 @@ export const LayoutHeader = ({
             {IS_PLATFORM ? (
               <>
                 <DevToolbarTrigger />
-                <SystemStatusBadge />
+                {isSystemStatusBadgeEnabled && <SystemStatusBadge />}
                 <FeedbackDropdown />
 
                 <div className="flex items-center gap-2">

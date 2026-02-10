@@ -12,7 +12,7 @@ import {
   useState,
 } from 'react'
 
-import { FEATURE_PREVIEWS } from './FeaturePreview.constants'
+import { getFeaturePreviews } from './FeaturePreview.constants'
 
 type FeaturePreviewContextType = {
   flags: { [key: string]: boolean }
@@ -28,6 +28,7 @@ export const useFeaturePreviewContext = () => useContext(FeaturePreviewContext)
 
 export const FeaturePreviewContextProvider = ({ children }: PropsWithChildren<{}>) => {
   const { hasLoaded } = useContext(FeatureFlagContext)
+  const FEATURE_PREVIEWS = getFeaturePreviews()
 
   // [Joshen] Similar logic to feature flagging previews, we can use flags to default opt in previews
   const isDefaultOptIn = (feature: (typeof FEATURE_PREVIEWS)[number]) => {
@@ -115,6 +116,12 @@ export const useIsTableFilterBarEnabled = () => {
   return flags[LOCAL_STORAGE_KEYS.UI_PREVIEW_TABLE_FILTER_BAR]
 }
 
+export const useIsSystemStatusBadgeEnabled = () => {
+  const { flags } = useFeaturePreviewContext()
+  const isSystemStatusBadgeEnabled = useFlag('enableSystemStatusBadge')
+  return isSystemStatusBadgeEnabled && flags[LOCAL_STORAGE_KEYS.UI_PREVIEW_SYSTEM_STATUS_BADGE]
+}
+
 export const useFeaturePreviewModal = () => {
   const [featurePreviewModal, setFeaturePreviewModal] = useQueryState('featurePreviewModal')
 
@@ -124,6 +131,8 @@ export const useFeaturePreviewModal = () => {
 
   const selectedFeatureKeyFromQuery = featurePreviewModal?.trim() ?? null
   const showFeaturePreviewModal = selectedFeatureKeyFromQuery !== null
+
+  const FEATURE_PREVIEWS = getFeaturePreviews()
 
   // [Joshen] Use this if we want to feature flag previews
   const isFeaturePreviewReleasedToPublic = useCallback(

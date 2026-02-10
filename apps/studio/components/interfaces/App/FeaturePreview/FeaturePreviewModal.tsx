@@ -1,19 +1,20 @@
-import { LOCAL_STORAGE_KEYS, useParams } from 'common'
+import { LOCAL_STORAGE_KEYS, useFlag, useParams } from 'common'
 import { useSendEventMutation } from 'data/telemetry/send-event-mutation'
 import { useSelectedOrganizationQuery } from 'hooks/misc/useSelectedOrganization'
 import { IS_PLATFORM } from 'lib/constants'
 import { ExternalLink, Eye, EyeOff, FlaskConical } from 'lucide-react'
 import Link from 'next/link'
-import { ReactNode } from 'react'
+import { ReactNode, useMemo } from 'react'
 import { Badge, Button, cn, Modal, ScrollArea } from 'ui'
 
 import { AdvisorRulesPreview } from './AdvisorRulesPreview'
 import { APISidePanelPreview } from './APISidePanelPreview'
 import { Branching2Preview } from './Branching2Preview'
 import { CLSPreview } from './CLSPreview'
-import { FEATURE_PREVIEWS } from './FeaturePreview.constants'
+import { getFeaturePreviews } from './FeaturePreview.constants'
 import { useFeaturePreviewContext, useFeaturePreviewModal } from './FeaturePreviewContext'
 import { QueueOperationsPreview } from './QueueOperationsPreview'
+import { SystemStatusBadgePreview } from './SystemStatusBadgePreview'
 import { TableFilterBarPreview } from './TableFilterBarPreview'
 import { UnifiedLogsPreview } from './UnifiedLogsPreview'
 
@@ -27,6 +28,7 @@ const FEATURE_PREVIEW_KEY_TO_CONTENT: {
   [LOCAL_STORAGE_KEYS.UI_PREVIEW_UNIFIED_LOGS]: <UnifiedLogsPreview />,
   [LOCAL_STORAGE_KEYS.UI_PREVIEW_QUEUE_OPERATIONS]: <QueueOperationsPreview />,
   [LOCAL_STORAGE_KEYS.UI_PREVIEW_TABLE_FILTER_BAR]: <TableFilterBarPreview />,
+  [LOCAL_STORAGE_KEYS.UI_PREVIEW_SYSTEM_STATUS_BADGE]: <SystemStatusBadgePreview />,
 }
 
 const FeaturePreviewModal = () => {
@@ -42,13 +44,23 @@ const FeaturePreviewModal = () => {
   const featurePreviewContext = useFeaturePreviewContext()
   const { mutate: sendEvent } = useSendEventMutation()
 
+  const enableSystemStatusBadge = useFlag('enableSystemStatusBadge')
+
+  const FEATURE_PREVIEWS = useMemo(
+    () =>
+      getFeaturePreviews({
+        enableSystemStatusBadge,
+      }),
+    [enableSystemStatusBadge]
+  )
+
   const { flags, onUpdateFlag } = featurePreviewContext
   const selectedFeature =
     FEATURE_PREVIEWS.find((preview) => preview.key === selectedFeatureKey) ?? FEATURE_PREVIEWS[0]
   const isSelectedFeatureEnabled = flags[selectedFeatureKey]
 
   const allFeaturePreviews = IS_PLATFORM
-    ? FEATURE_PREVIEWS
+    ? FEATURE_PREVIEWS.filter((x) => x.enabled !== false) // true by default
     : FEATURE_PREVIEWS.filter((x) => !x.isPlatformOnly)
 
   const toggleFeature = () => {
