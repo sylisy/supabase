@@ -30,6 +30,7 @@ import {
   DialogTrigger,
   FormControl_Shadcn_,
   FormField_Shadcn_,
+  DialogFooter,
   Form_Shadcn_,
   Input_Shadcn_,
   SelectContent_Shadcn_,
@@ -400,12 +401,11 @@ export const InviteMemberButton = () => {
                 )}
               />
             </DialogSection>
-            <DialogSectionSeparator />
-            <DialogSection className="pt-0">
+            <DialogFooter>
               <Button block htmlType="submit" loading={isInviting}>
                 {emailCount >= 2 ? 'Send invitations' : 'Send invitation'}
               </Button>
-            </DialogSection>
+            </DialogFooter>
           </form>
         </Form_Shadcn_>
       </DialogContent>
