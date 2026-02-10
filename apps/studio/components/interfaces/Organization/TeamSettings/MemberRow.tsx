@@ -83,12 +83,15 @@ export const MemberRow = ({ member }: MemberRowProps) => {
                 </Badge>
               )}
               {member.is_sso_user && <Badge variant="default">SSO</Badge>}
-              {true && (
+              {(member.metadata as any)?.origin && (
                 <PartnerIcon
                   organization={{
-                    managed_by: 'vercel-marketplace',
+                    managed_by:
+                      MEMBER_ORIGIN_TO_MANAGED_BY[
+                      (member.metadata as any).origin as keyof typeof MEMBER_ORIGIN_TO_MANAGED_BY
+                      ] ?? 'supabase',
                   }}
-                  tooltipText="Managed by Vercel Marketplace"
+                  tooltipText="Managed by Vercel Marketplace."
                 />
               )}
             </div>
@@ -102,13 +105,13 @@ export const MemberRow = ({ member }: MemberRowProps) => {
 
       <TableCell>
         <div className="flex items-center gap-x-1.5">
-          {true ? (
+          {member.mfa_enabled ? (
             <>
               <span className="text-foreground-lighter">Enabled</span><Check className="text-brand" strokeWidth={2} size={16} />
             </>
           ) : (
             <>
-              <span className="text-foreground-lighter">Disabled</span><X className="text-foreground-lighter" strokeWidth={1.5} size={16} />
+              <span className="text-foreground-lighter">Disabled</span><X className="text-foreground-muted" strokeWidth={1.5} size={16} />
             </>
           )}
         </div>
