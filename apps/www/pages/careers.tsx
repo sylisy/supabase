@@ -112,6 +112,7 @@ const CareerPage = ({ jobs, placeholderJob, contributors }: CareersPageProps) =>
         }}
       />
       <DefaultLayout>
+        <div className="bg-yellow-300">
         <header className="container relative mx-auto px-6 pt-12 pb-8 lg:pt-24 lg:px-16 xl:px-20 text-center space-y-4">
           <h1 className="text-sm text-brand md:text-base">
             <span className="sr-only">Supabase </span>Careers
@@ -441,6 +442,7 @@ const CareerPage = ({ jobs, placeholderJob, contributors }: CareersPageProps) =>
               </Button>
             </div>
           </SectionContainer>
+        </div>
         </div>
       </DefaultLayout>
     </>
