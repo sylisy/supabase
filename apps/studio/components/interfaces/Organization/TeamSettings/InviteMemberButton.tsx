@@ -88,10 +88,31 @@ export const InviteMemberButton = () => {
       )
     )
 
-  const { mutate: inviteMember, isPending: isInviting } = useOrganizationCreateInvitationMutation()
+  const { mutateAsync: inviteMemberAsync, isPending: isInviting } =
+    useOrganizationCreateInvitationMutation()
+
+  const emailSchema = z
+    .string()
+    .min(1, 'At least one email address is required')
+    .refine(
+      (val) => {
+        const emails = val.split(',').map((e) => e.trim()).filter(Boolean)
+        if (emails.length === 0) return false
+        return emails.every((e) => z.string().email().safeParse(e).success)
+      },
+      (val) => {
+        const emails = val.split(',').map((e) => e.trim()).filter(Boolean)
+        const invalid = emails.find((e) => !z.string().email().safeParse(e).success)
+        return {
+          message: invalid
+            ? `Invalid email address: ${invalid}`
+            : 'At least one email address is required',
+        }
+      }
+    )
 
   const FormSchema = z.object({
-    email: z.string().email('Must be a valid email address').min(1, 'At least one email address is required'),
+    email: emailSchema,
     role: z.string().min(1, 'Role is required'),
     applyToOrg: z.boolean(),
     projectRef: z.string(),
@@ -104,45 +125,104 @@ export const InviteMemberButton = () => {
     defaultValues: { email: '', role: '', applyToOrg: true, projectRef: '' },
   })
 
-  const { applyToOrg, projectRef } = form.watch()
+  const { applyToOrg, projectRef, email } = form.watch()
+
+  const emailCount = (() => {
+    const emails = (email ?? '').split(',').map((e) => e.trim()).filter(Boolean)
+    return emails.length
+  })()
 
   const onInviteMember = async (values: z.infer<typeof FormSchema>) => {
     if (!slug) return console.error('Slug is required')
     if (profile?.id === undefined) return console.error('Profile ID required')
 
     const developerRole = orgScopedRoles.find((role) => role.name === 'Developer')
-    const existingMember = (members ?? []).find(
-      (member) => member.primary_email === values.email.toLowerCase()
-    )
-    if (existingMember !== undefined) {
-      if (existingMember.invited_id) {
-        return toast('User has already been invited to this organization')
+    const emails = values.email
+      .split(',')
+      .map((e) => e.trim().toLowerCase())
+      .filter(Boolean)
+
+    const alreadyInvited: string[] = []
+    const alreadyMembers: string[] = []
+    const toInvite: string[] = []
+
+    for (const emailAddress of emails) {
+      const existingMember = (members ?? []).find(
+        (member) => member.primary_email === emailAddress
+      )
+      if (existingMember !== undefined) {
+        if (existingMember.invited_id) {
+          alreadyInvited.push(emailAddress)
+        } else {
+          alreadyMembers.push(emailAddress)
+        }
       } else {
-        return toast('User is already in this organization')
+        toInvite.push(emailAddress)
       }
     }
 
-    inviteMember(
-      {
-        slug,
-        email: values.email.toLowerCase(),
-        roleId: Number(values.role),
-        ...(!values.applyToOrg && values.projectRef ? { projects: [values.projectRef] } : {}),
-      },
-      {
-        onSuccess: () => {
-          toast.success('Successfully sent invitation to new member')
-          setIsOpen(!isOpen)
+    if (alreadyInvited.length > 0) {
+      toast.error(
+        alreadyInvited.length === 1
+          ? `${alreadyInvited[0]} has already been invited to this organization`
+          : `${alreadyInvited.length} emails have already been invited to this organization`
+      )
+    }
+    if (alreadyMembers.length > 0) {
+      toast.error(
+        alreadyMembers.length === 1
+          ? `${alreadyMembers[0]} is already in this organization`
+          : `${alreadyMembers.length} emails are already in this organization`
+      )
+    }
+    if (alreadyInvited.length > 0 || alreadyMembers.length > 0) {
+      if (toInvite.length === 0) return
+    }
 
-          form.reset({
-            email: '',
-            role: developerRole?.id.toString() ?? '',
-            applyToOrg: true,
-            projectRef: '',
-          })
-        },
+    const projectPayload =
+      !values.applyToOrg && values.projectRef ? { projects: [values.projectRef] } : {}
+
+    let successCount = 0
+    let failedEmails: string[] = []
+
+    for (const emailAddress of toInvite) {
+      try {
+        await inviteMemberAsync(
+          {
+            slug,
+            email: emailAddress,
+            roleId: Number(values.role),
+            ...projectPayload,
+          },
+          { onError: () => {} }
+        )
+        successCount++
+      } catch {
+        failedEmails.push(emailAddress)
       }
-    )
+    }
+
+    if (successCount > 0) {
+      toast.success(
+        successCount === 1
+          ? 'Successfully sent invitation to new member'
+          : `Successfully sent invitations to ${successCount} new members`
+      )
+      setIsOpen(!isOpen)
+      form.reset({
+        email: '',
+        role: developerRole?.id.toString() ?? '',
+        applyToOrg: true,
+        projectRef: '',
+      })
+    }
+    if (failedEmails.length > 0) {
+      toast.error(
+        failedEmails.length === 1
+          ? `Failed to send invitation to ${failedEmails[0]}`
+          : `Failed to send invitations to ${failedEmails.length} emails`
+      )
+    }
   }
 
   useEffect(() => {
@@ -323,7 +403,7 @@ export const InviteMemberButton = () => {
             <DialogSectionSeparator />
             <DialogSection className="pt-0">
               <Button block htmlType="submit" loading={isInviting}>
-                Send invitation
+                {emailCount >= 2 ? 'Send invitations' : 'Send invitation'}
               </Button>
             </DialogSection>
           </form>
