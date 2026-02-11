@@ -27,6 +27,14 @@ type InfrastructureMetrics = {
   diskIo: MetricData
 }
 
+export type MemoryPressureLevel = 'Low' | 'Medium' | 'High'
+
+export type MemoryPressureData = {
+  level: MemoryPressureLevel
+  ramUsedPercent: number
+  cachePercent: number
+}
+
 export function parseInfrastructureMetrics(
   infraData: InfraMonitoringResponse | undefined
 ): InfrastructureMetrics | null {
@@ -90,4 +98,52 @@ export function parseConnectionsData(
   const max = maxConnectionsData?.maxConnections || 0
 
   return { current, max }
+}
+
+/**
+ * Calculates memory pressure based on non-cache RAM usage
+ * Thresholds:
+ * - Low: < 60% non-cache memory used
+ * - Medium: 60-80% non-cache memory used
+ * - High: > 80% non-cache memory used
+ */
+export function parseMemoryPressure(
+  infraData: InfraMonitoringResponse | undefined
+): MemoryPressureData | null {
+  if (!infraData) {
+    return null
+  }
+
+  const series = 'series' in infraData ? infraData.series : {}
+
+  // Get RAM usage breakdown
+  const ramUsed = parseNumericValue(series.ram_usage_used?.totalAverage)
+  const ramCache = parseNumericValue(series.ram_usage_cache_and_buffers?.totalAverage)
+  const ramFree = parseNumericValue(series.ram_usage_free?.totalAverage)
+
+  const totalRam = ramUsed + ramCache + ramFree
+
+  if (totalRam === 0) {
+    return null
+  }
+
+  // Calculate percentages
+  const ramUsedPercent = (ramUsed / totalRam) * 100
+  const cachePercent = (ramCache / totalRam) * 100
+
+  // Determine pressure level based on non-cache memory usage
+  let level: MemoryPressureLevel
+  if (ramUsedPercent < 60) {
+    level = 'Low'
+  } else if (ramUsedPercent < 80) {
+    level = 'Medium'
+  } else {
+    level = 'High'
+  }
+
+  return {
+    level,
+    ramUsedPercent,
+    cachePercent,
+  }
 }

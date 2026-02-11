@@ -1,4 +1,5 @@
 import { useParams } from 'common'
+import { useQueryPerformanceQuery } from 'components/interfaces/Reports/Reports.queries'
 import { useInfraMonitoringAttributesQuery } from 'data/analytics/infra-monitoring-query'
 import { useMaxConnectionsQuery } from 'data/database/max-connections-query'
 import dayjs from 'dayjs'
@@ -17,6 +18,7 @@ import {
 import {
   parseConnectionsData,
   parseInfrastructureMetrics,
+  parseMemoryPressure,
 } from './DatabaseInfrastructureSection.utils'
 
 type DatabaseInfrastructureSectionProps = {
@@ -98,6 +100,9 @@ export const DatabaseInfrastructureSection = ({
     attributes: [
       'avg_cpu_usage',
       'ram_usage',
+      'ram_usage_used',
+      'ram_usage_cache_and_buffers',
+      'ram_usage_free',
       'disk_fs_used_system',
       'disk_fs_used_wal',
       'pg_database_size',
@@ -115,12 +120,20 @@ export const DatabaseInfrastructureSection = ({
     connectionString: project?.connectionString,
   })
 
+  // Get cache hit rate from query performance
+  const { data: queryMetrics } = useQueryPerformanceQuery({
+    preset: 'queryMetrics',
+  })
+
   const metrics = useMemo(() => parseInfrastructureMetrics(infraData), [infraData])
+  const memoryPressure = useMemo(() => parseMemoryPressure(infraData), [infraData])
 
   const connections = useMemo(
     () => parseConnectionsData(infraData, maxConnectionsData),
     [infraData, maxConnectionsData]
   )
+
+  const cacheHitRate = queryMetrics?.[0]?.cache_hit_rate || '0%'
 
   const errorMessage =
     infraError && typeof infraError === 'object' && 'message' in infraError
@@ -310,15 +323,31 @@ export const DatabaseInfrastructureSection = ({
           <Link href={databaseReportUrl} className="block group">
             <MetricCard isLoading={infraLoading}>
               <MetricCardHeader href={databaseReportUrl} linkTooltip="Go to database report">
-                <MetricCardLabel tooltip="RAM usage percentage. Sustained high usage may indicate memory pressure">
-                  Memory
+                <MetricCardLabel tooltip="Overall memory health indicator based on non-cache memory usage. Low = healthy, High = potential issues">
+                  Memory Pressure
                 </MetricCardLabel>
               </MetricCardHeader>
               <MetricCardContent>
                 {infraError ? (
                   <div className="text-xs text-destructive break-words">{errorMessage}</div>
-                ) : metrics ? (
-                  <MetricCardValue>{metrics.ram.current.toFixed(0)}%</MetricCardValue>
+                ) : memoryPressure ? (
+                  <div className="flex flex-col gap-1">
+                    <MetricCardValue
+                      className={cn({
+                        'text-foreground': memoryPressure.level === 'Low',
+                        'text-warning': memoryPressure.level === 'Medium',
+                        'text-destructive': memoryPressure.level === 'High',
+                      })}
+                    >
+                      {memoryPressure.level}
+                    </MetricCardValue>
+                    <div className="text-xs text-foreground-light">
+                      Cache hit: {cacheHitRate}
+                    </div>
+                    <div className="text-xs text-foreground-lighter">
+                      Non-cache: {memoryPressure.ramUsedPercent.toFixed(0)}%
+                    </div>
+                  </div>
                 ) : (
                   <MetricCardValue>--</MetricCardValue>
                 )}
@@ -328,15 +357,31 @@ export const DatabaseInfrastructureSection = ({
         ) : (
           <MetricCard isLoading={infraLoading}>
             <MetricCardHeader>
-              <MetricCardLabel tooltip="RAM usage percentage. Sustained high usage may indicate memory pressure">
-                Memory
+              <MetricCardLabel tooltip="Overall memory health indicator based on non-cache memory usage. Low = healthy, High = potential issues">
+                Memory Pressure
               </MetricCardLabel>
             </MetricCardHeader>
             <MetricCardContent>
               {infraError ? (
                 <div className="text-xs text-destructive break-words">{errorMessage}</div>
-              ) : metrics ? (
-                <MetricCardValue>{metrics.ram.current.toFixed(0)}%</MetricCardValue>
+              ) : memoryPressure ? (
+                <div className="flex flex-col gap-1">
+                  <MetricCardValue
+                    className={cn({
+                      'text-foreground': memoryPressure.level === 'Low',
+                      'text-warning': memoryPressure.level === 'Medium',
+                      'text-destructive': memoryPressure.level === 'High',
+                    })}
+                  >
+                    {memoryPressure.level}
+                  </MetricCardValue>
+                  <div className="text-xs text-foreground-light">
+                    Cache hit: {cacheHitRate}
+                  </div>
+                  <div className="text-xs text-foreground-lighter">
+                    Non-cache: {memoryPressure.ramUsedPercent.toFixed(0)}%
+                  </div>
+                </div>
               ) : (
                 <MetricCardValue>--</MetricCardValue>
               )}
