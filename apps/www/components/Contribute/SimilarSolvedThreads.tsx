@@ -78,7 +78,7 @@ export const SimilarSolvedThreads = ({ threads }: SimilarSolvedThreadsProps) => 
         onClick={() => setIsExpanded((prev) => !prev)}
         className="flex items-center gap-1.5 w-fit"
       >
-        <h3 className="text-sm font-medium text-foreground">Solved threads on this issue</h3>
+        <h3 className="text-sm font-medium text-foreground">Related solved threads</h3>
         <span className="text-xs text-foreground-muted tabular-nums">({threads.length})</span>
         <ChevronDown
           className={`h-3.5 w-3.5 text-foreground-lighter transition-transform duration-200 ${isExpanded ? 'rotate-0' : '-rotate-90'
