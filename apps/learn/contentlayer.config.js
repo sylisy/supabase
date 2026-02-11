@@ -12,11 +12,24 @@ import { visit } from 'unist-util-visit'
 const computedFields = {
   slug: {
     type: 'string',
-    resolve: (doc) => `/${doc._raw.flattenedPath}`,
+    resolve: (doc) => {
+      // Strip numeric prefixes like 01-01-, 02-02- from path segments
+      const cleanPath = doc._raw.flattenedPath
+        .split('/')
+        .map((segment) => segment.replace(/^\d{2}-\d{2}-/, ''))
+        .join('/')
+      return `/${cleanPath}`
+    },
   },
   slugAsParams: {
     type: 'string',
-    resolve: (doc) => doc._raw.flattenedPath,
+    resolve: (doc) => {
+      // Strip numeric prefixes like 01-01-, 02-02- from path segments
+      return doc._raw.flattenedPath
+        .split('/')
+        .map((segment) => segment.replace(/^\d{2}-\d{2}-/, ''))
+        .join('/')
+    },
   },
 }
 

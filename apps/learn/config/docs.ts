@@ -16,19 +16,19 @@ export const courses: SidebarNavGroup = {
           items: [
             {
               title: 'Supabase Architecture',
-              href: '/foundations/01-01-supabase-architecture',
+              href: '/foundations/supabase-architecture',
             },
             {
               title: 'When to Choose Supabase',
-              href: '/foundations/01-02-when-to-choose-supabase',
+              href: '/foundations/when-to-choose-supabase',
             },
             {
               title: 'Project Setup and Configuration',
-              href: '/foundations/01-03-project-setup-and-configuration',
+              href: '/foundations/project-setup-and-configuration',
             },
             {
               title: 'Local Development Workflow',
-              href: '/foundations/01-04-local-development-workflow',
+              href: '/foundations/local-development-workflow',
             },
           ],
         },
@@ -37,27 +37,27 @@ export const courses: SidebarNavGroup = {
           items: [
             {
               title: 'Schema Design for Supabase',
-              href: '/foundations/02-01-schema-design-for-supabase',
+              href: '/foundations/schema-design-for-supabase',
             },
             {
               title: 'Essential Postgres Data Types',
-              href: '/foundations/02-02-essential-postgres-data-types',
+              href: '/foundations/essential-postgres-data-types',
             },
             {
               title: 'Database Functions and Triggers',
-              href: '/foundations/02-03-database-functions-and-triggers',
+              href: '/foundations/database-functions-and-triggers',
             },
             {
               title: 'Key Postgres Extensions',
-              href: '/foundations/02-04-key-postgres-extensions',
+              href: '/foundations/key-postgres-extensions',
             },
             {
               title: 'Migrations and Version Control',
-              href: '/foundations/02-05-migrations-and-version-control',
+              href: '/foundations/migrations-and-version-control',
             },
             {
               title: 'Replication',
-              href: '/foundations/02-06-replication',
+              href: '/foundations/replication',
             },
           ],
         },
@@ -66,23 +66,23 @@ export const courses: SidebarNavGroup = {
           items: [
             {
               title: 'Authentication Fundamentals',
-              href: '/foundations/03-01-authentication-fundamentals',
+              href: '/foundations/authentication-fundamentals',
             },
             {
               title: 'Authentication Methods',
-              href: '/foundations/03-02-authentication-methods',
+              href: '/foundations/authentication-methods',
             },
             {
               title: 'Advanced Authentication',
-              href: '/foundations/03-03-advanced-authentication',
+              href: '/foundations/advanced-authentication',
             },
             {
               title: 'User Management',
-              href: '/foundations/03-04-user-management',
+              href: '/foundations/user-management',
             },
             {
               title: 'Security Considerations',
-              href: '/foundations/03-05-security-considerations',
+              href: '/foundations/security-considerations',
             },
           ],
         },
@@ -91,27 +91,27 @@ export const courses: SidebarNavGroup = {
           items: [
             {
               title: 'RLS Fundamentals',
-              href: '/foundations/04-01-rls-fundamentals',
+              href: '/foundations/rls-fundamentals',
             },
             {
               title: 'Policy Patterns',
-              href: '/foundations/04-02-policy-patterns',
+              href: '/foundations/policy-patterns',
             },
             {
               title: 'Auth Helper Functions',
-              href: '/foundations/04-03-auth-helper-functions',
+              href: '/foundations/auth-helper-functions',
             },
             {
               title: 'Multi-Tenancy Patterns',
-              href: '/foundations/04-04-multi-tenancy-patterns',
+              href: '/foundations/multi-tenancy-patterns',
             },
             {
               title: 'Performance Optimization',
-              href: '/foundations/04-05-performance-optimization',
+              href: '/foundations/rls-performance-optimization',
             },
             {
               title: 'Pitfalls & Debugging',
-              href: '/foundations/04-06-common-pitfalls-and-debugging',
+              href: '/foundations/common-pitfalls-and-debugging',
             },
           ],
         },
@@ -120,23 +120,23 @@ export const courses: SidebarNavGroup = {
           items: [
             {
               title: 'Storage Architecture',
-              href: '/foundations/05-01-storage-architecture',
+              href: '/foundations/storage-architecture',
             },
             {
               title: 'Access Control',
-              href: '/foundations/05-02-access-control',
+              href: '/foundations/access-control',
             },
             {
               title: 'File Operations',
-              href: '/foundations/05-03-file-operations',
+              href: '/foundations/file-operations',
             },
             {
               title: 'Image Transformations',
-              href: '/foundations/05-04-image-transformations',
+              href: '/foundations/image-transformations',
             },
             {
               title: 'Integration Patterns',
-              href: '/foundations/05-05-integration-patterns',
+              href: '/foundations/integration-patterns',
             },
           ],
         },
@@ -145,23 +145,23 @@ export const courses: SidebarNavGroup = {
           items: [
             {
               title: 'Realtime Architecture',
-              href: '/foundations/06-01-realtime-architecture',
+              href: '/foundations/realtime-architecture',
             },
             {
               title: 'Database Changes',
-              href: '/foundations/06-02-database-changes',
+              href: '/foundations/database-changes',
             },
             {
               title: 'Broadcast',
-              href: '/foundations/06-03-broadcast',
+              href: '/foundations/broadcast',
             },
             {
               title: 'Presence',
-              href: '/foundations/06-04-presence',
+              href: '/foundations/presence',
             },
             {
               title: 'Real-World Patterns',
-              href: '/foundations/06-05-real-world-patterns',
+              href: '/foundations/real-world-patterns',
             },
           ],
         },
@@ -170,27 +170,27 @@ export const courses: SidebarNavGroup = {
           items: [
             {
               title: 'Edge Functions Architecture',
-              href: '/foundations/07-01-edge-functions-architecture',
+              href: '/foundations/edge-functions-architecture',
             },
             {
               title: 'Development Workflow',
-              href: '/foundations/07-02-development-workflow',
+              href: '/foundations/development-workflow',
             },
             {
               title: 'Common Patterns',
-              href: '/foundations/07-03-common-patterns',
+              href: '/foundations/common-patterns',
             },
             {
               title: 'Database Integration',
-              href: '/foundations/07-04-database-integration',
+              href: '/foundations/database-integration',
             },
             {
               title: 'AI and LLM Integration',
-              href: '/foundations/07-05-ai-and-llm-integration',
+              href: '/foundations/ai-and-llm-integration',
             },
             {
               title: 'Advanced Topics',
-              href: '/foundations/07-06-advanced-topics',
+              href: '/foundations/advanced-topics',
             },
           ],
         },
@@ -199,23 +199,23 @@ export const courses: SidebarNavGroup = {
           items: [
             {
               title: 'Vector Fundamentals',
-              href: '/foundations/08-01-vector-fundamentals',
+              href: '/foundations/vector-fundamentals',
             },
             {
               title: 'Indexing Strategies',
-              href: '/foundations/08-02-indexing-strategies',
+              href: '/foundations/indexing-strategies',
             },
             {
               title: 'Search Patterns',
-              href: '/foundations/08-03-search-patterns',
+              href: '/foundations/search-patterns',
             },
             {
               title: 'RAG Implementation',
-              href: '/foundations/08-04-rag-implementation',
+              href: '/foundations/rag-implementation',
             },
             {
               title: 'Production Considerations',
-              href: '/foundations/08-05-production-considerations',
+              href: '/foundations/production-considerations',
             },
           ],
         },
@@ -224,27 +224,27 @@ export const courses: SidebarNavGroup = {
           items: [
             {
               title: 'Performance Optimization',
-              href: '/foundations/09-01-performance-optimization',
+              href: '/foundations/performance-optimization',
             },
             {
               title: 'Monitoring & Observability',
-              href: '/foundations/09-02-monitoring-and-observability',
+              href: '/foundations/monitoring-and-observability',
             },
             {
               title: 'Security Hardening',
-              href: '/foundations/09-03-security-hardening',
+              href: '/foundations/security-hardening',
             },
             {
               title: 'Backup and Recovery',
-              href: '/foundations/09-04-backup-and-recovery',
+              href: '/foundations/backup-and-recovery',
             },
             {
               title: 'Deployment Patterns',
-              href: '/foundations/09-05-deployment-patterns',
+              href: '/foundations/deployment-patterns',
             },
             {
               title: 'Client Considerations',
-              href: '/foundations/09-06-client-considerations',
+              href: '/foundations/client-considerations',
             },
           ],
         },
