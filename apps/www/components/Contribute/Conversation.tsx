@@ -31,7 +31,7 @@ export async function Conversation({ thread }: { thread: ThreadRow }) {
                 {thread.channel === 'discord' && <DiscordIcon className="h-5 w-5 text-[#5865F2]" />}
                 {thread.channel === 'reddit' && <RedditIcon className="h-5 w-5 text-[#FF4500]" />}
                 {thread.channel === 'github' && <GitHubIcon className="h-5 w-5 text-foreground" />}
-                <span className="text-sm text-foreground-lighter capitalize">{thread.channel}</span>
+                <span className="text-sm text-foreground-lighter">{thread.channelDisplayName}</span>
                 <span className="text-sm text-foreground-lighter">·</span>
                 <span className="text-sm text-foreground-lighter">{thread.posted}</span>
               </div>

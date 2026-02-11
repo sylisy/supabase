@@ -31,6 +31,7 @@ export interface ThreadRow {
   conversation: string
   user: string
   channel: ThreadSource
+  channelDisplayName: string
   tags: string[]
   product_areas: string[]
   stack: string[]

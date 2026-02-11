@@ -25,6 +25,10 @@ function normalizeSource(source: string | null): ThreadSource {
   return source.toLowerCase().trim() as ThreadSource
 }
 
+export function getChannelDisplayName(source: ThreadSource): string {
+  return source === 'discord' ? 'Discord' : source === 'reddit' ? 'Reddit' : 'GitHub'
+}
+
 function mapThreadRowToThread(row: Thread): ThreadRow {
   const firstMsgTime = row.first_msg_time ? new Date(row.first_msg_time) : null
   const source = normalizeSource(row.source)
@@ -34,6 +38,7 @@ function mapThreadRowToThread(row: Thread): ThreadRow {
     title: row.subject ?? row.title ?? '',
     user: row.author,
     channel: source,
+    channelDisplayName: getChannelDisplayName(source),
     conversation: row.conversation ?? '',
     tags: row.product_areas ?? [],
     product_areas: row.product_areas ?? [],
