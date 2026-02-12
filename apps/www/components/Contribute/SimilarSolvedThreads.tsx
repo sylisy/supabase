@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import {
   Badge,
   Card,
@@ -13,10 +13,19 @@ import {
   DialogDescription,
   DialogFooter,
   DialogHeader,
+  DialogSection,
+  DialogSectionSeparator,
   DialogTitle,
+  Label_Shadcn_,
+  Button,
   Textarea,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+  TextArea_Shadcn_,
 } from 'ui'
-import { ChevronDown, ThumbsUp, ThumbsDown, MessageSquarePlus } from 'lucide-react'
+import { ChevronDown, ThumbsUp, ThumbsDown } from 'lucide-react'
 import type {
   SimilarSolvedThread,
   SimilarThreadFeedbackReaction,
@@ -32,7 +41,7 @@ import { ChannelIcon } from './Icons'
 const MOCK_FEEDBACK = true
 
 /** When MOCK_FEEDBACK is true, use this to jump to a state for design. */
-type MockState = 'idle' | 'thanks' | 'dialog'
+type MockState = 'idle' | 'dialog'
 
 function getChannelFromUrl(url: string): ThreadSource {
   const u = url.toLowerCase()
@@ -117,6 +126,7 @@ export const SimilarSolvedThreads = ({ threads, parentThreadId }: SimilarSolvedT
   const [dialogReaction, setDialogReaction] = useState<SimilarThreadFeedbackReaction>('positive')
   const [dialogFeedback, setDialogFeedback] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const isClosingProgrammatically = useRef(false)
 
   const handleThumbClick = async (reaction: SimilarThreadFeedbackReaction) => {
     if (submittedReaction) return
@@ -133,14 +143,14 @@ export const SimilarSolvedThreads = ({ threads, parentThreadId }: SimilarSolvedT
       })
     setIsSubmitting(false)
     if (result.success) {
-      setSubmittedReaction(reaction)
       setFeedbackId(result.id ?? null)
       setDialogReaction(reaction)
       setDialogFeedback('')
+      setDialogOpen(true)
     }
   }
 
-  const handleTellUsMoreSubmit = async () => {
+  const persistAndCloseDialog = async () => {
     if (!feedbackId) return
     setIsSubmitting(true)
     const result = MOCK_FEEDBACK
@@ -156,7 +166,18 @@ export const SimilarSolvedThreads = ({ threads, parentThreadId }: SimilarSolvedT
     setIsSubmitting(false)
     if (result.success) {
       setSubmittedReaction(dialogReaction)
+      isClosingProgrammatically.current = true
       setDialogOpen(false)
+      queueMicrotask(() => {
+        isClosingProgrammatically.current = false
+      })
+    }
+  }
+
+  const handleDialogOpenChange = (open: boolean) => {
+    setDialogOpen(open)
+    if (!open && feedbackId && !isClosingProgrammatically.current) {
+      persistAndCloseDialog()
     }
   }
 
@@ -166,41 +187,18 @@ export const SimilarSolvedThreads = ({ threads, parentThreadId }: SimilarSolvedT
       setSubmittedReaction(null)
       setFeedbackId(null)
       setDialogOpen(false)
-    } else if (state === 'thanks') {
-      setSubmittedReaction('positive')
-      setFeedbackId('mock-feedback-id')
-      setDialogOpen(false)
     } else {
-      setSubmittedReaction('positive')
+      setSubmittedReaction(null)
       setFeedbackId('mock-feedback-id')
+      setDialogReaction('positive')
+      setDialogFeedback('')
       setDialogOpen(true)
     }
   }
 
   return (
     <Card className={cn('relative')}>
-      {MOCK_FEEDBACK && (
-        <div className="px-[var(--card-padding-x)] py-2 border-b border-dashed border-amber-500/50 bg-amber-500/5 text-xs font-mono">
-          <span className="text-foreground-muted">Mock:</span>{' '}
-          {(['idle', 'thanks', 'dialog'] as const).map((s) => (
-            <button
-              key={s}
-              type="button"
-              onClick={() => setMockState(s)}
-              className={cn(
-                'ml-2 px-2 py-0.5 rounded',
-                (s === 'idle' && !submittedReaction) ||
-                  (s === 'thanks' && submittedReaction && !dialogOpen) ||
-                  (s === 'dialog' && dialogOpen)
-                  ? 'bg-amber-500/20 text-foreground'
-                  : 'hover:bg-amber-500/10 text-foreground-lighter'
-              )}
-            >
-              {s}
-            </button>
-          ))}
-        </div>
-      )}
+
       <CardHeader className={cn('p-0', !isExpanded && 'border-b-0')}>
         <button
           type="button"
@@ -226,108 +224,145 @@ export const SimilarSolvedThreads = ({ threads, parentThreadId }: SimilarSolvedT
               />
             ))}
           </CardContent>
-          <CardFooter className="flex items-center justify-between">
+          <CardFooter className="flex items-center justify-between min-h-[58px]">
             {submittedReaction ? (
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-foreground-lighter">Thanks!</span>
-                <button
-                  type="button"
-                  onClick={() => setDialogOpen(true)}
-                  className="text-sm text-foreground-light hover:text-foreground transition-colors inline-flex items-center gap-1"
-                >
-                  <MessageSquarePlus className="h-4 w-4" />
-                  Tell us more?
-                </button>
-              </div>
+              <span className="text-sm text-foreground-muted">Thanks for helping improve related threads</span>
             ) : (
-              <div className="flex items-center gap-1">
-                <button
-                  type="button"
-                  onClick={() => handleThumbClick('positive')}
-                  disabled={isSubmitting}
-                  className="p-1 rounded hover:bg-surface-200 transition-colors disabled:opacity-50"
-                  aria-label="Helpful"
-                >
-                  <ThumbsUp className="h-4 w-4 text-foreground-muted" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleThumbClick('negative')}
-                  disabled={isSubmitting}
-                  className="p-1 rounded hover:bg-surface-200 transition-colors disabled:opacity-50"
-                  aria-label="Not helpful"
-                >
-                  <ThumbsDown className="h-4 w-4 text-foreground-muted" />
-                </button>
+              <TooltipProvider>
+                <div className="flex items-center gap-1">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        type="button"
+                        onClick={() => handleThumbClick('positive')}
+                        disabled={isSubmitting}
+                        className="p-1 rounded hover:bg-surface-200 transition-colors disabled:opacity-50"
+                        aria-label="Relevant"
+                      >
+                        <ThumbsUp className="h-4 w-4 text-foreground-muted" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>Relevant</TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        type="button"
+                        onClick={() => handleThumbClick('negative')}
+                        disabled={isSubmitting}
+                        className="p-1 rounded hover:bg-surface-200 transition-colors disabled:opacity-50"
+                        aria-label="Irrelevant"
+                      >
+                        <ThumbsDown className="h-4 w-4 text-foreground-muted" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>Irrelevant</TooltipContent>
+                  </Tooltip>
+                </div>
+              </TooltipProvider>
+            )}
+
+            {MOCK_FEEDBACK && (
+              <div className="text-xs font-mono uppercase">
+                <span className="text-foreground-muted">Mock:</span>{' '}
+                {(['idle', 'dialog'] as const).map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => setMockState(s)}
+                    className={cn(
+                      'mx-1 uppercase',
+                      (s === 'idle' && !submittedReaction && !dialogOpen) ||
+                        (s === 'dialog' && dialogOpen)
+                        ? 'text-foreground'
+                        : 'text-foreground-lighter'
+                    )}
+                  >
+                    {s}
+                  </button>
+                ))}
               </div>
             )}
           </CardFooter>
         </>
       )}
 
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+      <Dialog open={dialogOpen} onOpenChange={handleDialogOpenChange}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Tell us more</DialogTitle>
+            <DialogTitle>Help improve related threads</DialogTitle>
             <DialogDescription>
-              Change your rating or add optional feedback to help us improve.
+              How relevant were these threads to your issue?
             </DialogDescription>
           </DialogHeader>
-          <div className="flex flex-col gap-4 py-4">
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-foreground-lighter">Were these helpful?</span>
+          <DialogSectionSeparator />
+          <DialogSection className="space-y-4">
+            <fieldset className="space-y-1">
+              <legend className="text-sm text-foreground">
+                Relevance
+              </legend>
               <div className="flex items-center gap-1">
-                <button
-                  type="button"
-                  onClick={() => setDialogReaction('positive')}
+                <label
                   className={cn(
-                    'p-2 rounded transition-colors',
+                    'p-2 rounded cursor-pointer transition-colors',
                     dialogReaction === 'positive'
                       ? 'bg-surface-300 text-foreground'
                       : 'hover:bg-surface-200 text-foreground-lighter'
                   )}
-                  aria-label="Helpful"
                 >
-                  <ThumbsUp className="h-4 w-4" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setDialogReaction('negative')}
+                  <input
+                    type="radio"
+                    name="relevance"
+                    value="positive"
+                    checked={dialogReaction === 'positive'}
+                    onChange={() => setDialogReaction('positive')}
+                    className="sr-only"
+                    aria-label="Relevant"
+                  />
+                  <ThumbsUp className="h-4 w-4" aria-hidden />
+                </label>
+                <label
                   className={cn(
-                    'p-2 rounded transition-colors',
+                    'p-2 rounded cursor-pointer transition-colors',
                     dialogReaction === 'negative'
                       ? 'bg-surface-300 text-foreground'
                       : 'hover:bg-surface-200 text-foreground-lighter'
                   )}
-                  aria-label="Not helpful"
                 >
-                  <ThumbsDown className="h-4 w-4" />
-                </button>
+                  <input
+                    type="radio"
+                    name="relevance"
+                    value="negative"
+                    checked={dialogReaction === 'negative'}
+                    onChange={() => setDialogReaction('negative')}
+                    className="sr-only"
+                    aria-label="Irrelevant or unhelpful"
+                  />
+                  <ThumbsDown className="h-4 w-4" aria-hidden />
+                </label>
               </div>
-            </div>
-            <div>
-              <label htmlFor="feedback" className="block text-sm text-foreground-lighter mb-2">
-                Additional feedback (optional)
-              </label>
-              <Textarea
+            </fieldset>
+            <div className="space-y-1">
+              <Label_Shadcn_ htmlFor="feedback">Additional feedback <span className="text-foreground-muted">(optional)</span></Label_Shadcn_>
+              <TextArea_Shadcn_
                 id="feedback"
-                placeholder="Anything else you'd like to share?"
+                placeholder="What was helpful or missing?"
+                rows={4}
                 value={dialogFeedback}
                 onChange={(e) => setDialogFeedback(e.target.value)}
-                rows={3}
-                className="w-full"
+                className="text-sm resize-none"
               />
             </div>
-          </div>
+
+          </DialogSection>
           <DialogFooter>
-            <button
-              type="button"
-              onClick={handleTellUsMoreSubmit}
+            <Button
+              onClick={persistAndCloseDialog}
               disabled={isSubmitting}
-              className="px-4 py-2 rounded-md text-sm font-medium bg-foreground text-background hover:opacity-90 disabled:opacity-50 transition-opacity"
+              loading={isSubmitting}
             >
-              {isSubmitting ? 'Saving…' : 'Submit'}
-            </button>
+              {isSubmitting ? 'Submitting...' : 'Submit feedback'}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
