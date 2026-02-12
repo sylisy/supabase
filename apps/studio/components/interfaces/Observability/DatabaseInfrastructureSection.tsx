@@ -316,19 +316,20 @@ export const DatabaseInfrastructureSection = ({
                 {infraError ? (
                   <div className="text-xs text-destructive break-words">{errorMessage}</div>
                 ) : metrics && diskDetails ? (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <MetricCardValue className="cursor-help border-b border-dashed border-foreground-lighter">
-                        {metrics.disk.current.toFixed(0)}%
-                      </MetricCardValue>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <div className="text-xs">
-                        <div>Used: {formatBytes(diskDetails.used)}</div>
-                        <div>Total: {formatBytes(diskDetails.total)}</div>
-                      </div>
-                    </TooltipContent>
-                  </Tooltip>
+                  <div className="flex flex-col gap-1">
+                    <MetricCardValue>{metrics.disk.current.toFixed(0)}%</MetricCardValue>
+                    <div className="text-xs">
+                      <span className="text-foreground-lighter">Used:</span>{' '}
+                      <span className="font-mono text-foreground">
+                        {formatBytes(diskDetails.used)}
+                      </span>{' '}
+                      <span className="text-foreground-lighter">·</span>{' '}
+                      <span className="text-foreground-lighter">Total:</span>{' '}
+                      <span className="font-mono text-foreground">
+                        {formatBytes(diskDetails.total)}
+                      </span>
+                    </div>
+                  </div>
                 ) : (
                   <MetricCardValue>--</MetricCardValue>
                 )}
@@ -346,19 +347,20 @@ export const DatabaseInfrastructureSection = ({
               {infraError ? (
                 <div className="text-xs text-destructive break-words">{errorMessage}</div>
               ) : metrics && diskDetails ? (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <MetricCardValue className="cursor-help border-b border-dashed border-foreground-lighter">
-                      {metrics.disk.current.toFixed(0)}%
-                    </MetricCardValue>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <div className="text-xs">
-                      <div>Used: {formatBytes(diskDetails.used)}</div>
-                      <div>Total: {formatBytes(diskDetails.total)}</div>
-                    </div>
-                  </TooltipContent>
-                </Tooltip>
+                <div className="flex flex-col gap-1">
+                  <MetricCardValue>{metrics.disk.current.toFixed(0)}%</MetricCardValue>
+                  <div className="text-xs">
+                    <span className="text-foreground-lighter">Used:</span>{' '}
+                    <span className="font-mono text-foreground">
+                      {formatBytes(diskDetails.used)}
+                    </span>{' '}
+                    <span className="text-foreground-lighter">·</span>{' '}
+                    <span className="text-foreground-lighter">Total:</span>{' '}
+                    <span className="font-mono text-foreground">
+                      {formatBytes(diskDetails.total)}
+                    </span>
+                  </div>
+                </div>
               ) : (
                 <MetricCardValue>--</MetricCardValue>
               )}
