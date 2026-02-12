@@ -51,61 +51,52 @@ const SimilarThreadCard = ({
   const hasStack = filteredStack.length > 0
 
   const url = thread.external_activity_url || null
-
-  return (
-    <div
-      className={cn(
-        'border-b border-border px-6 py-4 flex items-center gap-3 overflow-hidden',
-        className
-      )}
-    >
-      <div className="flex items-center gap-3 overflow-hidden min-w-0 flex-1">
-        {url ? (
-          <a
-            href={url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-center bg-surface-200 h-10 w-10 rounded-md shrink-0 hover:opacity-80 transition-opacity"
-            aria-label={`View thread: ${thread.subject}`}
-          >
-            <ChannelIcon channel={channel} />
-          </a>
-        ) : (
-          <div className="flex items-center justify-center bg-surface-200 h-10 w-10 rounded-md shrink-0">
-            <ChannelIcon channel={channel} />
-          </div>
-        )}
-        <div className="min-w-0 flex-1 flex flex-col gap-y-0.5">
-          {url ? (
-            <a
-              href={url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-base text-foreground truncate transition-[text-decoration] duration-100 underline-offset-2 hover:underline w-fit"
-            >
-              {thread.subject}
-            </a>
-          ) : (
-            <span className="text-base text-foreground truncate">{thread.subject}</span>
-          )}
-          {thread.problem_description ? (
-            <p className="text-sm text-foreground-lighter leading-relaxed line-clamp-2">
-              {thread.problem_description}
-            </p>
-          ) : null}
-          {hasStack ? (
-            <div className="flex flex-wrap gap-x-1.5 gap-y-1 overflow-hidden pt-0.5">
-              {filteredStack.map((tech) => (
-                <Badge key={tech} variant="default">
-                  {tech}
-                </Badge>
-              ))}
-            </div>
-          ) : null}
-        </div>
-      </div>
-    </div>
+  const linkClassName = cn(
+    'border-b border-border px-6 py-4 flex items-center gap-3 overflow-hidden hover:bg-surface-200 transition-colors',
+    className
   )
+  const content = (
+    <>
+      <div className="flex items-center justify-center bg-surface-200 h-10 w-10 rounded-md shrink-0">
+        <ChannelIcon channel={channel} />
+      </div>
+      <div className="min-w-0 flex-1 flex flex-col gap-y-0.5">
+        <span className="text-base text-foreground truncate block">
+          {thread.subject}
+        </span>
+        {thread.problem_description ? (
+          <p className="text-sm text-foreground-lighter leading-relaxed line-clamp-2">
+            {thread.problem_description}
+          </p>
+        ) : null}
+        {hasStack ? (
+          <div className="flex flex-wrap gap-x-1.5 gap-y-1 overflow-hidden pt-0.5">
+            {filteredStack.map((tech) => (
+              <Badge key={tech} variant="default">
+                {tech}
+              </Badge>
+            ))}
+          </div>
+        ) : null}
+      </div>
+    </>
+  )
+
+  if (url) {
+    return (
+      <a
+        href={url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={linkClassName}
+        aria-label={`View thread: ${thread.subject}`}
+      >
+        {content}
+      </a>
+    )
+  }
+
+  return <div className={linkClassName}>{content}</div>
 }
 
 export const SimilarSolvedThreads = ({ threads }: SimilarSolvedThreadsProps) => {
