@@ -2,7 +2,7 @@ import type { IncidentInfo } from 'lib/api/incident-status'
 import { AlertCircleIcon, Cog } from 'lucide-react'
 import { Separator } from 'ui'
 
-import StatusIcon from './StatusIcon'
+import { SystemStatusIcon } from './SystemStatusIcon'
 
 export type SystemStatus = 'operational' | 'incident' | 'maintenance'
 
@@ -34,7 +34,7 @@ export function getBadgeConfig(status: SystemStatus): BadgeVariant {
       return {
         variant: 'success',
         label: 'Operational',
-        icon: <StatusIcon status="operational" />,
+        icon: <SystemStatusIcon status="operational" />,
         hoverStyle: 'aspect-square border-transparent hover:border-stronger bg-transparent',
       }
     case 'incident':

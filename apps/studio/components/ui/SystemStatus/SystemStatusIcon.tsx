@@ -1,6 +1,6 @@
 import type { SystemStatus } from './SystemStatus.utils'
 
-const StatusIcon = ({ status }: { status: SystemStatus }) => {
+export const SystemStatusIcon = ({ status }: { status: SystemStatus }) => {
   const getFillColor = (status: SystemStatus) => {
     switch (status) {
       case 'operational':
@@ -8,6 +8,8 @@ const StatusIcon = ({ status }: { status: SystemStatus }) => {
       case 'maintenance':
       case 'incident':
         return 'hsl(var(--warning-default))'
+      default:
+        return 'currentColor'
     }
   }
 
@@ -33,5 +35,3 @@ const StatusIcon = ({ status }: { status: SystemStatus }) => {
     </svg>
   )
 }
-
-export default StatusIcon

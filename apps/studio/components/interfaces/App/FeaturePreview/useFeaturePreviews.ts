@@ -24,7 +24,7 @@ export const useFeaturePreviews = (): FeaturePreview[] => {
       key: LOCAL_STORAGE_KEYS.UI_PREVIEW_UNIFIED_LOGS,
       name: 'New Logs interface',
       discussionsUrl: 'https://github.com/orgs/supabase/discussions/37234',
-      isNew: true,
+      isNew: false,
       isPlatformOnly: true,
       isDefaultOptIn: false,
       enabled: isUnifiedLogsPreviewAvailable,
@@ -34,7 +34,7 @@ export const useFeaturePreviews = (): FeaturePreview[] => {
       name: 'Branching via dashboard',
       discussionsUrl: 'https://github.com/orgs/supabase/discussions/branching-2-0',
       enabled: gitlessBranchingEnabled,
-      isNew: true,
+      isNew: false,
       isPlatformOnly: true,
       isDefaultOptIn: false,
     },
@@ -43,7 +43,7 @@ export const useFeaturePreviews = (): FeaturePreview[] => {
       name: 'Disable Advisor rules',
       discussionsUrl: undefined,
       enabled: advisorRulesEnabled,
-      isNew: true,
+      isNew: false,
       isPlatformOnly: true,
       isDefaultOptIn: false,
     },
@@ -92,5 +92,5 @@ export const useFeaturePreviews = (): FeaturePreview[] => {
       isPlatformOnly: true,
       isDefaultOptIn: false,
     },
-  ]
+  ].sort((a, b) => Number(b.isNew) - Number(a.isNew))
 }

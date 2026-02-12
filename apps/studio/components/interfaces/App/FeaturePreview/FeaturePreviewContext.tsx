@@ -32,9 +32,7 @@ export const FeaturePreviewContextProvider = ({ children }: PropsWithChildren<{}
   const featurePreviews = useFeaturePreviews()
 
   const [flags, setFlags] = useState(() =>
-    featurePreviews.reduce((a, b) => {
-      return { ...a, [b.key]: false }
-    }, {})
+    featurePreviews.reduce((a, b) => ({ ...a, [b.key]: false }), {})
   )
 
   const initializeFlags = useStaticEffectEvent(() => {

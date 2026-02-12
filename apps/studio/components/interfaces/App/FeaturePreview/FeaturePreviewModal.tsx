@@ -98,29 +98,29 @@ export const FeaturePreviewModal = () => {
                         key={feature.key}
                         onClick={() => selectFeaturePreview(feature.key)}
                         className={cn(
-                          'flex items-center space-x-3 p-4 border-b cursor-pointer bg transition',
+                          'flex items-center justify-between p-4 border-b cursor-pointer bg transition',
                           selectedFeature.key === feature.key ? 'bg-surface-300' : 'bg-surface-100'
                         )}
                       >
-                        {isEnabled ? (
-                          <Eye size={14} strokeWidth={2} className="text-brand" />
-                        ) : (
-                          <EyeOff size={14} strokeWidth={1.5} className="text-foreground-light" />
-                        )}
-                        <p className="text-sm truncate" title={feature.name}>
-                          {feature.name}
-                        </p>
+                        <div className="flex items-center gap-x-3">
+                          {isEnabled ? (
+                            <Eye size={14} strokeWidth={2} className="text-brand" />
+                          ) : (
+                            <EyeOff size={14} strokeWidth={1.5} className="text-foreground-light" />
+                          )}
+                          <p className="text-sm truncate" title={feature.name}>
+                            {feature.name}
+                          </p>
+                        </div>
+                        {feature.isNew && <Badge variant="success">New</Badge>}
                       </div>
                     )
                   })}
                 </ScrollArea>
               </div>
-              <div className="flex-grow max-h-[550px] p-4 space-y-3 overflow-y-auto">
+              <div className="flex-grow max-h-[550px] p-4 flex flex-col gap-y-3 overflow-y-auto">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-x-2">
-                    <p>{selectedFeature?.name}</p>
-                    {selectedFeature?.isNew && <Badge variant="success">New</Badge>}
-                  </div>
+                  <p>{selectedFeature?.name}</p>
                   <div className="flex items-center gap-x-2">
                     {selectedFeature?.discussionsUrl !== undefined && (
                       <Button asChild type="default" icon={<ExternalLink strokeWidth={1.5} />}>

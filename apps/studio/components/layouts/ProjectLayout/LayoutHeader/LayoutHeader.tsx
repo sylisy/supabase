@@ -12,7 +12,7 @@ import { InlineEditorButton } from 'components/layouts/AppLayout/InlineEditorBut
 import { OrganizationDropdown } from 'components/layouts/AppLayout/OrganizationDropdown'
 import { ProjectDropdown } from 'components/layouts/AppLayout/ProjectDropdown'
 import { getResourcesExceededLimitsOrg } from 'components/ui/OveragesBanner/OveragesBanner.utils'
-import { SystemStatusBadge } from 'components/ui/SystemStatus'
+import { SystemStatusBadge } from 'components/ui/SystemStatus/SystemStatusBadge'
 import { useOrgUsageQuery } from 'data/usage/org-usage-query'
 import { DevToolbarTrigger } from 'dev-tools'
 import { AnimatePresence, motion } from 'framer-motion'
