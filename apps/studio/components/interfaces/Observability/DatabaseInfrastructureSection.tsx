@@ -215,7 +215,7 @@ export const DatabaseInfrastructureSection = ({
           href={`/project/${projectRef}/observability/query-performance?totalTimeFilter=${encodeURIComponent(JSON.stringify({ operator: '>', value: 1000 }))}`}
           className="block group h-full"
         >
-          <MetricCard isLoading={slowQueriesLoading}>
+          <MetricCard isLoading={slowQueriesLoading} className="h-full">
             <MetricCardHeader
               href={`/project/${projectRef}/observability/query-performance?totalTimeFilter=${encodeURIComponent(JSON.stringify({ operator: '>', value: 1000 }))}`}
               linkTooltip="Go to query performance"
@@ -232,7 +232,7 @@ export const DatabaseInfrastructureSection = ({
 
         {showLinks ? (
           <Link href={databaseReportUrl} className="block group h-full">
-            <MetricCard isLoading={infraLoading}>
+            <MetricCard isLoading={infraLoading} className="h-full">
               <MetricCardHeader href={databaseReportUrl} linkTooltip="Go to database report">
                 <MetricCardLabel
                   tooltip={
@@ -306,7 +306,7 @@ export const DatabaseInfrastructureSection = ({
 
         {showLinks ? (
           <Link href={databaseReportUrl} className="block group h-full">
-            <MetricCard isLoading={infraLoading}>
+            <MetricCard isLoading={infraLoading} className="h-full">
               <MetricCardHeader href={databaseReportUrl} linkTooltip="Go to database report">
                 <MetricCardLabel tooltip="Disk usage percentage of total disk space used">
                   Disk Usage
@@ -370,7 +370,7 @@ export const DatabaseInfrastructureSection = ({
 
         {showLinks ? (
           <Link href={databaseReportUrl} className="block group h-full">
-            <MetricCard isLoading={infraLoading}>
+            <MetricCard isLoading={infraLoading} className="h-full">
               <MetricCardHeader href={databaseReportUrl} linkTooltip="Go to database report">
                 <MetricCardLabel
                   tooltip={
@@ -438,7 +438,7 @@ export const DatabaseInfrastructureSection = ({
 
         {showLinks ? (
           <Link href={databaseReportUrl} className="block group h-full">
-            <MetricCard isLoading={infraLoading}>
+            <MetricCard isLoading={infraLoading} className="h-full">
               <MetricCardHeader href={databaseReportUrl} linkTooltip="Go to database report">
                 <MetricCardLabel
                   tooltip={
@@ -627,7 +627,7 @@ export const DatabaseInfrastructureSection = ({
 
         {showLinks ? (
           <Link href={databaseReportUrl} className="block group h-full">
-            <MetricCard isLoading={infraLoading}>
+            <MetricCard isLoading={infraLoading} className="h-full">
               <MetricCardHeader href={databaseReportUrl} linkTooltip="Go to database report">
                 <MetricCardLabel
                   tooltip={

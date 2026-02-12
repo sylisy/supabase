@@ -280,39 +280,41 @@ const DatabaseUsage = () => {
             />
           </div>
         )}
-        {selectedDateRange &&
-          orgPlan?.id &&
-          REPORT_ATTRIBUTES.filter((chart) => !chart.hide).map((chart) =>
-            chart.availableIn?.includes(orgPlan?.id) ? (
-              <LazyComposedChartHandler
-                key={chart.id}
-                {...chart}
-                attributes={chart.attributes as MultiAttribute[]}
-                interval={selectedDateRange.interval}
-                startDate={selectedDateRange?.period_start?.date}
-                endDate={selectedDateRange?.period_end?.date}
-                updateDateRange={updateDateRange}
-                defaultChartStyle={chart.defaultChartStyle as 'line' | 'bar' | 'stackedAreaLine'}
-                syncId="database-charts"
-                showMaxValue={
-                  chart.id === 'client-connections' ||
-                  chart.id === 'client-connections-basic' ||
-                  chart.id === 'pgbouncer-connections'
-                    ? true
-                    : chart.showMaxValue
-                }
-              />
-            ) : (
-              <ReportChartUpsell
-                key={chart.id}
-                report={{
-                  label: chart.label,
-                  availableIn: chart.availableIn ?? [],
-                }}
-                orgSlug={org?.slug ?? ''}
-              />
-            )
-          )}
+        {selectedDateRange && orgPlan?.id && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {REPORT_ATTRIBUTES.filter((chart) => !chart.hide).map((chart) =>
+              chart.availableIn?.includes(orgPlan?.id) ? (
+                <LazyComposedChartHandler
+                  key={chart.id}
+                  {...chart}
+                  attributes={chart.attributes as MultiAttribute[]}
+                  interval={selectedDateRange.interval}
+                  startDate={selectedDateRange?.period_start?.date}
+                  endDate={selectedDateRange?.period_end?.date}
+                  updateDateRange={updateDateRange}
+                  defaultChartStyle={chart.defaultChartStyle as 'line' | 'bar' | 'stackedAreaLine'}
+                  syncId="database-charts"
+                  showMaxValue={
+                    chart.id === 'client-connections' ||
+                    chart.id === 'client-connections-basic' ||
+                    chart.id === 'pgbouncer-connections'
+                      ? true
+                      : chart.showMaxValue
+                  }
+                />
+              ) : (
+                <ReportChartUpsell
+                  key={chart.id}
+                  report={{
+                    label: chart.label,
+                    availableIn: chart.availableIn ?? [],
+                  }}
+                  orgSlug={org?.slug ?? ''}
+                />
+              )
+            )}
+          </div>
+        )}
         {selectedDateRange && isReplicaSelected && (
           <Panel title="Replica Information">
             <Panel.Content>
