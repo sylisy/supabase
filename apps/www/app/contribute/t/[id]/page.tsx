@@ -1,11 +1,13 @@
 import Link from 'next/link'
+import { notFound } from 'next/navigation'
 import { Suspense } from 'react'
 import { ArrowLeft } from 'lucide-react'
 import DefaultLayout from '~/components/Layouts/Default'
-import { ThreadContent } from '~/components/Contribute/ThreadContent'
-import PageLoading from './page-loading'
+import { Conversation } from '~/components/Contribute/Conversation'
+import { getThreadById } from '~/data/contribute'
 import type { Metadata } from 'next'
 import { ContributeGuard } from '../../ContributeGuard'
+import PageLoading from './page-loading'
 
 export const metadata: Metadata = {
   robots: {
@@ -17,6 +19,11 @@ export const metadata: Metadata = {
 // eslint-disable-next-line no-restricted-exports
 export default async function ThreadPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
+  const thread = await getThreadById(id)
+
+  if (!thread) {
+    notFound()
+  }
 
   return (
     <ContributeGuard>
@@ -32,7 +39,9 @@ export default async function ThreadPage({ params }: { params: Promise<{ id: str
             </Link>
 
             <Suspense fallback={<PageLoading />}>
-              <ThreadContent id={id} />
+              <div className="grid gap-6">
+                <Conversation thread={thread} />
+              </div>
             </Suspense>
           </div>
         </main>
