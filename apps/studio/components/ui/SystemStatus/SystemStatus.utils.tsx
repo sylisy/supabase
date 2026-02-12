@@ -4,27 +4,24 @@ import { Separator } from 'ui'
 
 import { SystemStatusIcon } from './SystemStatusIcon'
 
-export type SystemStatus = 'operational' | 'incident' | 'maintenance'
+type SystemStatus = 'operational' | 'incident' | 'maintenance'
 
-export interface BadgeVariant {
-  variant: 'success' | 'warning'
+interface BadgeVariant {
+  variant: 'success' | 'warning' | 'default'
   label: string
   icon: JSX.Element
   hoverStyle: string
 }
 
-export function deriveSystemStatus(
-  incidents: IncidentInfo[],
-  maintenanceEvents: IncidentInfo[],
-  hasOverride: boolean
-): SystemStatus {
-  if (hasOverride) return 'incident'
-
-  const highImpactIncident = incidents.find((incident) => incident.impact !== 'none')
-  if (highImpactIncident) return 'incident'
-
+export function deriveSystemStatus({
+  maintenanceEvents,
+  hasIncident,
+}: {
+  maintenanceEvents: IncidentInfo[]
+  hasIncident: boolean
+}): SystemStatus {
+  if (hasIncident) return 'incident'
   if (maintenanceEvents.length > 0) return 'maintenance'
-
   return 'operational'
 }
 
@@ -35,26 +32,27 @@ export function getBadgeConfig(status: SystemStatus): BadgeVariant {
         variant: 'success',
         label: 'Operational',
         icon: <SystemStatusIcon status="operational" />,
-        hoverStyle: 'aspect-square border-transparent hover:border-stronger bg-transparent',
+        hoverStyle:
+          'transition aspect-square border-transparent hover:border-stronger bg-transparent',
       }
     case 'incident':
       return {
         variant: 'warning',
         label: 'Investigating issue',
         icon: <AlertCircleIcon className="w-3 h-3" />,
-        hoverStyle: 'hover:border-warning/50 hover:bg-warning-300',
+        hoverStyle: '',
       }
     case 'maintenance':
       return {
-        variant: 'warning',
+        variant: 'default',
         label: 'Ongoing Maintenance',
-        icon: <Cog className="w-3 h-3 animate-spin" />,
-        hoverStyle: 'hover:border-warning/50 hover:bg-warning-300',
+        icon: <Cog className="w-3 h-3" />,
+        hoverStyle: '',
       }
   }
 }
 
-export function formatActiveSince(dateString: string): string {
+function formatActiveSince(dateString: string): string {
   try {
     const date = new Date(dateString)
     return date.toLocaleString('en-US', {
@@ -84,29 +82,35 @@ export function getTooltipContent({ status, incident, maintenanceEvent }: Toolti
     )
   }
 
-  if (status === 'incident' && incident) {
+  if (status === 'incident') {
     return (
       <div className="flex flex-col gap-2 p-2">
         <p className="text-xs text-foreground-light">We are investigating a technical issue</p>
-        <Separator />
-        <div>
-          <p className="text-xs text-warning">{incident.name}</p>
-        </div>
+        {!!incident && (
+          <>
+            <Separator />
+            <div>
+              <p className="text-xs text-warning">{incident.name}</p>
+            </div>
+          </>
+        )}
       </div>
     )
   }
 
-  if (status === 'maintenance' && maintenanceEvent) {
+  if (status === 'maintenance') {
     return (
       <div className="flex flex-col gap-2 p-2">
         <p className="text-xs text-foreground-light">
           Scheduled maintenance is currently in progress
           <span className="inline-block w-[1.2em] text-left after:content-[''] after:animate-ellipsis after:inline-block" />
         </p>
-        <div className="flex flex-col gap-0.5 text-xs text-foreground-lighter">
-          <p>{maintenanceEvent.name}</p>
-          <p>{formatActiveSince(maintenanceEvent.active_since)}</p>
-        </div>
+        {maintenanceEvent && (
+          <div className="flex flex-col gap-0.5 text-xs text-foreground-lighter">
+            <p>{maintenanceEvent.name}</p>
+            <p>{formatActiveSince(maintenanceEvent.active_since)}</p>
+          </div>
+        )}
       </div>
     )
   }

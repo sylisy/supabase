@@ -10,12 +10,11 @@ export const SystemStatusBadge = () => {
   const { data: allStatusPageEvents } = useIncidentStatusQuery()
   const { incidents = [], maintenanceEvents = [] } = allStatusPageEvents ?? {}
 
-  const showIncidentBannerOverride =
+  const hasIncident =
     useFlag('ongoingIncident') || process.env.NEXT_PUBLIC_ONGOING_INCIDENT === 'true'
 
-  const status = deriveSystemStatus(incidents, maintenanceEvents, showIncidentBannerOverride)
-  const highImpactIncident = incidents.find((incident) => incident.impact !== 'none')
-  const currentIncident = showIncidentBannerOverride ? incidents[0] : highImpactIncident
+  const status = deriveSystemStatus({ maintenanceEvents, hasIncident })
+  const currentIncident = incidents[0]
   const currentMaintenance = maintenanceEvents[0]
 
   const badgeConfig = getBadgeConfig(status)
@@ -40,12 +39,12 @@ export const SystemStatusBadge = () => {
         })}
         <footer className="w-full flex flex-col items-start gap-1 p-2 bg-overlay border-t">
           <Button
+            asChild
             type="default"
             size="tiny"
             iconRight={<ArrowUpRight className="w-3 h-3" />}
-            asChild
           >
-            <Link href="https://status.supabase.com" target="_blank">
+            <Link href="https://status.supabase.com" target="_blank" rel="noreferrer noopener">
               View Status Page
             </Link>
           </Button>
