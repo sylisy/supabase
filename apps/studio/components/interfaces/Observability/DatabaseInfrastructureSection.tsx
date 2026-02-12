@@ -1,4 +1,4 @@
-import { useParams } from 'common'
+import { useFlag, useParams } from 'common'
 import { useQueryPerformanceQuery } from 'components/interfaces/Reports/Reports.queries'
 import { useInfraMonitoringAttributesQuery } from 'data/analytics/infra-monitoring-query'
 import { useMaxConnectionsQuery } from 'data/database/max-connections-query'
@@ -6,7 +6,7 @@ import dayjs from 'dayjs'
 import { useSelectedProjectQuery } from 'hooks/misc/useSelectedProject'
 import Link from 'next/link'
 import { useMemo } from 'react'
-import { cn } from 'ui'
+import { cn, Tooltip, TooltipContent, TooltipTrigger } from 'ui'
 import {
   MetricCard,
   MetricCardContent,
@@ -48,6 +48,11 @@ export const DatabaseInfrastructureSection = ({
 }: DatabaseInfrastructureSectionProps) => {
   const { ref: projectRef } = useParams()
   const { data: project } = useSelectedProjectQuery()
+  const databaseReportMetrics = useFlag('DatabaseReportMetrics')
+
+  if (!databaseReportMetrics) {
+    return null
+  }
 
   // refreshKey forces date recalculation when user clicks refresh button
   // Use provided dates if available, otherwise calculate from interval
@@ -206,7 +211,20 @@ export const DatabaseInfrastructureSection = ({
           <Link href={databaseReportUrl} className="block group">
             <MetricCard isLoading={infraLoading}>
               <MetricCardHeader href={databaseReportUrl} linkTooltip="Go to database report">
-                <MetricCardLabel tooltip="Active database connections (current/max). Monitor to avoid connection exhaustion">
+                <MetricCardLabel
+                  tooltip={
+                    <div className="space-y-2">
+                      <p>Active database connections (current/max). Monitor to avoid connection exhaustion.</p>
+                      <Link
+                        href="https://supabase.com/docs/guides/troubleshooting?search=connections"
+                        target="_blank"
+                        className="text-xs text-brand font-medium hover:underline"
+                      >
+                        Troubleshooting guide
+                      </Link>
+                    </div>
+                  }
+                >
                   Connections
                 </MetricCardLabel>
               </MetricCardHeader>
@@ -226,7 +244,20 @@ export const DatabaseInfrastructureSection = ({
         ) : (
           <MetricCard isLoading={infraLoading}>
             <MetricCardHeader>
-              <MetricCardLabel tooltip="Active database connections (current/max). Monitor to avoid connection exhaustion">
+              <MetricCardLabel
+                tooltip={
+                  <div className="space-y-2">
+                    <p>Active database connections (current/max). Monitor to avoid connection exhaustion.</p>
+                    <Link
+                      href="https://supabase.com/docs/guides/troubleshooting?search=connections"
+                      target="_blank"
+                      className="text-xs text-brand font-medium hover:underline"
+                    >
+                      Troubleshooting guide
+                    </Link>
+                  </div>
+                }
+              >
                 Connections
               </MetricCardLabel>
             </MetricCardHeader>
@@ -286,7 +317,20 @@ export const DatabaseInfrastructureSection = ({
           <Link href={databaseReportUrl} className="block group">
             <MetricCard isLoading={infraLoading}>
               <MetricCardHeader href={databaseReportUrl} linkTooltip="Go to database report">
-                <MetricCardLabel tooltip="Disk I/O consumption percentage. High values may indicate disk bottlenecks">
+                <MetricCardLabel
+                  tooltip={
+                    <div className="space-y-2">
+                      <p>Disk I/O consumption percentage. High values may indicate disk bottlenecks.</p>
+                      <Link
+                        href="https://supabase.com/docs/guides/troubleshooting/exhaust-disk-io"
+                        target="_blank"
+                        className="text-xs text-brand font-medium hover:underline"
+                      >
+                        Troubleshooting guide
+                      </Link>
+                    </div>
+                  }
+                >
                   Disk IO
                 </MetricCardLabel>
               </MetricCardHeader>
@@ -304,7 +348,20 @@ export const DatabaseInfrastructureSection = ({
         ) : (
           <MetricCard isLoading={infraLoading}>
             <MetricCardHeader>
-              <MetricCardLabel tooltip="Disk I/O consumption percentage. High values may indicate disk bottlenecks">
+              <MetricCardLabel
+                tooltip={
+                  <div className="space-y-2">
+                    <p>Disk I/O consumption percentage. High values may indicate disk bottlenecks.</p>
+                    <Link
+                      href="https://supabase.com/docs/guides/troubleshooting/exhaust-disk-io"
+                      target="_blank"
+                      className="text-xs text-brand font-medium hover:underline"
+                    >
+                      Troubleshooting guide
+                    </Link>
+                  </div>
+                }
+              >
                 Disk IO
               </MetricCardLabel>
             </MetricCardHeader>
@@ -324,7 +381,18 @@ export const DatabaseInfrastructureSection = ({
           <Link href={databaseReportUrl} className="block group">
             <MetricCard isLoading={infraLoading}>
               <MetricCardHeader href={databaseReportUrl} linkTooltip="Go to database report">
-                <MetricCardLabel tooltip="Overall memory health indicator based on non-cache memory usage. Low = healthy, High = potential issues">
+                <MetricCardLabel
+                  tooltip={
+                    <div>
+                      <p>Overall memory health based on swap and non-cache memory.</p>
+                      <ul>
+                        <li>Healthy: swap &lt; max(64 MB, 1% of RAM)</li>
+                        <li>Elevated: swap ≥ max(64 MB, 1% of RAM)</li>
+                        <li>Unhealthy: swap ≥ max(256 MB, 3% of RAM)</li>
+                      </ul>
+                    </div>
+                  }
+                >
                   Memory Pressure
                 </MetricCardLabel>
               </MetricCardHeader>
@@ -335,22 +403,56 @@ export const DatabaseInfrastructureSection = ({
                   <div className="flex flex-col gap-1">
                     <MetricCardValue
                       className={cn({
-                        'text-foreground': memoryPressure.level === 'Low',
-                        'text-warning': memoryPressure.level === 'Medium',
-                        'text-destructive': memoryPressure.level === 'High',
+                        'text-foreground': memoryPressure.level === 'Healthy',
+                        'text-warning': memoryPressure.level === 'Elevated',
+                        'text-destructive': memoryPressure.level === 'Unhealthy',
                       })}
                     >
                       {memoryPressure.level}
                     </MetricCardValue>
-                    <div
-                      className={cn('text-xs font-medium', {
-                        'text-foreground-light': memoryPressure.swapUsedMB === 0,
-                        'text-destructive': memoryPressure.swapUsedMB > 0,
-                      })}
-                    >
-                      Swap: {memoryPressure.swapUsedMB.toFixed(0)} MB
+                    <div className="text-xs">
+                      <span className="text-foreground-lighter">Swap:</span>{' '}
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="font-mono text-foreground border-b border-dashed border-foreground-lighter cursor-help">
+                            {memoryPressure.swapUsedMB > 0 && memoryPressure.swapUsedMB < 1
+                              ? '<1'
+                              : memoryPressure.swapUsedMB.toFixed(0)}{' '}
+                            MB
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-xs">
+                          <div className="flex flex-col gap-2">
+                            <p className="text-xs">
+                              Swap is disk used as emergency memory. High swap can slow queries and
+                              indicates memory pressure.
+                            </p>
+                            <p className="text-xs">
+                              Swap usage: {memoryPressure.swapPercent.toFixed(1)}% of RAM
+                            </p>
+                            <Link
+                              href="https://supabase.com/docs/guides/troubleshooting/exhaust-swap"
+                              target="_blank"
+                              className="text-xs text-brand font-medium hover:underline"
+                            >
+                              Troubleshooting guide
+                            </Link>
+                          </div>
+                        </TooltipContent>
+                      </Tooltip>{' '}
+                      <span className="text-foreground-lighter">·</span>{' '}
+                      <span className="text-foreground-lighter">Cache hit:</span>{' '}
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="font-mono text-foreground border-b border-dashed border-foreground-lighter cursor-help">
+                            {cacheHitRate}
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-xs">
+                          Percentage of queries served from memory cache vs disk. Higher is better.
+                        </TooltipContent>
+                      </Tooltip>
                     </div>
-                    <div className="text-xs text-foreground-light">Cache hit: {cacheHitRate}</div>
                   </div>
                 ) : (
                   <MetricCardValue>--</MetricCardValue>
@@ -361,7 +463,41 @@ export const DatabaseInfrastructureSection = ({
         ) : (
           <MetricCard isLoading={infraLoading}>
             <MetricCardHeader>
-              <MetricCardLabel tooltip="Overall memory health indicator based on non-cache memory usage. Low = healthy, High = potential issues">
+              <MetricCardLabel
+                tooltip={
+                  <div className="space-y-2">
+                    <p>Overall memory health based on swap and non-cache memory.</p>
+                    <ul>
+                      <li>
+                        Healthy: <code>swap &lt; max(64 MB, 1% of RAM)</code>
+                      </li>
+                      <li>
+                        Elevated: <code>swap ≥ max(64 MB, 1% of RAM)</code>
+                      </li>
+                      <li>
+                        Unhealthy: <code>swap ≥ max(256 MB, 3% of RAM)</code>
+                      </li>
+                    </ul>
+                    <p className="text-foreground-light">Troubleshooting guides</p>
+                    <p className="grid">
+                      <Link
+                        href="https://supabase.com/docs/guides/troubleshooting/memory-and-swap-usage-explained-aPNgm0"
+                        target="_blank"
+                        className="text-xs text-brand font-medium hover:underline"
+                      >
+                        Memory and Swap usage explained
+                      </Link>
+                      <Link
+                        href="https://supabase.com/docs/guides/troubleshooting/exhaust-swap"
+                        target="_blank"
+                        className="text-xs text-brand font-medium hover:underline"
+                      >
+                        High swap usage
+                      </Link>
+                    </p>
+                  </div>
+                }
+              >
                 Memory Pressure
               </MetricCardLabel>
             </MetricCardHeader>
@@ -372,22 +508,56 @@ export const DatabaseInfrastructureSection = ({
                 <div className="flex flex-col gap-1">
                   <MetricCardValue
                     className={cn({
-                      'text-foreground': memoryPressure.level === 'Low',
-                      'text-warning': memoryPressure.level === 'Medium',
-                      'text-destructive': memoryPressure.level === 'High',
+                      'text-foreground': memoryPressure.level === 'Healthy',
+                      'text-warning': memoryPressure.level === 'Elevated',
+                      'text-destructive': memoryPressure.level === 'Unhealthy',
                     })}
                   >
                     {memoryPressure.level}
                   </MetricCardValue>
-                  <div
-                    className={cn('text-xs font-medium', {
-                      'text-foreground-light': memoryPressure.swapUsedMB === 0,
-                      'text-destructive': memoryPressure.swapUsedMB > 0,
-                    })}
-                  >
-                    Swap: {memoryPressure.swapUsedMB.toFixed(0)} MB
+                  <div className="text-xs">
+                    <span className="text-foreground-lighter">Swap:</span>{' '}
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span className="font-mono text-foreground border-b border-dashed border-foreground-lighter cursor-help">
+                          {memoryPressure.swapUsedMB > 0 && memoryPressure.swapUsedMB < 1
+                            ? '<1'
+                            : memoryPressure.swapUsedMB.toFixed(0)}{' '}
+                          MB
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent className="max-w-xs">
+                        <div className="flex flex-col gap-2">
+                          <p className="text-xs">
+                            Swap is disk used as emergency memory. High swap can slow queries and
+                            indicates memory pressure.
+                          </p>
+                          <p className="text-xs">
+                            Swap usage: {memoryPressure.swapPercent.toFixed(1)}% of RAM
+                          </p>
+                          <Link
+                            href="https://supabase.com/docs/guides/troubleshooting/exhaust-swap"
+                            target="_blank"
+                            className="text-xs text-brand font-medium hover:underline"
+                          >
+                            Troubleshooting guide
+                          </Link>
+                        </div>
+                      </TooltipContent>
+                    </Tooltip>{' '}
+                    <span className="text-foreground-lighter">·</span>{' '}
+                    <span className="text-foreground-lighter">Cache hit:</span>{' '}
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span className="font-mono text-foreground border-b border-dashed border-foreground-lighter cursor-help">
+                          {cacheHitRate}
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent className="max-w-xs">
+                        Percentage of queries served from memory cache vs disk. Higher is better.
+                      </TooltipContent>
+                    </Tooltip>
                   </div>
-                  <div className="text-xs text-foreground-light">Cache hit: {cacheHitRate}</div>
                 </div>
               ) : (
                 <MetricCardValue>--</MetricCardValue>
@@ -400,7 +570,20 @@ export const DatabaseInfrastructureSection = ({
           <Link href={databaseReportUrl} className="block group">
             <MetricCard isLoading={infraLoading}>
               <MetricCardHeader href={databaseReportUrl} linkTooltip="Go to database report">
-                <MetricCardLabel tooltip="CPU usage percentage. High values may suggest CPU-intensive queries or workloads">
+                <MetricCardLabel
+                  tooltip={
+                    <div className="space-y-2">
+                      <p>CPU usage percentage. High values may suggest CPU-intensive queries or workloads.</p>
+                      <Link
+                        href="https://supabase.com/docs/guides/troubleshooting?search=cpu"
+                        target="_blank"
+                        className="text-xs text-brand font-medium hover:underline"
+                      >
+                        Troubleshooting guide
+                      </Link>
+                    </div>
+                  }
+                >
                   CPU
                 </MetricCardLabel>
               </MetricCardHeader>
@@ -418,7 +601,20 @@ export const DatabaseInfrastructureSection = ({
         ) : (
           <MetricCard isLoading={infraLoading}>
             <MetricCardHeader>
-              <MetricCardLabel tooltip="CPU usage percentage. High values may suggest CPU-intensive queries or workloads">
+              <MetricCardLabel
+                tooltip={
+                  <div className="space-y-2">
+                    <p>CPU usage percentage. High values may suggest CPU-intensive queries or workloads.</p>
+                    <Link
+                      href="https://supabase.com/docs/guides/troubleshooting?search=cpu"
+                      target="_blank"
+                      className="text-xs text-brand font-medium hover:underline"
+                    >
+                      Troubleshooting guide
+                    </Link>
+                  </div>
+                }
+              >
                 CPU
               </MetricCardLabel>
             </MetricCardHeader>
