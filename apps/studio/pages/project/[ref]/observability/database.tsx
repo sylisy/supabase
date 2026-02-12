@@ -280,13 +280,15 @@ const DatabaseUsage = () => {
             />
           </div>
         )}
-        {selectedDateRange && orgPlan?.id && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {REPORT_ATTRIBUTES.filter((chart) => !chart.hide).map((chart) =>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 auto-rows-fr">
+          {selectedDateRange &&
+            orgPlan?.id &&
+            REPORT_ATTRIBUTES.filter((chart) => !chart.hide).map((chart) =>
               chart.availableIn?.includes(orgPlan?.id) ? (
                 <LazyComposedChartHandler
                   key={chart.id}
                   {...chart}
+                  className="h-full"
                   attributes={chart.attributes as MultiAttribute[]}
                   interval={selectedDateRange.interval}
                   startDate={selectedDateRange?.period_start?.date}
@@ -313,8 +315,7 @@ const DatabaseUsage = () => {
                 />
               )
             )}
-          </div>
-        )}
+        </div>
         {selectedDateRange && isReplicaSelected && (
           <Panel title="Replica Information">
             <Panel.Content>
