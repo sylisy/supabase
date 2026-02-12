@@ -74,7 +74,7 @@ const SimilarThreadCard = ({
   )
   const content = (
     <>
-      <div className="flex items-center justify-center bg-surface-200 h-10 w-10 rounded-md shrink-0">
+      <div className="flex items-center justify-center bg-surface-200 dark:bg-surface-300 h-10 w-10 rounded-md shrink-0">
         <ChannelIcon channel={channel} />
       </div>
       <div className="min-w-0 flex-1 flex flex-col">
