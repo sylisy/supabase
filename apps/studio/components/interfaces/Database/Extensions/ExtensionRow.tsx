@@ -1,6 +1,5 @@
 import { PermissionAction } from '@supabase/shared-types/out/constants'
 import { ButtonTooltip } from 'components/ui/ButtonTooltip'
-import { useDatabaseExtensionDisableMutation } from 'data/database-extensions/database-extension-disable-mutation'
 import { DatabaseExtension } from 'data/database-extensions/database-extensions-query'
 import { useAsyncCheckPermissions } from 'hooks/misc/useCheckPermissions'
 import { useIsOrioleDb, useSelectedProjectQuery } from 'hooks/misc/useSelectedProject'
@@ -14,8 +13,9 @@ import { Button, Switch, TableCell, TableRow, Tooltip, TooltipContent, TooltipTr
 import { Admonition } from 'ui-patterns'
 import { ConfirmationModal } from 'ui-patterns/Dialogs/ConfirmationModal'
 
-import { EnableExtensionModal } from './EnableExtensionModal'
-import { EXTENSION_DISABLE_WARNINGS } from './Extensions.constants'
+import { EXTENSION_UNINSTALL_WARNINGS } from './Extensions.constants'
+import { InstallExtensionModal } from './InstallExtensionModal'
+import { useDatabaseExtensionUninstallMutation } from '@/data/database-extensions/database-extension-uninstall-mutation'
 
 interface ExtensionRowProps {
   extension: DatabaseExtension
@@ -26,8 +26,8 @@ export const ExtensionRow = ({ extension }: ExtensionRowProps) => {
   const isOn = extension.installed_version !== null
   const isOrioleDb = useIsOrioleDb()
 
-  const [isDisableModalOpen, setIsDisableModalOpen] = useState(false)
-  const [showConfirmEnableModal, setShowConfirmEnableModal] = useState(false)
+  const [isUninstallModalOpen, setIsUninstallModalOpen] = useState(false)
+  const [showConfirmInstallModal, setShowConfirmInstallModal] = useState(false)
 
   const { can: canUpdateExtensions } = useAsyncCheckPermissions(
     PermissionAction.TENANT_SQL_ADMIN_WRITE,
@@ -41,17 +41,18 @@ export const ExtensionRow = ({ extension }: ExtensionRowProps) => {
     ? `${DOCS_URL}${extensionMeta?.link}`
     : extensionMeta?.link ?? undefined
 
-  const { mutate: disableExtension, isPending: isDisabling } = useDatabaseExtensionDisableMutation({
-    onSuccess: () => {
-      toast.success(`${extension.name} is off.`)
-      setIsDisableModalOpen(false)
-    },
-  })
+  const { mutate: uninstallExtension, isPending: isUninstalling } =
+    useDatabaseExtensionUninstallMutation({
+      onSuccess: () => {
+        toast.success(`${extension.name} is off.`)
+        setIsUninstallModalOpen(false)
+      },
+    })
 
-  const onConfirmDisable = () => {
+  const onConfirmUninstall = () => {
     if (project === undefined) return console.error('Project is required')
 
-    disableExtension({
+    uninstallExtension({
       projectRef: project.ref,
       connectionString: project.connectionString,
       id: extension.name,
@@ -154,7 +155,7 @@ export const ExtensionRow = ({ extension }: ExtensionRowProps) => {
         */}
         <TableCell className="w-20 sticky bg-surface-100 right-0 relative">
           <div className="absolute top-0 right-0 left-0 bottom-0 flex items-center justify-center border-l">
-            {isDisabling ? (
+            {isUninstalling ? (
               <Loader2 className="animate-spin" size={16} />
             ) : (
               <Tooltip>
@@ -163,7 +164,7 @@ export const ExtensionRow = ({ extension }: ExtensionRowProps) => {
                     disabled={disabled}
                     checked={isOn}
                     onCheckedChange={() =>
-                      isOn ? setIsDisableModalOpen(true) : setShowConfirmEnableModal(true)
+                      isOn ? setIsUninstallModalOpen(true) : setShowConfirmInstallModal(true)
                     }
                   />
                 </TooltipTrigger>
@@ -182,28 +183,28 @@ export const ExtensionRow = ({ extension }: ExtensionRowProps) => {
         </TableCell>
       </TableRow>
 
-      <EnableExtensionModal
-        visible={showConfirmEnableModal}
+      <InstallExtensionModal
+        visible={showConfirmInstallModal}
         extension={extension}
-        onCancel={() => setShowConfirmEnableModal(false)}
+        onCancel={() => setShowConfirmInstallModal(false)}
       />
 
       <ConfirmationModal
-        visible={isDisableModalOpen}
-        title="Confirm to disable extension"
-        confirmLabel="Disable"
+        visible={isUninstallModalOpen}
+        title="Uninstall extension"
+        confirmLabel="Uninstall"
         variant="destructive"
-        confirmLabelLoading="Disabling"
-        loading={isDisabling}
-        onCancel={() => setIsDisableModalOpen(false)}
-        onConfirm={() => onConfirmDisable()}
+        confirmLabelLoading="Uninstalling"
+        loading={isUninstalling}
+        onCancel={() => setIsUninstallModalOpen(false)}
+        onConfirm={() => onConfirmUninstall()}
       >
         <div className="flex flex-col gap-y-3">
           <p className="text-sm text-foreground-light">
-            Are you sure you want to turn OFF the "{extension.name}" extension?
+            Are you sure you want to uninstall the <code className="text-code-inline">{extension.name}</code> extension?
           </p>
-          {EXTENSION_DISABLE_WARNINGS[extension.name] && (
-            <Admonition type="warning">{EXTENSION_DISABLE_WARNINGS[extension.name]}</Admonition>
+          {EXTENSION_UNINSTALL_WARNINGS[extension.name] && (
+            <Admonition type="warning">{EXTENSION_UNINSTALL_WARNINGS[extension.name]}</Admonition>
           )}
         </div>
       </ConfirmationModal>

@@ -1,7 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import type { PostgresExtension } from '@supabase/postgres-meta'
 import { DocsButton } from 'components/ui/DocsButton'
-import { useDatabaseExtensionEnableMutation } from 'data/database-extensions/database-extension-enable-mutation'
 import { useSchemasQuery } from 'data/database/schemas-query'
 import { useIsOrioleDb, useSelectedProjectQuery } from 'hooks/misc/useSelectedProject'
 import { useProtectedSchemas } from 'hooks/useProtectedSchemas'
@@ -18,23 +17,24 @@ import {
   DialogSection,
   DialogSectionSeparator,
   DialogTitle,
+  Form_Shadcn_,
   FormControl_Shadcn_,
   FormField_Shadcn_,
-  Form_Shadcn_,
   Input_Shadcn_,
+  Select_Shadcn_,
   SelectContent_Shadcn_,
   SelectItem_Shadcn_,
   SelectSeparator_Shadcn_,
   SelectTrigger_Shadcn_,
   SelectValue_Shadcn_,
-  Select_Shadcn_,
 } from 'ui'
 import { Admonition } from 'ui-patterns'
-import { ShimmeringLoader } from 'ui-patterns/ShimmeringLoader'
 import { FormItemLayout } from 'ui-patterns/form/FormItemLayout/FormItemLayout'
+import { ShimmeringLoader } from 'ui-patterns/ShimmeringLoader'
 import * as z from 'zod'
 
 import { extensionsWithRecommendedSchemas } from './Extensions.constants'
+import { useDatabaseExtensionInstallMutation } from '@/data/database-extensions/database-extension-install-mutation'
 import { useDatabaseExtensionDefaultSchemaQuery } from '@/data/database-extensions/database-extension-schema-query'
 
 const orioleExtCallOuts = ['vector', 'postgis']
@@ -49,17 +49,17 @@ const FormSchema = z.object({ name: z.string(), schema: z.string() }).superRefin
   }
 })
 
-interface EnableExtensionModalProps {
+interface InstallExtensionModalProps {
   visible: boolean
   extension: PostgresExtension
   onCancel: () => void
 }
 
-export const EnableExtensionModal = ({
+export const InstallExtensionModal = ({
   visible,
   extension,
   onCancel,
-}: EnableExtensionModalProps) => {
+}: InstallExtensionModalProps) => {
   const isOrioleDb = useIsOrioleDb()
   const { data: project } = useSelectedProjectQuery()
   const { data: protectedSchemas } = useProtectedSchemas({ excludeSchemas: ['extensions'] })
@@ -93,15 +93,17 @@ export const EnableExtensionModal = ({
 
   const isLoading = fetchingSchemaInfo || isSchemasLoading
 
-  const { mutate: enableExtension, isPending: isEnabling } = useDatabaseExtensionEnableMutation({
-    onSuccess: () => {
-      toast.success(`Extension "${extension.name}" is now enabled`)
-      onCancel()
-    },
-    onError: (error) => {
-      toast.error(`Failed to enable ${extension.name}: ${error.message}`)
-    },
-  })
+  const { mutate: installExtension, isPending: isInstalling } = useDatabaseExtensionInstallMutation(
+    {
+      onSuccess: () => {
+        toast.success(`Extension "${extension.name}" is now installed`)
+        onCancel()
+      },
+      onError: (error) => {
+        toast.error(`Failed to install ${extension.name}: ${error.message}`)
+      },
+    }
+  )
 
   const defaultValues = { name: extension.name, schema: recommendedSchema ?? 'extensions' }
   const form = useForm<z.infer<typeof FormSchema>>({
@@ -122,7 +124,7 @@ export const EnableExtensionModal = ({
           ? values.name
           : values.schema
 
-    enableExtension({
+    installExtension({
       projectRef: project.ref,
       connectionString: project?.connectionString,
       schema,
@@ -142,7 +144,7 @@ export const EnableExtensionModal = ({
     >
       <DialogContent size="small" aria-describedby={undefined}>
         <DialogHeader>
-          <DialogTitle>Enable {extension.name}</DialogTitle>
+          <DialogTitle>Install extension</DialogTitle>
         </DialogHeader>
 
         <DialogSectionSeparator />
@@ -168,7 +170,7 @@ export const EnableExtensionModal = ({
             className="border-x-0 border-t-0 rounded-none"
           >
             <p>
-              You can still enable the extension, but pg_cron jobs may not run due to the behavior
+              You can still install the extension, but pg_cron jobs may not run due to the behavior
               of Fly projects.
             </p>
             <DocsButton
@@ -180,7 +182,7 @@ export const EnableExtensionModal = ({
 
         <DialogSection>
           <Form_Shadcn_ {...form}>
-            <form id="enable-extensions-form" onSubmit={form.handleSubmit(onSubmit)}>
+            <form id="install-extensions-form" onSubmit={form.handleSubmit(onSubmit)}>
               {isLoading ? (
                 <div className="space-y-2">
                   <ShimmeringLoader />
@@ -192,13 +194,16 @@ export const EnableExtensionModal = ({
                 <div className="flex flex-col gap-y-2">
                   <FormItemLayout
                     isReactForm={false}
-                    label="Select a schema to enable the extension for"
+                    // label="Extension must be installed in the following schema"
+                    label={
+                      <>
+                        Extension <code className="text-code-inline">{extension.name}</code> must be
+                        installed in the following schema
+                      </>
+                    }
                   >
                     <Input_Shadcn_ disabled value={defaultSchema} />
                   </FormItemLayout>
-                  <p className="text-sm text-foreground-light">
-                    Extension must be installed in the “{defaultSchema}” schema.
-                  </p>
                 </div>
               ) : (
                 <div className="flex flex-col gap-y-2">
@@ -209,7 +214,15 @@ export const EnableExtensionModal = ({
                     render={({ field }) => (
                       <FormItemLayout
                         name="schema"
-                        label="Select a schema to enable the extension for"
+                        label={
+                          <>
+                            <span className="whitespace-nowrap">
+                              Select a schema in which to install the{' '}
+                            </span>
+                            <code className="text-code-inline">{extension.name}</code>{' '}
+                            <span className="whitespace-nowrap">extension</span>
+                          </>
+                        }
                       >
                         <FormControl_Shadcn_>
                           <Select_Shadcn_
@@ -275,16 +288,16 @@ export const EnableExtensionModal = ({
         </DialogSection>
 
         <DialogFooter>
-          <Button type="default" disabled={isEnabling} onClick={() => onCancel()}>
+          <Button type="default" disabled={isInstalling} onClick={() => onCancel()}>
             Cancel
           </Button>
           <Button
             htmlType="submit"
-            form="enable-extensions-form"
-            loading={isEnabling}
-            disabled={isLoading || isEnabling}
+            form="install-extensions-form"
+            loading={isInstalling}
+            disabled={isLoading || isInstalling}
           >
-            Enable extension
+            Install extension
           </Button>
         </DialogFooter>
       </DialogContent>

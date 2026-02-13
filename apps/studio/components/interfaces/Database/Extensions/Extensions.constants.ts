@@ -21,8 +21,8 @@ export const SEARCH_TERMS: Record<string, string[]> = {
   vector: ['pgvector', 'pg_vector'],
 }
 
-export const EXTENSION_DISABLE_WARNINGS: Record<string, string> = {
-  pg_cron: 'Disabling this extension will delete all scheduled jobs. This cannot be undone.',
+export const EXTENSION_UNINSTALL_WARNINGS: Record<string, string> = {
+  pg_cron: 'Uninstalling this extension will delete all scheduled jobs. This cannot be undone.',
 }
 
 // Extensions that have recommended schemas (rather than required schemas)

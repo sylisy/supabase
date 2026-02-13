@@ -1,14 +1,14 @@
 import pgMeta from '@supabase/pg-meta'
 import { ident } from '@supabase/pg-meta/src/pg-format'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { toast } from 'sonner'
-
 import { configKeys } from 'data/config/keys'
 import { executeSql } from 'data/sql/execute-sql-query'
+import { toast } from 'sonner'
 import type { ResponseError, UseCustomMutationOptions } from 'types'
+
 import { databaseExtensionsKeys } from './keys'
 
-export type DatabaseExtensionEnableVariables = {
+export type DatabaseExtensionInstallVariables = {
   projectRef: string
   connectionString?: string | null
   schema: string
@@ -18,7 +18,7 @@ export type DatabaseExtensionEnableVariables = {
   createSchema?: boolean
 }
 
-export async function enableDatabaseExtension({
+export async function installDatabaseExtension({
   projectRef,
   connectionString,
   schema,
@@ -26,7 +26,7 @@ export async function enableDatabaseExtension({
   version,
   cascade = false,
   createSchema = false,
-}: DatabaseExtensionEnableVariables) {
+}: DatabaseExtensionInstallVariables) {
   let headers = new Headers()
   if (connectionString) headers.set('x-connection-encrypted', connectionString)
 
@@ -41,24 +41,28 @@ export async function enableDatabaseExtension({
   return result
 }
 
-type DatabaseExtensionEnableData = Awaited<ReturnType<typeof enableDatabaseExtension>>
+type DatabaseExtensionInstallData = Awaited<ReturnType<typeof installDatabaseExtension>>
 
-export const useDatabaseExtensionEnableMutation = ({
+export const useDatabaseExtensionInstallMutation = ({
   onSuccess,
   onError,
   ...options
 }: Omit<
   UseCustomMutationOptions<
-    DatabaseExtensionEnableData,
+    DatabaseExtensionInstallData,
     ResponseError,
-    DatabaseExtensionEnableVariables
+    DatabaseExtensionInstallVariables
   >,
   'mutationFn'
 > = {}) => {
   const queryClient = useQueryClient()
 
-  return useMutation<DatabaseExtensionEnableData, ResponseError, DatabaseExtensionEnableVariables>({
-    mutationFn: (vars) => enableDatabaseExtension(vars),
+  return useMutation<
+    DatabaseExtensionInstallData,
+    ResponseError,
+    DatabaseExtensionInstallVariables
+  >({
+    mutationFn: (vars) => installDatabaseExtension(vars),
     async onSuccess(data, variables, context) {
       const { projectRef } = variables
       await Promise.all([
@@ -69,7 +73,7 @@ export const useDatabaseExtensionEnableMutation = ({
     },
     async onError(data, variables, context) {
       if (onError === undefined) {
-        toast.error(`Failed to enable database extension: ${data.message}`)
+        toast.error(`Failed to install database extension: ${data.message}`)
       } else {
         onError(data, variables, context)
       }

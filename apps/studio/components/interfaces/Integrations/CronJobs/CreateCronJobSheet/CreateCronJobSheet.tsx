@@ -2,7 +2,6 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { PermissionAction } from '@supabase/shared-types/out/constants'
 import { useWatch } from '@ui/components/shadcn/ui/form'
 import { useParams } from 'common'
-import { EnableExtensionModal } from 'components/interfaces/Database/Extensions/EnableExtensionModal'
 import { ButtonTooltip } from 'components/ui/ButtonTooltip'
 import { getDatabaseCronJob } from 'data/database-cron-jobs/database-cron-job-query'
 import { useDatabaseCronJobCreateMutation } from 'data/database-cron-jobs/database-cron-jobs-create-mutation'
@@ -18,9 +17,9 @@ import { SubmitHandler, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import {
   Button,
+  Form_Shadcn_,
   FormControl_Shadcn_,
   FormField_Shadcn_,
-  Form_Shadcn_,
   Input_Shadcn_,
   RadioGroupStacked,
   RadioGroupStackedItem,
@@ -43,11 +42,12 @@ import { HttpRequestSection } from '../HttpRequestSection'
 import { SqlFunctionSection } from '../SqlFunctionSection'
 import { SqlSnippetSection } from '../SqlSnippetSection'
 import {
+  FormSchema,
   type CreateCronJobForm,
   type CronJobType,
-  FormSchema,
 } from './CreateCronJobSheet.constants'
 import { CronJobScheduleSection } from './CronJobScheduleSection'
+import { InstallExtensionModal } from '@/components/interfaces/Database/Extensions/InstallExtensionModal'
 
 interface CreateCronJobSheetProps {
   selectedCronJob?: Pick<CronJob, 'jobname' | 'schedule' | 'active' | 'command'>
@@ -444,7 +444,7 @@ export const CreateCronJobSheet = ({
         </SheetFooter>
       </div>
       {pgNetExtension && (
-        <EnableExtensionModal
+        <InstallExtensionModal
           visible={showEnableExtensionModal}
           extension={pgNetExtension}
           onCancel={() => setShowEnableExtensionModal(false)}

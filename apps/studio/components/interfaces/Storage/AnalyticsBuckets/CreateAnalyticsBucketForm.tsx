@@ -1,11 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { SubmitHandler, useForm } from 'react-hook-form'
-import { toast } from 'sonner'
-import z from 'zod'
-
 import { useParams } from 'common'
 import { InlineLink } from 'components/ui/InlineLink'
-import { useDatabaseExtensionEnableMutation } from 'data/database-extensions/database-extension-enable-mutation'
 import { useAnalyticsBucketCreateMutation } from 'data/storage/analytics-bucket-create-mutation'
 import { useAnalyticsBucketsQuery } from 'data/storage/analytics-buckets-query'
 import { useIcebergWrapperCreateMutation } from 'data/storage/iceberg-wrapper-create-mutation'
@@ -13,6 +8,8 @@ import { useSendEventMutation } from 'data/telemetry/send-event-mutation'
 import { useSelectedOrganizationQuery } from 'hooks/misc/useSelectedOrganization'
 import { useSelectedProjectQuery } from 'hooks/misc/useSelectedProject'
 import { DOCS_URL } from 'lib/constants'
+import { SubmitHandler, useForm } from 'react-hook-form'
+import { toast } from 'sonner'
 import {
   Button,
   cn,
@@ -27,12 +24,15 @@ import {
 } from 'ui'
 import { Admonition } from 'ui-patterns'
 import { FormItemLayout } from 'ui-patterns/form/FormItemLayout/FormItemLayout'
+import z from 'zod'
+
 import { useIcebergWrapperExtension } from './AnalyticsBucketDetails/useIcebergWrapper'
 import {
   reservedPrefixes,
   reservedSuffixes,
   validBucketNameRegex,
 } from './CreateAnalyticsBucketForm.utils'
+import { useDatabaseExtensionInstallMutation } from '@/data/database-extensions/database-extension-install-mutation'
 
 const FormSchema = z
   .object({
@@ -139,7 +139,7 @@ export const CreateAnalyticsBucketForm = ({
     useIcebergWrapperCreateMutation()
 
   const { mutateAsync: enableExtension, isPending: isEnablingExtension } =
-    useDatabaseExtensionEnableMutation()
+    useDatabaseExtensionInstallMutation()
 
   const isCreating = isEnablingExtension || isCreatingIcebergWrapper || isCreatingAnalyticsBucket
 

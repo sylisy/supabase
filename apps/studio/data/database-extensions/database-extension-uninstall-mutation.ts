@@ -1,25 +1,25 @@
 import pgMeta from '@supabase/pg-meta'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { toast } from 'sonner'
-
 import { configKeys } from 'data/config/keys'
 import { executeSql } from 'data/sql/execute-sql-query'
+import { toast } from 'sonner'
 import type { ResponseError, UseCustomMutationOptions } from 'types'
+
 import { databaseExtensionsKeys } from './keys'
 
-export type DatabaseExtensionDisableVariables = {
+export type DatabaseExtensionUninstallVariables = {
   projectRef: string
   connectionString?: string | null
   id: string
   cascade?: boolean
 }
 
-export async function disableDatabaseExtension({
+export async function uninstallDatabaseExtension({
   projectRef,
   connectionString,
   id,
   cascade,
-}: DatabaseExtensionDisableVariables) {
+}: DatabaseExtensionUninstallVariables) {
   let headers = new Headers()
   if (connectionString) headers.set('x-connection-encrypted', connectionString)
 
@@ -34,28 +34,28 @@ export async function disableDatabaseExtension({
   return result
 }
 
-type DatabaseExtensionDisableData = Awaited<ReturnType<typeof disableDatabaseExtension>>
+type DatabaseExtensionUninstallData = Awaited<ReturnType<typeof uninstallDatabaseExtension>>
 
-export const useDatabaseExtensionDisableMutation = ({
+export const useDatabaseExtensionUninstallMutation = ({
   onSuccess,
   onError,
   ...options
 }: Omit<
   UseCustomMutationOptions<
-    DatabaseExtensionDisableData,
+    DatabaseExtensionUninstallData,
     ResponseError,
-    DatabaseExtensionDisableVariables
+    DatabaseExtensionUninstallVariables
   >,
   'mutationFn'
 > = {}) => {
   const queryClient = useQueryClient()
 
   return useMutation<
-    DatabaseExtensionDisableData,
+    DatabaseExtensionUninstallData,
     ResponseError,
-    DatabaseExtensionDisableVariables
+    DatabaseExtensionUninstallVariables
   >({
-    mutationFn: (vars) => disableDatabaseExtension(vars),
+    mutationFn: (vars) => uninstallDatabaseExtension(vars),
     async onSuccess(data, variables, context) {
       const { projectRef } = variables
       await Promise.all([
@@ -66,7 +66,7 @@ export const useDatabaseExtensionDisableMutation = ({
     },
     async onError(data, variables, context) {
       if (onError === undefined) {
-        toast.error(`Failed to disable database extension: ${data.message}`)
+        toast.error(`Failed to uninstall database extension: ${data.message}`)
       } else {
         onError(data, variables, context)
       }

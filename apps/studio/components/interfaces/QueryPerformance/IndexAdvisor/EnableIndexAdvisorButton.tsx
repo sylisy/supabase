@@ -1,10 +1,8 @@
-import { useState } from 'react'
-import { toast } from 'sonner'
-
-import { useDatabaseExtensionEnableMutation } from 'data/database-extensions/database-extension-enable-mutation'
 import { useDatabaseExtensionsQuery } from 'data/database-extensions/database-extensions-query'
 import { useSelectedProjectQuery } from 'hooks/misc/useSelectedProject'
 import { useTrack } from 'lib/telemetry/track'
+import { useState } from 'react'
+import { toast } from 'sonner'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,7 +15,9 @@ import {
   AlertDialogTrigger,
   Button,
 } from 'ui'
+
 import { getIndexAdvisorExtensions } from './index-advisor.utils'
+import { useDatabaseExtensionInstallMutation } from '@/data/database-extensions/database-extension-install-mutation'
 
 export const EnableIndexAdvisorButton = () => {
   const track = useTrack()
@@ -32,7 +32,7 @@ export const EnableIndexAdvisorButton = () => {
   const { hypopg, indexAdvisor } = getIndexAdvisorExtensions(extensions)
 
   const { mutateAsync: enableExtension, isPending: isEnablingExtension } =
-    useDatabaseExtensionEnableMutation()
+    useDatabaseExtensionInstallMutation()
 
   const onEnableIndexAdvisor = async () => {
     if (project === undefined) return toast.error('Project is required')
