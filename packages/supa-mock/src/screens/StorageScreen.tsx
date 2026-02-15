@@ -562,7 +562,7 @@ function S3Content() {
               <div className="flex items-center justify-between gap-8">
                 <span className="text-sm text-foreground whitespace-nowrap">Endpoint</span>
                 <div className="md:w-1/2 min-w-[400px]">
-                  <CopyInput value="https://rtlybsbjjaewcbcjqgfu.storage.supabase.co/storage/v1/s3" />
+                  <CopyInput value="https://cjbjbsewfrtljaqgycbu.storage.supabase.co/storage/v1/s3" />
                 </div>
               </div>
             </CardContent>
