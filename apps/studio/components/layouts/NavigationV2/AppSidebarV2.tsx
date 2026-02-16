@@ -265,7 +265,7 @@ export function AppSidebarV2({ scope }: AppSidebarV2Props = {}) {
           <div className="space-y-2">
             {isProjectScope ? <ProjectBranchSelector /> : IS_PLATFORM ? <OrgSelector /> : null}
             {isProjectScope && (
-              <div className="flex items-center gap-3 px-2">
+              <div className="flex items-center gap-2 px-1.5">
                 <Button
                   type="outline"
                   size="small"
@@ -302,7 +302,7 @@ export function AppSidebarV2({ scope }: AppSidebarV2Props = {}) {
                 <NavGroup label="Integrations" items={integrationsItems} />
               </>
             ) : (
-              <NavGroup label="Organization" items={organizationItems} />
+              <NavGroup label="Organization" items={organizationItems} isCollapsible={false} />
             )}
           </SidebarContent>
           <div
