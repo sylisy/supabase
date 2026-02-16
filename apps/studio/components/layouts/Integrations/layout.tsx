@@ -1,7 +1,9 @@
 import { useRouter } from 'next/router'
 import { PropsWithChildren } from 'react'
 
+import { useIsNavigationV2Enabled } from 'components/interfaces/App/FeaturePreview/FeaturePreviewContext'
 import { useInstalledIntegrations } from 'components/interfaces/Integrations/Landing/useInstalledIntegrations'
+import { ProjectLayoutV2 } from 'components/layouts/NavigationV2/ProjectLayoutV2'
 import { ProjectLayout } from 'components/layouts/ProjectLayout'
 import AlertError from 'components/ui/AlertError'
 import { ProductMenu } from 'components/ui/ProductMenu'
@@ -13,11 +15,7 @@ import { withAuth } from 'hooks/misc/withAuth'
 import { Menu, Separator } from 'ui'
 import { GenericSkeletonLoader } from 'ui-patterns'
 
-/**
- * Layout component for the Integrations section
- * Provides sidebar navigation for integrations
- */
-const IntegrationsLayout = ({ children }: PropsWithChildren) => {
+const IntegrationsProductMenu = () => {
   const router = useRouter()
   const { data: project } = useSelectedProjectQuery()
   const { integrationsWrappers: showWrappers } = useIsFeatureEnabled(['integrations:wrappers'])
@@ -52,49 +50,66 @@ const IntegrationsLayout = ({ children }: PropsWithChildren) => {
   }))
 
   return (
+    <>
+      <ProductMenu
+        page={
+          page === 'integrations'
+            ? categoryParam
+              ? `integrations-${categoryParam}`
+              : 'integrations'
+            : page
+        }
+        menu={generateIntegrationsMenu({ projectRef: project?.ref, flags: { showWrappers } })}
+      />
+      <Separator />
+      <div className="px-4 py-6 md:px-6">
+        <Menu.Group
+          title={
+            <div className="flex flex-col space-y-2 uppercase font-mono">
+              <span>Installed</span>
+            </div>
+          }
+        />
+        {isLoading && <GenericSkeletonLoader />}
+        {isError && (
+          <AlertError
+            showIcon={false}
+            error={error}
+            subject="Failed to retrieve installed integrations"
+          />
+        )}
+        {isSuccess && (
+          <div>
+            {installedIntegrationItems.map((item) => (
+              <ProductMenuItem key={item.key} isActive={page === item.key} item={item} />
+            ))}
+          </div>
+        )}
+      </div>
+    </>
+  )
+}
+
+/**
+ * Layout component for the Integrations section
+ */
+const IntegrationsLayout = ({ children }: PropsWithChildren) => {
+  const isNavigationV2 = useIsNavigationV2Enabled()
+
+  if (isNavigationV2) {
+    return (
+      <ProjectLayoutV2 title="Integrations" product="Integrations" isBlocking={false}>
+        {children}
+      </ProjectLayoutV2>
+    )
+  }
+
+  return (
     <ProjectLayout
-      title={'Integrations'}
+      title="Integrations"
       product="Integrations"
       isBlocking={false}
-      productMenu={
-        <>
-          <ProductMenu
-            page={
-              page === 'integrations'
-                ? categoryParam
-                  ? `integrations-${categoryParam}`
-                  : 'integrations'
-                : page
-            }
-            menu={generateIntegrationsMenu({ projectRef: project?.ref, flags: { showWrappers } })}
-          />
-          <Separator />
-          <div className="px-4 py-6 md:px-6">
-            <Menu.Group
-              title={
-                <div className="flex flex-col space-y-2 uppercase font-mono">
-                  <span>Installed</span>
-                </div>
-              }
-            />
-            {isLoading && <GenericSkeletonLoader />}
-            {isError && (
-              <AlertError
-                showIcon={false}
-                error={error}
-                subject="Failed to retrieve installed integrations"
-              />
-            )}
-            {isSuccess && (
-              <div>
-                {installedIntegrationItems.map((item) => (
-                  <ProductMenuItem key={item.key} isActive={page === item.key} item={item} />
-                ))}
-              </div>
-            )}
-          </div>
-        </>
-      }
+      productMenu={<IntegrationsProductMenu />}
     >
       {children}
     </ProjectLayout>

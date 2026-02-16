@@ -59,7 +59,7 @@ export const DefaultLayoutV2 = ({ children }: PropsWithChildren<DefaultLayoutV2P
                   >
                     <AppSidebarV2 scope={scope} />
                   </ResizablePanel>
-                  <ResizableHandle withHandle className="hidden md:flex" />
+                  <ResizableHandle withHandle className="hidden md:flex bg-background" />
                   <ResizablePanel
                     id="panel-v2-main-content"
                     order={2}
