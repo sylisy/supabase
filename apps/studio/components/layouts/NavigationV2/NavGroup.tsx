@@ -57,7 +57,7 @@ export function NavGroup({ id, label, items, isCollapsible = true }: NavGroupPro
   }
 
   const content = (
-    <SidebarMenu className="gap-0">
+    <SidebarMenu className="gap-[2px]">
       {items.map((item) =>
         item.items && item.items.length > 0 ? (
           <Collapsible
@@ -87,7 +87,7 @@ export function NavGroup({ id, label, items, isCollapsible = true }: NavGroupPro
                 </SidebarMenuButton>
               </CollapsibleTrigger>
               <CollapsibleContent>
-                <SidebarMenuSub className="gap-0 ml-3 mr-0 px-3.5">
+                <SidebarMenuSub className="gap-[2px] ml-3 mr-0 px-3.5">
                   {item.items.map((subItem) => (
                     <SidebarMenuSubItem key={subItem.title}>
                       <SidebarMenuSubButton asChild isActive={subItem.isActive}>

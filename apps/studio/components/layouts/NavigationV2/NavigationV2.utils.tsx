@@ -28,6 +28,7 @@ interface DatabaseNavFlags {
   enablePgReplicate?: boolean
   showRoles?: boolean
   showWrappers?: boolean
+  pathname?: string
 }
 
 interface PlatformNavFlags {
@@ -36,12 +37,14 @@ interface PlatformNavFlags {
   storageEnabled?: boolean
   realtimeEnabled?: boolean
   authOverviewPageEnabled?: boolean
+  pathname?: string
 }
 
 interface OtherNavFlags {
   showReports?: boolean
   unifiedLogs?: boolean
   apiDocsSidePanel?: boolean
+  pathname?: string
 }
 
 export function generateDatabaseNavItems(
@@ -61,18 +64,33 @@ export function generateDatabaseNavItems(
     enablePgReplicate,
     showRoles,
     showWrappers,
+    pathname = '',
   } = flags || {}
+
+  const isSchemaActive =
+    pathname.includes('/database/schemas') ||
+    pathname.includes('/database/tables') ||
+    pathname.includes('/database/functions') ||
+    pathname.includes('/database/triggers') ||
+    pathname.includes('/database/types') ||
+    pathname.includes('/database/extensions') ||
+    pathname.includes('/database/indexes') ||
+    pathname.includes('/database/publications') ||
+    pathname.includes('/database/roles') ||
+    pathname.includes('/database/column-privileges')
 
   return [
     {
       title: 'Table Editor',
       url: isProjectBuilding ? buildingUrl : `/project/${ref}/editor`,
       icon: FileText,
+      isActive: pathname.includes('/editor'),
     },
     {
       title: 'SQL Editor',
       url: isProjectBuilding ? buildingUrl : `/project/${ref}/sql`,
       icon: Zap,
+      isActive: pathname.includes('/sql'),
     },
     {
       title: 'Schema',
@@ -82,18 +100,65 @@ export function generateDatabaseNavItems(
           ? `/project/${ref}/database/schemas`
           : `/project/${ref}/database/backups/scheduled`,
       icon: Network,
+      isActive: isSchemaActive,
       items: [
-        { title: 'Visualizer', url: `/project/${ref}/database/schemas` },
-        { title: 'Tables', url: `/project/${ref}/database/tables` },
-        { title: 'Functions', url: `/project/${ref}/database/functions` },
-        { title: 'Triggers', url: `/project/${ref}/database/triggers/data` },
-        { title: 'Enumerated Types', url: `/project/${ref}/database/types` },
-        { title: 'Extensions', url: `/project/${ref}/database/extensions` },
-        { title: 'Indexes', url: `/project/${ref}/database/indexes` },
-        { title: 'Publications', url: `/project/${ref}/database/publications` },
-        ...(showRoles ? [{ title: 'Roles', url: `/project/${ref}/database/roles` }] : []),
+        {
+          title: 'Visualizer',
+          url: `/project/${ref}/database/schemas`,
+          isActive: pathname.includes('/database/schemas'),
+        },
+        {
+          title: 'Tables',
+          url: `/project/${ref}/database/tables`,
+          isActive: pathname.includes('/database/tables'),
+        },
+        {
+          title: 'Functions',
+          url: `/project/${ref}/database/functions`,
+          isActive: pathname.includes('/database/functions'),
+        },
+        {
+          title: 'Triggers',
+          url: `/project/${ref}/database/triggers/data`,
+          isActive: pathname.includes('/database/triggers'),
+        },
+        {
+          title: 'Enumerated Types',
+          url: `/project/${ref}/database/types`,
+          isActive: pathname.includes('/database/types'),
+        },
+        {
+          title: 'Extensions',
+          url: `/project/${ref}/database/extensions`,
+          isActive: pathname.includes('/database/extensions'),
+        },
+        {
+          title: 'Indexes',
+          url: `/project/${ref}/database/indexes`,
+          isActive: pathname.includes('/database/indexes'),
+        },
+        {
+          title: 'Publications',
+          url: `/project/${ref}/database/publications`,
+          isActive: pathname.includes('/database/publications'),
+        },
+        ...(showRoles
+          ? [
+              {
+                title: 'Roles',
+                url: `/project/${ref}/database/roles`,
+                isActive: pathname.includes('/database/roles'),
+              },
+            ]
+          : []),
         ...(columnLevelPrivileges
-          ? [{ title: 'Column Privileges', url: `/project/${ref}/database/column-privileges` }]
+          ? [
+              {
+                title: 'Column Privileges',
+                url: `/project/${ref}/database/column-privileges`,
+                isActive: pathname.includes('/database/column-privileges'),
+              },
+            ]
           : []),
       ],
     },
@@ -104,6 +169,7 @@ export function generateDatabaseNavItems(
             url: `/project/${ref}/database/replication`,
             icon: Copy,
             label: enablePgReplicate ? 'New' : undefined,
+            isActive: pathname.includes('/database/replication'),
           },
         ]
       : []),
@@ -115,6 +181,7 @@ export function generateDatabaseNavItems(
               ? `/project/${ref}/database/backups/pitr`
               : `/project/${ref}/database/backups/scheduled`,
             icon: DatabaseBackup,
+            isActive: pathname.includes('/database/backups'),
           },
         ]
       : []),
@@ -122,11 +189,13 @@ export function generateDatabaseNavItems(
       title: 'Migrations',
       url: `/project/${ref}/database/migrations`,
       icon: ArrowRightLeft,
+      isActive: pathname.includes('/database/migrations'),
     },
     {
       title: 'Database Settings',
       url: `/project/${ref}/database/settings`,
       icon: Settings,
+      isActive: pathname.includes('/database/settings'),
     },
   ]
 }
@@ -145,7 +214,13 @@ export function generatePlatformNavItems(
     storageEnabled = true,
     realtimeEnabled = true,
     authOverviewPageEnabled = false,
+    pathname = '',
   } = flags || {}
+
+  const isAuthActive = pathname.includes('/auth')
+  const isStorageActive = pathname.includes('/storage')
+  const isFunctionsActive = pathname.includes('/functions')
+  const isRealtimeActive = pathname.includes('/realtime')
 
   return [
     ...(authEnabled
@@ -158,17 +233,50 @@ export function generatePlatformNavItems(
                 ? `/project/${ref}/auth/overview`
                 : `/project/${ref}/auth/users`,
             icon: Lock,
+            isActive: isAuthActive,
             items: [
-              { title: 'Users', url: `/project/${ref}/auth/users` },
-              { title: 'Policies', url: `/project/${ref}/auth/policies` },
+              {
+                title: 'Users',
+                url: `/project/${ref}/auth/users`,
+                isActive: pathname.includes('/auth/users'),
+              },
+              {
+                title: 'Policies',
+                url: `/project/${ref}/auth/policies`,
+                isActive: pathname.includes('/auth/policies'),
+              },
               ...(IS_PLATFORM
                 ? [
-                    { title: 'Providers', url: `/project/${ref}/auth/providers` },
-                    { title: 'Sessions', url: `/project/${ref}/auth/sessions` },
-                    { title: 'Rate Limits', url: `/project/${ref}/auth/rate-limits` },
-                    { title: 'Email Templates', url: `/project/${ref}/auth/templates` },
-                    { title: 'URL Configuration', url: `/project/${ref}/auth/url-configuration` },
-                    { title: 'Auth Hooks', url: `/project/${ref}/auth/hooks` },
+                    {
+                      title: 'Providers',
+                      url: `/project/${ref}/auth/providers`,
+                      isActive: pathname.includes('/auth/providers'),
+                    },
+                    {
+                      title: 'Sessions',
+                      url: `/project/${ref}/auth/sessions`,
+                      isActive: pathname.includes('/auth/sessions'),
+                    },
+                    {
+                      title: 'Rate Limits',
+                      url: `/project/${ref}/auth/rate-limits`,
+                      isActive: pathname.includes('/auth/rate-limits'),
+                    },
+                    {
+                      title: 'Email Templates',
+                      url: `/project/${ref}/auth/templates`,
+                      isActive: pathname.includes('/auth/templates'),
+                    },
+                    {
+                      title: 'URL Configuration',
+                      url: `/project/${ref}/auth/url-configuration`,
+                      isActive: pathname.includes('/auth/url-configuration'),
+                    },
+                    {
+                      title: 'Auth Hooks',
+                      url: `/project/${ref}/auth/hooks`,
+                      isActive: pathname.includes('/auth/hooks'),
+                    },
                   ]
                 : []),
             ],
@@ -181,12 +289,30 @@ export function generatePlatformNavItems(
             title: 'Storage',
             url: isProjectBuilding ? buildingUrl : `/project/${ref}/storage/files`,
             icon: HardDrive,
+            isActive: isStorageActive,
             items: [
-              { title: 'Buckets', url: `/project/${ref}/storage/files` },
+              {
+                title: 'Buckets',
+                url: `/project/${ref}/storage/files`,
+                isActive:
+                  pathname.includes('/storage/files') &&
+                  !pathname.includes('/storage/files/settings') &&
+                  !pathname.includes('/storage/files/policies'),
+              },
               ...(IS_PLATFORM
-                ? [{ title: 'Settings', url: `/project/${ref}/storage/files/settings` }]
+                ? [
+                    {
+                      title: 'Settings',
+                      url: `/project/${ref}/storage/files/settings`,
+                      isActive: pathname.includes('/storage/files/settings'),
+                    },
+                  ]
                 : []),
-              { title: 'Policies', url: `/project/${ref}/storage/files/policies` },
+              {
+                title: 'Policies',
+                url: `/project/${ref}/storage/files/policies`,
+                isActive: pathname.includes('/storage/files/policies'),
+              },
             ],
           },
         ]
@@ -197,9 +323,20 @@ export function generatePlatformNavItems(
             title: 'Edge Functions',
             url: isProjectBuilding ? buildingUrl : `/project/${ref}/functions`,
             icon: Globe,
+            isActive: isFunctionsActive,
             items: [
-              { title: 'Functions', url: `/project/${ref}/functions` },
-              { title: 'Secrets', url: `/project/${ref}/functions/secrets` },
+              {
+                title: 'Functions',
+                url: `/project/${ref}/functions`,
+                isActive:
+                  pathname === `/project/${ref}/functions` ||
+                  (pathname.includes('/functions') && !pathname.includes('/functions/secrets')),
+              },
+              {
+                title: 'Secrets',
+                url: `/project/${ref}/functions/secrets`,
+                isActive: pathname.includes('/functions/secrets'),
+              },
             ],
           },
         ]
@@ -210,11 +347,26 @@ export function generatePlatformNavItems(
             title: 'Realtime',
             url: isProjectBuilding ? buildingUrl : `/project/${ref}/realtime/inspector`,
             icon: Radio,
+            isActive: isRealtimeActive,
             items: [
-              { title: 'Inspector', url: `/project/${ref}/realtime/inspector` },
-              { title: 'Policies', url: `/project/${ref}/realtime/policies` },
+              {
+                title: 'Inspector',
+                url: `/project/${ref}/realtime/inspector`,
+                isActive: pathname.includes('/realtime/inspector'),
+              },
+              {
+                title: 'Policies',
+                url: `/project/${ref}/realtime/policies`,
+                isActive: pathname.includes('/realtime/policies'),
+              },
               ...(IS_PLATFORM
-                ? [{ title: 'Settings', url: `/project/${ref}/realtime/settings` }]
+                ? [
+                    {
+                      title: 'Settings',
+                      url: `/project/${ref}/realtime/settings`,
+                      isActive: pathname.includes('/realtime/settings'),
+                    },
+                  ]
                 : []),
             ],
           },
@@ -231,13 +383,14 @@ export function generateObservabilityNavItems(
   const isProjectBuilding = project?.status === PROJECT_STATUS.COMING_UP
   const buildingUrl = `/project/${ref}`
 
-  const { showReports = true, unifiedLogs = false } = flags || {}
+  const { showReports = true, unifiedLogs = false, pathname = '' } = flags || {}
 
   return [
     {
       title: 'Advisors',
       url: isProjectBuilding ? buildingUrl : `/project/${ref}/advisors/security`,
       icon: Lightbulb,
+      isActive: pathname.includes('/advisors'),
     },
     ...(IS_PLATFORM && showReports
       ? [
@@ -245,6 +398,7 @@ export function generateObservabilityNavItems(
             title: 'Observability',
             url: isProjectBuilding ? buildingUrl : `/project/${ref}/observability`,
             icon: Telescope,
+            isActive: pathname.includes('/observability'),
           },
         ]
       : []),
@@ -256,6 +410,7 @@ export function generateObservabilityNavItems(
           ? `/project/${ref}/logs`
           : `/project/${ref}/logs/explorer`,
       icon: ScrollText,
+      isActive: pathname.includes('/logs'),
     },
   ]
 }
@@ -268,7 +423,7 @@ export function generateIntegrationsNavItems(
   const isProjectBuilding = project?.status === PROJECT_STATUS.COMING_UP
   const buildingUrl = `/project/${ref}`
 
-  const { apiDocsSidePanel = false } = flags || {}
+  const { apiDocsSidePanel = false, pathname = '' } = flags || {}
 
   return [
     ...(apiDocsSidePanel
@@ -277,6 +432,7 @@ export function generateIntegrationsNavItems(
             title: 'API Docs',
             url: isProjectBuilding ? buildingUrl : `/project/${ref}/integrations/data_api/docs`,
             icon: FileText,
+            isActive: pathname.includes('/integrations/data_api/docs'),
           },
         ]
       : []),
@@ -284,6 +440,7 @@ export function generateIntegrationsNavItems(
       title: 'Integrations',
       url: isProjectBuilding ? buildingUrl : `/project/${ref}/integrations`,
       icon: Blocks,
+      isActive: pathname.includes('/integrations') && !pathname.includes('/integrations/data_api/docs'),
     },
   ]
 }

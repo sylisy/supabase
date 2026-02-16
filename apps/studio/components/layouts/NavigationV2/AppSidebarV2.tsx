@@ -133,14 +133,17 @@ export function AppSidebarV2({ scope }: AppSidebarV2Props = {}) {
           }))
       : []
 
+  const isProjectHome =
+    router.pathname === `/project/[ref]` || router.pathname === `/project/${ref}`
+  const isProjectSettings = router.pathname.includes('/settings')
+
   const projectItems = isProjectScope
     ? [
         {
           title: 'Home',
           url: ref ? `/project/${ref}` : '/project',
-          icon: ({ className }: { className: string }) => (
-            <Home strokeWidth={1.5} className={className} />
-          ),
+          icon: Home,
+          isActive: isProjectHome,
         },
         {
           title: 'Project Settings',
@@ -151,7 +154,11 @@ export function AppSidebarV2({ scope }: AppSidebarV2Props = {}) {
                 ? `/project/${ref}/settings/log-drains`
                 : '/project',
           icon: Settings,
-          items: projectSettingsItems,
+          items: projectSettingsItems.map((item) => ({
+            ...item,
+            isActive: router.pathname.includes(item.url),
+          })),
+          isActive: isProjectSettings,
         },
       ]
     : []
@@ -166,6 +173,7 @@ export function AppSidebarV2({ scope }: AppSidebarV2Props = {}) {
           enablePgReplicate,
           showRoles,
           showWrappers,
+          pathname: router.pathname,
         })
       : []
 
@@ -177,6 +185,7 @@ export function AppSidebarV2({ scope }: AppSidebarV2Props = {}) {
           storageEnabled,
           realtimeEnabled,
           authOverviewPageEnabled,
+          pathname: router.pathname,
         })
       : []
 
@@ -185,6 +194,7 @@ export function AppSidebarV2({ scope }: AppSidebarV2Props = {}) {
       ? generateObservabilityNavItems(ref, project, {
           showReports,
           unifiedLogs: isUnifiedLogsEnabled,
+          pathname: router.pathname,
         })
       : []
 
@@ -197,12 +207,19 @@ export function AppSidebarV2({ scope }: AppSidebarV2Props = {}) {
             title: 'Explore',
             url: isProjectBuilding ? `/project/${ref}` : `/project/${ref}/integrations`,
             icon: Compass,
+            isActive:
+              router.pathname === `/project/[ref]/integrations` ||
+              (router.pathname.includes('/integrations') &&
+                !installedIntegrations.some((int) =>
+                  router.pathname.includes(`/integrations/${int.id}`)
+                )),
           },
           ...installedIntegrations.map((integration) => ({
             title: integration.name,
             label: integration.status,
             url: `/project/${ref}/integrations/${integration.id}/overview`,
             icon: Blocks,
+            isActive: router.pathname.includes(`/integrations/${integration.id}`),
           })),
         ]
       : []
@@ -314,11 +331,11 @@ export function AppSidebarV2({ scope }: AppSidebarV2Props = {}) {
           </SidebarContent>
           <div
             aria-hidden
-            className="pointer-events-none absolute inset-x-0 top-0 z-10 h-6 bg-gradient-to-b from-sidebar to-transparent"
+            className="pointer-events-none absolute inset-x-0 top-0 z-10 h-4 bg-gradient-to-b from-sidebar to-transparent"
           />
           <div
             aria-hidden
-            className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-6 bg-gradient-to-t from-sidebar to-transparent"
+            className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-4 bg-gradient-to-t from-sidebar to-transparent"
           />
         </div>
         <SidebarFooter>{IS_PLATFORM && <NavUser />}</SidebarFooter>

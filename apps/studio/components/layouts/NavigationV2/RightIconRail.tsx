@@ -3,7 +3,16 @@ import { SqlEditor } from 'icons'
 import { HelpCircle, Lightbulb } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useSidebarManagerSnapshot } from 'state/sidebar-manager-state'
-import { AiIconAnimation, cn, ResizableHandle, ResizablePanel, ResizablePanelGroup } from 'ui'
+import {
+  AiIconAnimation,
+  cn,
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from 'ui'
 
 import { SIDEBAR_KEYS } from '../ProjectLayout/LayoutSidebar/LayoutSidebarProvider'
 
@@ -16,7 +25,7 @@ interface RailItem {
 const RAIL_ITEMS: RailItem[] = [
   {
     id: SIDEBAR_KEYS.AI_ASSISTANT,
-    label: 'AI',
+    label: 'Assistant',
     icon: ({ isActive }) => (
       <AiIconAnimation
         allowHoverEffect={false}
@@ -37,7 +46,7 @@ const RAIL_ITEMS: RailItem[] = [
   },
   {
     id: SIDEBAR_KEYS.SUPPORT_PANEL,
-    label: 'Support',
+    label: 'Help & Support',
     icon: () => <HelpCircle size={16} strokeWidth={1.5} />,
   },
 ]
@@ -56,21 +65,26 @@ function RightIconRail() {
           const isActive = activeSidebar?.id === item.id
 
           return (
-            <button
-              key={item.id}
-              type="button"
-              aria-label={item.label}
-              aria-pressed={isActive}
-              onClick={() => toggleSidebar(item.id)}
-              className={cn(
-                'inline-flex size-8 items-center justify-center rounded-md transition-colors',
-                isActive
-                  ? 'bg-surface-200 text-foreground'
-                  : 'hover:bg-surface-200 hover:text-foreground'
-              )}
-            >
-              {item.icon({ isActive })}
-            </button>
+            <Tooltip>
+              <TooltipTrigger>
+                <button
+                  key={item.id}
+                  type="button"
+                  aria-label={item.label}
+                  aria-pressed={isActive}
+                  onClick={() => toggleSidebar(item.id)}
+                  className={cn(
+                    'inline-flex size-8 items-center justify-center rounded-md transition-colors',
+                    isActive
+                      ? 'bg-foreground text-background [&_svg]:text-background'
+                      : 'hover:bg-surface-200 hover:text-foreground'
+                  )}
+                >
+                  {item.icon({ isActive })}
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="left">{item.label}</TooltipContent>
+            </Tooltip>
           )
         })}
       </nav>
