@@ -31,18 +31,18 @@ import { useTableEditorStateSnapshot } from 'state/table-editor'
 import { useTableEditorTableStateSnapshot } from 'state/table-editor-table'
 import {
   Button,
+  cn,
+  copyToClipboard,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
   Separator,
-  cn,
-  copyToClipboard,
 } from 'ui'
 
 import { ExportDialog } from './ExportDialog'
-import { formatRowsForCSV } from './Header.utils'
 import { FilterPopover } from './filter/FilterPopover'
+import { formatRowsForCSV } from './Header.utils'
 import { SortPopover } from './sort/SortPopover'
 
 export type HeaderProps = {
@@ -240,7 +240,6 @@ const RowHeader = ({ tableQueriesEnabled = true }: RowHeaderProps) => {
   const { data } = useTableRowsQuery(
     {
       projectRef: project?.ref,
-      connectionString: project?.connectionString,
       tableId: snap.table.id,
       sorts,
       filters,
@@ -254,7 +253,6 @@ const RowHeader = ({ tableQueriesEnabled = true }: RowHeaderProps) => {
   const { data: countData } = useTableRowsCountQuery(
     {
       projectRef: project?.ref,
-      connectionString: project?.connectionString,
       tableId: snap.table.id,
       filters,
       enforceExactCount: snap.enforceExactCount,

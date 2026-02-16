@@ -1,6 +1,7 @@
 import { QueryClient, useQuery } from '@tanstack/react-query'
-
 import { UseCustomQueryOptions } from 'types'
+
+import { useConnectionStringForReadOps } from '../read-replicas/replicas-query'
 import { executeSql, ExecuteSqlError } from '../sql/execute-sql-query'
 import { databaseKeys } from './keys'
 
@@ -127,13 +128,20 @@ export type ForeignKeyConstraintsData = Awaited<ReturnType<typeof getForeignKeyC
 export type ForeignKeyConstraintsError = ExecuteSqlError
 
 export const useForeignKeyConstraintsQuery = <TData = ForeignKeyConstraintsData>(
-  { projectRef, connectionString, schema }: ForeignKeyConstraintsVariables,
+  {
+    projectRef,
+    connectionString: connectionStringOverride,
+    schema,
+  }: ForeignKeyConstraintsVariables,
   {
     enabled = true,
     ...options
   }: UseCustomQueryOptions<ForeignKeyConstraintsData, ForeignKeyConstraintsError, TData> = {}
-) =>
-  useQuery<ForeignKeyConstraintsData, ForeignKeyConstraintsError, TData>({
+) => {
+  const { connectionString: connectionStringReadOps } = useConnectionStringForReadOps()
+  const connectionString = connectionStringOverride || connectionStringReadOps
+
+  return useQuery<ForeignKeyConstraintsData, ForeignKeyConstraintsError, TData>({
     queryKey: databaseKeys.foreignKeyConstraints(projectRef, schema),
     queryFn: ({ signal }) =>
       getForeignKeyConstraints({ projectRef, connectionString, schema }, signal),
@@ -144,6 +152,7 @@ export const useForeignKeyConstraintsQuery = <TData = ForeignKeyConstraintsData>
       schema.length > 0,
     ...options,
   })
+}
 
 export function prefetchForeignKeyConstraints(
   client: QueryClient,

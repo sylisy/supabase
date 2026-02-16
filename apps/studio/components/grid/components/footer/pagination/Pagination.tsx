@@ -1,7 +1,4 @@
 import { THRESHOLD_COUNT } from '@supabase/pg-meta/src/sql/studio/get-count-estimate'
-import { ArrowLeft, ArrowRight, HelpCircle, Loader2 } from 'lucide-react'
-import { useEffect, useState } from 'react'
-
 import { keepPreviousData } from '@tanstack/react-query'
 import { useParams } from 'common'
 import { useTableFilter } from 'components/grid/hooks/useTableFilter'
@@ -12,12 +9,15 @@ import { useTableRowsCountQuery } from 'data/table-rows/table-rows-count-query'
 import { useTableRowsQuery } from 'data/table-rows/table-rows-query'
 import { useSelectedProjectQuery } from 'hooks/misc/useSelectedProject'
 import { RoleImpersonationState } from 'lib/role-impersonation'
+import { ArrowLeft, ArrowRight, HelpCircle, Loader2 } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { useRoleImpersonationStateSnapshot } from 'state/role-impersonation-state'
 import { useTableEditorStateSnapshot } from 'state/table-editor'
 import { useTableEditorTableStateSnapshot } from 'state/table-editor-table'
 import { Button, Tooltip, TooltipContent, TooltipTrigger } from 'ui'
 import { Input } from 'ui-patterns/DataInputs/Input'
 import ConfirmationModal from 'ui-patterns/Dialogs/ConfirmationModal'
+
 import { DropdownControl } from '../../common/DropdownControl'
 import { formatEstimatedCount } from './Pagination.utils'
 
@@ -53,7 +53,7 @@ type PaginationProps = {
 }
 
 export const Pagination = ({ enableForeignRowsQuery = true }: PaginationProps) => {
-  const { id: _id } = useParams()
+  const { ref, id: _id } = useParams()
   const id = _id ? Number(_id) : undefined
 
   const { sorts } = useTableSort()
@@ -90,7 +90,6 @@ export const Pagination = ({ enableForeignRowsQuery = true }: PaginationProps) =
   } = useTableRowsCountQuery(
     {
       projectRef: project?.ref,
-      connectionString: project?.connectionString,
       tableId: snap.table.id,
       filters,
       enforceExactCount: snap.enforceExactCount,
@@ -111,7 +110,6 @@ export const Pagination = ({ enableForeignRowsQuery = true }: PaginationProps) =
   const { data: rowsData, isPending: isLoadingRows } = useTableRowsQuery(
     {
       projectRef: project?.ref,
-      connectionString: project?.connectionString,
       tableId: id,
       sorts,
       filters,

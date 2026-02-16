@@ -118,7 +118,6 @@ export const Grid = memo(
 
       const { data } = useForeignKeyConstraintsQuery({
         projectRef: project?.ref,
-        connectionString: project?.connectionString,
         schema: table?.schema ?? undefined,
       })
 

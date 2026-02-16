@@ -1,9 +1,10 @@
 import { useQuery } from '@tanstack/react-query'
-
 import type { components } from 'data/api'
 import { get, handleError } from 'data/fetchers'
 import type { ResponseError, UseCustomQueryOptions } from 'types'
+
 import { replicaKeys } from './keys'
+import { useSelectedProjectQuery } from '@/hooks/misc/useSelectedProject'
 
 export const MAX_REPLICAS_BELOW_XL = 2
 export const MAX_REPLICAS_ABOVE_XL = 5
@@ -54,4 +55,31 @@ export const usePrimaryDatabase = ({ projectRef }: { projectRef?: string }) => {
   } = useReadReplicasQuery({ projectRef })
   const primaryDatabase = databases.find((x) => x.identifier === projectRef)
   return { database: primaryDatabase, error, isLoading, isError, isSuccess }
+}
+
+/**
+ * [Joshen] JFYI this is logic here can and should be optimized
+ * Use connection string of read replica if available, otherwise default to project's (primary)
+ * If multiple read replicas available, (naively) prioritise replica in the same region as primary
+ * to minimize any latency. Otherwise just use the first available read replica
+ */
+export const useConnectionStringForReadOps = () => {
+  const { data: project, isSuccess: isSuccessProject } = useSelectedProjectQuery()
+  const { data: databases = [], isSuccess: isSuccessDatabases } = useReadReplicasQuery({
+    projectRef: project?.ref,
+  })
+
+  const readReplicas = databases.filter((x) => x.identifier !== project?.ref)
+  const readReplica = databases.some((x) => x.region === project?.region)
+    ? databases.find((x) => x.region === project?.region)
+    : readReplicas[0]
+
+  if (!isSuccessProject || !isSuccessDatabases)
+    return { connectionString: undefined, type: undefined }
+
+  return {
+    type: !!readReplica ? 'replica' : 'primary',
+    identifier: !!readReplica ? readReplica.identifier : project.ref,
+    connectionString: !!readReplica ? readReplica.connectionString : project.connectionString,
+  }
 }

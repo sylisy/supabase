@@ -40,7 +40,7 @@ export const SupabaseGrid = ({
     gridProps?: GridProps
   }
 >) => {
-  const { id: _id } = useParams()
+  const { ref, id: _id } = useParams()
   const tableId = _id ? Number(_id) : undefined
 
   const isQueueOperationsEnabled = useIsQueueOperationsEnabled()
@@ -76,7 +76,6 @@ export const SupabaseGrid = ({
   } = useTableRowsQuery(
     {
       projectRef: project?.ref,
-      connectionString: project?.connectionString,
       tableId,
       sorts,
       filters,
