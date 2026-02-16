@@ -1,13 +1,13 @@
-import { useRouter } from 'next/router'
-import { PropsWithChildren } from 'react'
-
 import { useParams } from 'common'
 import { AppBannerWrapper } from 'components/interfaces/App/AppBannerWrapper'
+import { useRouter } from 'next/router'
+import { PropsWithChildren } from 'react'
 import { SidebarInset, SidebarProvider } from 'ui'
-import { AppSidebarV2 } from './AppSidebarV2'
-import { RightRailLayout } from './RightIconRail'
+
 import { LayoutSidebarProvider } from '../ProjectLayout/LayoutSidebar/LayoutSidebarProvider'
 import { ProjectContextProvider } from '../ProjectLayout/ProjectContext'
+import { AppSidebarV2 } from './AppSidebarV2'
+import { RightRailLayout } from './RightIconRail'
 
 export interface DefaultLayoutV2Props {
   headerTitle?: string
@@ -28,17 +28,18 @@ export interface DefaultLayoutV2Props {
 export const DefaultLayoutV2 = ({ children }: PropsWithChildren<DefaultLayoutV2Props>) => {
   const { ref } = useParams()
   const router = useRouter()
+  const scope = router.pathname.startsWith('/project') ? 'project' : 'organization'
 
   return (
     <ProjectContextProvider projectRef={ref}>
       <LayoutSidebarProvider>
-        <div className="flex flex-col h-screen w-screen">
+        <div className="flex h-screen w-screen flex-col overflow-hidden">
           <AppBannerWrapper />
           <RightRailLayout>
-            <SidebarProvider defaultOpen={true}>
-              {!router.pathname.startsWith('/account') && <AppSidebarV2 />}
-              <SidebarInset>
-                <div className="h-full overflow-y-auto">{children}</div>
+            <SidebarProvider defaultOpen={true} className="h-full min-h-0 overflow-hidden">
+              {!router.pathname.startsWith('/account') && <AppSidebarV2 scope={scope} />}
+              <SidebarInset className="h-full min-h-0 overflow-hidden">
+                <div className="flex h-full min-h-0 flex-1 overflow-hidden">{children}</div>
               </SidebarInset>
             </SidebarProvider>
           </RightRailLayout>

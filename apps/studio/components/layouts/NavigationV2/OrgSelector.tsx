@@ -1,29 +1,28 @@
+import { useParams } from 'common'
+import PartnerIcon from 'components/ui/PartnerIcon'
+import { useOrganizationsQuery } from 'data/organizations/organizations-query'
+import { useOrgProjectsInfiniteQuery } from 'data/projects/org-projects-infinite-query'
+import { useIsFeatureEnabled } from 'hooks/misc/useIsFeatureEnabled'
+import { useSelectedOrganizationQuery } from 'hooks/misc/useSelectedOrganization'
 import { Boxes, Check, ChevronsUpDown, Plus } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
-
-import { useParams } from 'common'
-import PartnerIcon from 'components/ui/PartnerIcon'
-import { useOrganizationsQuery } from 'data/organizations/organizations-query'
-import { useIsFeatureEnabled } from 'hooks/misc/useIsFeatureEnabled'
-import { useSelectedOrganizationQuery } from 'hooks/misc/useSelectedOrganization'
 import {
+  Command_Shadcn_,
   CommandEmpty_Shadcn_,
   CommandGroup_Shadcn_,
   CommandInput_Shadcn_,
   CommandItem_Shadcn_,
   CommandList_Shadcn_,
   CommandSeparator_Shadcn_,
-  Command_Shadcn_,
+  Popover_Shadcn_,
   PopoverContent_Shadcn_,
   PopoverTrigger_Shadcn_,
-  Popover_Shadcn_,
   ScrollArea,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  cn,
 } from 'ui'
 import { ShimmeringLoader } from 'ui-patterns/ShimmeringLoader'
 
@@ -37,13 +36,24 @@ export function OrgSelector() {
   const [open, setOpen] = useState(false)
 
   const slug = selectedOrganization?.slug
+  const selectedOrgInitial = selectedOrganization?.name?.trim().charAt(0).toUpperCase() || 'O'
+  const { data: projects } = useOrgProjectsInfiniteQuery(
+    { slug, limit: 1 },
+    { enabled: Boolean(slug) }
+  )
+
+  const numProjects = projects?.pages[0]?.pagination.count
+  const projectsLabel =
+    typeof numProjects === 'number'
+      ? `${numProjects} project${numProjects === 1 ? '' : 's'}`
+      : 'No projects'
 
   if (isLoadingOrganizations) {
     return (
       <SidebarMenu>
         <SidebarMenuItem>
           <div className="px-2 py-2">
-            <ShimmeringLoader className="w-full py-2" />
+            <ShimmeringLoader className="w-full py-3" />
           </div>
         </SidebarMenuItem>
       </SidebarMenu>
@@ -56,16 +66,25 @@ export function OrgSelector() {
         <Popover_Shadcn_ open={open} onOpenChange={setOpen} modal={false}>
           <PopoverTrigger_Shadcn_ asChild>
             <SidebarMenuButton
-              className={cn(
-                'data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground',
-                'h-8'
-              )}
+              size="lg"
+              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground gap-3 h-auto text-left group px-2"
             >
-              <Boxes size={14} strokeWidth={1.5} className="text-foreground-lighter" />
-              <span className="truncate text-xs text-foreground-light">
-                {selectedOrganization?.name ?? 'Select organization'}
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded border bg-surface-100 text-xs font-medium text-foreground-lighter">
+                {selectedOrgInitial}
               </span>
-              <ChevronsUpDown className="ml-auto size-3.5 text-foreground-lighter" />
+              <div className="text-left min-w-0">
+                <div className="truncate text-foreground font-medium">
+                  {selectedOrganization?.name ?? 'Select organization'}
+                </div>
+                <div className="flex items-center gap-1 truncate text-foreground-light">
+                  <Boxes size={12} />
+                  <span>{projectsLabel}</span>
+                </div>
+              </div>
+              <ChevronsUpDown
+                strokeWidth={1.5}
+                className="ml-auto text-foreground-lighter hidden group-hover:block !w-4 !h-4"
+              />
             </SidebarMenuButton>
           </PopoverTrigger_Shadcn_>
           <PopoverContent_Shadcn_ className="p-0" side="bottom" align="start">

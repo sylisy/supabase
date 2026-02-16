@@ -114,7 +114,7 @@ export const ProjectLayoutV2 = forwardRef<HTMLDivElement, PropsWithChildren<Proj
           <meta name="description" content="Supabase Studio" />
         </Head>
         <main
-          className="h-full flex flex-col flex-1 w-full overflow-y-auto overflow-x-hidden @container"
+          className="@container flex h-full min-h-0 w-full flex-1 flex-col overflow-x-hidden overflow-y-auto"
           ref={combinedRef}
         >
           {showPausedState ? (

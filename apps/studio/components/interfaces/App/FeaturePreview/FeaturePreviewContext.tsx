@@ -116,6 +116,7 @@ export const useIsTableFilterBarEnabled = () => {
 }
 
 export const useIsNavigationV2Enabled = () => {
+  return true
   const { flags } = useFeaturePreviewContext()
   return flags[LOCAL_STORAGE_KEYS.UI_PREVIEW_NAVIGATION_V2]
 }

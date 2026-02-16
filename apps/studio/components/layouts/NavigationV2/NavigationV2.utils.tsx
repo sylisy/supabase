@@ -1,27 +1,24 @@
-import type { NavGroupItem } from './NavGroup'
 import type { Project } from 'data/projects/project-detail-query'
 import { IS_PLATFORM, PROJECT_STATUS } from 'lib/constants'
 import {
   ArrowRightLeft,
   Blocks,
-  Compass,
   Copy,
   DatabaseBackup,
   FileText,
-  Gauge,
   Globe,
   HardDrive,
   Lightbulb,
-  List,
   Lock,
   Network,
   Radio,
   ScrollText,
   Settings,
   Telescope,
-  TrendingUp,
   Zap,
 } from 'lucide-react'
+
+import type { NavGroupItem } from './NavGroup'
 
 interface DatabaseNavFlags {
   pgNetExtensionExists?: boolean
@@ -78,7 +75,7 @@ export function generateDatabaseNavItems(
       icon: Zap,
     },
     {
-      title: 'Schema Visualizer',
+      title: 'Schema',
       url: isProjectBuilding
         ? buildingUrl
         : isProjectActive
@@ -86,6 +83,7 @@ export function generateDatabaseNavItems(
           : `/project/${ref}/database/backups/scheduled`,
       icon: Network,
       items: [
+        { title: 'Visualizer', url: `/project/${ref}/database/schemas` },
         { title: 'Tables', url: `/project/${ref}/database/tables` },
         { title: 'Functions', url: `/project/${ref}/database/functions` },
         { title: 'Triggers', url: `/project/${ref}/database/triggers/data` },
@@ -93,9 +91,7 @@ export function generateDatabaseNavItems(
         { title: 'Extensions', url: `/project/${ref}/database/extensions` },
         { title: 'Indexes', url: `/project/${ref}/database/indexes` },
         { title: 'Publications', url: `/project/${ref}/database/publications` },
-        ...(showRoles
-          ? [{ title: 'Roles', url: `/project/${ref}/database/roles` }]
-          : []),
+        ...(showRoles ? [{ title: 'Roles', url: `/project/${ref}/database/roles` }] : []),
         ...(columnLevelPrivileges
           ? [{ title: 'Column Privileges', url: `/project/${ref}/database/column-privileges` }]
           : []),
@@ -185,6 +181,13 @@ export function generatePlatformNavItems(
             title: 'Storage',
             url: isProjectBuilding ? buildingUrl : `/project/${ref}/storage/files`,
             icon: HardDrive,
+            items: [
+              { title: 'Buckets', url: `/project/${ref}/storage/files` },
+              ...(IS_PLATFORM
+                ? [{ title: 'Settings', url: `/project/${ref}/storage/files/settings` }]
+                : []),
+              { title: 'Policies', url: `/project/${ref}/storage/files/policies` },
+            ],
           },
         ]
       : []),
@@ -194,6 +197,10 @@ export function generatePlatformNavItems(
             title: 'Edge Functions',
             url: isProjectBuilding ? buildingUrl : `/project/${ref}/functions`,
             icon: Globe,
+            items: [
+              { title: 'Functions', url: `/project/${ref}/functions` },
+              { title: 'Secrets', url: `/project/${ref}/functions/secrets` },
+            ],
           },
         ]
       : []),
@@ -203,6 +210,13 @@ export function generatePlatformNavItems(
             title: 'Realtime',
             url: isProjectBuilding ? buildingUrl : `/project/${ref}/realtime/inspector`,
             icon: Radio,
+            items: [
+              { title: 'Inspector', url: `/project/${ref}/realtime/inspector` },
+              { title: 'Policies', url: `/project/${ref}/realtime/policies` },
+              ...(IS_PLATFORM
+                ? [{ title: 'Settings', url: `/project/${ref}/realtime/settings` }]
+                : []),
+            ],
           },
         ]
       : []),
@@ -261,9 +275,7 @@ export function generateIntegrationsNavItems(
       ? [
           {
             title: 'API Docs',
-            url: isProjectBuilding
-              ? buildingUrl
-              : `/project/${ref}/integrations/data_api/docs`,
+            url: isProjectBuilding ? buildingUrl : `/project/${ref}/integrations/data_api/docs`,
             icon: FileText,
           },
         ]

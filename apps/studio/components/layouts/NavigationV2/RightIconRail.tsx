@@ -1,9 +1,9 @@
 import { Bot, Lightbulb, PenLine, type LucideIcon } from 'lucide-react'
 import type { ReactNode } from 'react'
-
 import { useSidebarManagerSnapshot } from 'state/sidebar-manager-state'
-import { SIDEBAR_KEYS } from '../ProjectLayout/LayoutSidebar/LayoutSidebarProvider'
 import { cn } from 'ui'
+
+import { SIDEBAR_KEYS } from '../ProjectLayout/LayoutSidebar/LayoutSidebarProvider'
 
 interface RailItem {
   id: string
@@ -22,7 +22,7 @@ function RightIconRail() {
 
   return (
     <aside className="bg-dash-sidebar text-foreground-lighter border-default flex w-12 shrink-0 border-l">
-      <nav className="flex flex-1 flex-col items-center gap-1 py-2 pt-3">
+      <nav className="flex flex-1 flex-col items-center justify-center gap-1 py-2 pt-3">
         {RAIL_ITEMS.map((item) => {
           const isActive = activeSidebar?.id === item.id
 
@@ -63,8 +63,8 @@ function RightSidebarPanel() {
 
 export function RightRailLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="flex flex-1 overflow-hidden">
-      <div className="min-w-0 flex-1">{children}</div>
+    <div className="flex min-h-0 flex-1 overflow-hidden">
+      <div className="min-h-0 min-w-0 flex-1">{children}</div>
 
       <div className="hidden md:flex md:shrink-0">
         <RightSidebarPanel />

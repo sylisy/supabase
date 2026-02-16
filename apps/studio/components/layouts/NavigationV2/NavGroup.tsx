@@ -1,8 +1,7 @@
-import { ChevronRight } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
+import { ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import { isValidElement, ReactNode } from 'react'
-
 import {
   Collapsible_Shadcn_ as Collapsible,
   CollapsibleContent_Shadcn_ as CollapsibleContent,
@@ -38,7 +37,7 @@ export interface NavGroupProps {
 export function NavGroup({ label, items }: NavGroupProps) {
   return (
     <SidebarGroup>
-      {label && <SidebarGroupLabel>{label}</SidebarGroupLabel>}
+      {label && <SidebarGroupLabel className="text-foreground-lighter">{label}</SidebarGroupLabel>}
       <SidebarMenu>
         {items.map((item) =>
           item.items && item.items.length > 0 ? (
@@ -50,7 +49,11 @@ export function NavGroup({ label, items }: NavGroupProps) {
             >
               <SidebarMenuItem>
                 <CollapsibleTrigger asChild>
-                  <SidebarMenuButton tooltip={item.title} isActive={item.isActive}>
+                  <SidebarMenuButton
+                    tooltip={item.title}
+                    isActive={item.isActive}
+                    className="gap-3 text-foreground-light"
+                  >
                     <NavItemIcon icon={item.icon} />
                     <span>{item.title}</span>
                     {item.label && (
@@ -58,7 +61,11 @@ export function NavGroup({ label, items }: NavGroupProps) {
                         {item.label}
                       </span>
                     )}
-                    <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                    <ChevronRight
+                      size={14}
+                      strokeWidth={1.5}
+                      className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 text-foreground-lighter hidden !w-4 !h-4 group-hover:block"
+                    />
                   </SidebarMenuButton>
                 </CollapsibleTrigger>
                 <CollapsibleContent>
@@ -78,7 +85,12 @@ export function NavGroup({ label, items }: NavGroupProps) {
             </Collapsible>
           ) : (
             <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton tooltip={item.title} isActive={item.isActive} asChild>
+              <SidebarMenuButton
+                tooltip={item.title}
+                isActive={item.isActive}
+                asChild
+                className="gap-3 text-foreground-light"
+              >
                 <Link href={item.url}>
                   <NavItemIcon icon={item.icon} />
                   <span>{item.title}</span>
@@ -107,5 +119,5 @@ function NavItemIcon({ icon }: { icon?: LucideIcon | ReactNode }) {
 
   // Otherwise it's a component reference (function or forwardRef) - render it
   const IconComponent = icon as LucideIcon
-  return <IconComponent size={16} />
+  return <IconComponent size={14} strokeWidth={1.5} />
 }
