@@ -96,7 +96,7 @@ export function RightRailLayout({ children }: { children: ReactNode }) {
   const showRightSidebar = !isMobile && activeSidebar?.component !== undefined
 
   return (
-    <div className="flex min-h-0 flex-1 overflow-hidden bg-background">
+    <div className="flex min-h-0 flex-1 overflow-hidden">
       {showRightSidebar ? (
         <ResizablePanelGroup
           direction="horizontal"
@@ -111,7 +111,7 @@ export function RightRailLayout({ children }: { children: ReactNode }) {
             defaultSize={100 - RIGHT_SIDEBAR_DEFAULT_SIZE_PERCENTAGE}
             className="h-full min-h-0 min-w-0 overflow-hidden"
           >
-            <div className="min-h-0 min-w-0 h-full bg-background">{children}</div>
+            <div className="min-h-0 min-w-0 h-full">{children}</div>
           </ResizablePanel>
           <ResizableHandle withHandle className="hidden md:flex bg-background" />
           <ResizablePanel
