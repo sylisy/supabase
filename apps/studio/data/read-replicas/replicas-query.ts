@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
+import { useFeatureFlags, useFlag } from 'common'
 import type { components } from 'data/api'
 import { get, handleError } from 'data/fetchers'
 import type { ResponseError, UseCustomQueryOptions } from 'types'
@@ -64,6 +65,9 @@ export const usePrimaryDatabase = ({ projectRef }: { projectRef?: string }) => {
  * to minimize any latency. Otherwise just use the first available read replica
  */
 export const useConnectionStringForReadOps = () => {
+  const { hasLoaded: flagsLoaded } = useFeatureFlags()
+  const defaultToReadReplicaConnectionString = useFlag('defaultToReadReplicaConnectionString')
+
   const { data: project, isSuccess: isSuccessProject } = useSelectedProjectQuery()
   const { data: databases = [], isSuccess: isSuccessDatabases } = useReadReplicasQuery({
     projectRef: project?.ref,
@@ -74,8 +78,13 @@ export const useConnectionStringForReadOps = () => {
     ? databases.find((x) => x.region === project?.region)
     : readReplicas[0]
 
-  if (!isSuccessProject || !isSuccessDatabases)
+  if (!isSuccessProject || !isSuccessDatabases || !flagsLoaded) {
     return { connectionString: undefined, type: undefined }
+  }
+
+  if (!defaultToReadReplicaConnectionString) {
+    return { type: 'primary', identifier: project.ref, connectionString: project.connectionString }
+  }
 
   return {
     type: !!readReplica ? 'replica' : 'primary',

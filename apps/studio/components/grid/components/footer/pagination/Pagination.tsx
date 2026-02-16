@@ -53,7 +53,7 @@ type PaginationProps = {
 }
 
 export const Pagination = ({ enableForeignRowsQuery = true }: PaginationProps) => {
-  const { ref, id: _id } = useParams()
+  const { id: _id } = useParams()
   const id = _id ? Number(_id) : undefined
 
   const { sorts } = useTableSort()
