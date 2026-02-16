@@ -1,4 +1,13 @@
 import type { Project } from 'data/projects/project-detail-query'
+import {
+  Auth as AuthIcon,
+  EdgeFunctions as EdgeFunctionsIcon,
+  Logs as LogsIcon,
+  Realtime as RealtimeIcon,
+  SqlEditor as SqlEditorIcon,
+  Storage as StorageIcon,
+  TableEditor as TableEditorIcon,
+} from 'icons'
 import { IS_PLATFORM, PROJECT_STATUS } from 'lib/constants'
 import {
   ArrowRightLeft,
@@ -6,12 +15,8 @@ import {
   Copy,
   DatabaseBackup,
   FileText,
-  Globe,
-  HardDrive,
   Lightbulb,
-  Lock,
   Network,
-  Radio,
   ScrollText,
   Settings,
   Telescope,
@@ -83,13 +88,13 @@ export function generateDatabaseNavItems(
     {
       title: 'Table Editor',
       url: isProjectBuilding ? buildingUrl : `/project/${ref}/editor`,
-      icon: FileText,
+      icon: TableEditorIcon,
       isActive: pathname.includes('/editor'),
     },
     {
       title: 'SQL Editor',
       url: isProjectBuilding ? buildingUrl : `/project/${ref}/sql`,
-      icon: Zap,
+      icon: SqlEditorIcon,
       isActive: pathname.includes('/sql'),
     },
     {
@@ -232,7 +237,7 @@ export function generatePlatformNavItems(
               : authOverviewPageEnabled
                 ? `/project/${ref}/auth/overview`
                 : `/project/${ref}/auth/users`,
-            icon: Lock,
+            icon: AuthIcon,
             isActive: isAuthActive,
             items: [
               {
@@ -288,7 +293,7 @@ export function generatePlatformNavItems(
           {
             title: 'Storage',
             url: isProjectBuilding ? buildingUrl : `/project/${ref}/storage/files`,
-            icon: HardDrive,
+            icon: StorageIcon,
             isActive: isStorageActive,
             items: [
               {
@@ -322,7 +327,7 @@ export function generatePlatformNavItems(
           {
             title: 'Edge Functions',
             url: isProjectBuilding ? buildingUrl : `/project/${ref}/functions`,
-            icon: Globe,
+            icon: EdgeFunctionsIcon,
             isActive: isFunctionsActive,
             items: [
               {
@@ -346,7 +351,7 @@ export function generatePlatformNavItems(
           {
             title: 'Realtime',
             url: isProjectBuilding ? buildingUrl : `/project/${ref}/realtime/inspector`,
-            icon: Radio,
+            icon: RealtimeIcon,
             isActive: isRealtimeActive,
             items: [
               {
@@ -409,7 +414,7 @@ export function generateObservabilityNavItems(
         : unifiedLogs
           ? `/project/${ref}/logs`
           : `/project/${ref}/logs/explorer`,
-      icon: ScrollText,
+      icon: LogsIcon,
       isActive: pathname.includes('/logs'),
     },
   ]
@@ -440,7 +445,8 @@ export function generateIntegrationsNavItems(
       title: 'Integrations',
       url: isProjectBuilding ? buildingUrl : `/project/${ref}/integrations`,
       icon: Blocks,
-      isActive: pathname.includes('/integrations') && !pathname.includes('/integrations/data_api/docs'),
+      isActive:
+        pathname.includes('/integrations') && !pathname.includes('/integrations/data_api/docs'),
     },
   ]
 }
