@@ -372,7 +372,16 @@ export const InviteMemberButton = () => {
                 name="email"
                 control={form.control}
                 render={({ field }) => (
-                  <FormItemLayout label="Email addresses">
+                  <FormItemLayout
+                    label="Email addresses"
+                    hideMessage={
+                      Boolean(
+                        form.formState.errors.email &&
+                          !form.formState.dirtyFields.email &&
+                          form.formState.submitCount === 0
+                      )
+                    }
+                  >
                     <FormControl_Shadcn_>
                       <ExpandingTextArea
                         autoFocus
