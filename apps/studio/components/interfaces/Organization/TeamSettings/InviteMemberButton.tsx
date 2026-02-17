@@ -227,8 +227,20 @@ export const InviteMemberButton = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSuccess, isOpen])
 
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      form.reset({
+        email: '',
+        role: '',
+        applyToOrg: true,
+        projectRef: '',
+      })
+    }
+    setIsOpen(open)
+  }
+
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <ButtonTooltip
           type="primary"
