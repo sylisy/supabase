@@ -110,7 +110,7 @@ export const getCodeWorkflowSteps = ({
       title: 'Define who can access your data',
       icon: <Shield strokeWidth={1} className="text-foreground-muted" size={16} />,
       description:
-        "Secure your data by enabling Row Level Security (per-row access rules that decide who can read or write specific records) and defining policies in a migration file. You'll also want to ensure your tables have the right Data API privileges granted to the anon and authenticated roles—without these grants, tables won't be accessible via the Data API or client libraries.",
+        "Secure your data by enabling Row Level Security (per-row access rules that decide who can read or write specific records) and defining policies in a migration file. You'll also want to manage Data API privileges—you can grant access to individual tables and functions, or configure schema-level default privileges so that new objects are automatically accessible (or not) to the anon, authenticated, and service_role roles via the Data API and client libraries.",
       actions: [
         {
           label: 'Create a migration file',
@@ -288,7 +288,7 @@ export const getNoCodeWorkflowSteps = ({
       title: 'Define who can access your data',
       icon: <Shield strokeWidth={1} className="text-foreground-muted" size={16} />,
       description:
-        "Now that you have some data, secure it by enabling Row Level Security (row-specific access rules that control who can view or modify records) and creating policies. You should also check that your tables have the appropriate Data API privileges—these control whether the anon and authenticated roles can access your tables via the Data API and client libraries.",
+        "Now that you have some data, secure it by enabling Row Level Security (row-specific access rules that control who can view or modify records) and creating policies. You should also configure Data API privileges from the settings page—you can pick specific tables and functions to expose, or grant access to entire schemas, controlling whether the anon and authenticated roles can reach your data via the Data API and client libraries.",
       actions: [
         {
           label: 'Create a policy',
