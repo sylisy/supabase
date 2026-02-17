@@ -167,27 +167,15 @@ export const courses: SidebarNavGroup = {
           ],
         },
         {
-          title: 'AI and Vectors',
+          title: 'Search and Embeddings',
           items: [
             {
-              title: 'Vector Fundamentals',
+              title: 'Embeddings and Vector Search',
               href: '/foundations/vector-fundamentals',
             },
             {
-              title: 'Indexing Strategies',
-              href: '/foundations/indexing-strategies',
-            },
-            {
-              title: 'Search Patterns',
-              href: '/foundations/search-patterns',
-            },
-            {
-              title: 'RAG Implementation',
+              title: 'Building a RAG Pipeline',
               href: '/foundations/rag-implementation',
-            },
-            {
-              title: 'Production Considerations',
-              href: '/foundations/production-considerations',
             },
           ],
         },
