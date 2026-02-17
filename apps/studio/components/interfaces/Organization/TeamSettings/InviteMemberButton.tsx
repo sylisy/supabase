@@ -128,8 +128,8 @@ export const InviteMemberButton = () => {
   })
 
   const form = useForm<z.infer<typeof FormSchema>>({
-    mode: 'onBlur',
-    reValidateMode: 'onBlur',
+    mode: 'onSubmit',
+    reValidateMode: 'onChange',
     resolver: zodResolver(FormSchema),
     defaultValues: { email: '', role: '', applyToOrg: true, projectRef: '' },
   })
@@ -372,14 +372,7 @@ export const InviteMemberButton = () => {
                 name="email"
                 control={form.control}
                 render={({ field }) => (
-                  <FormItemLayout
-                    label="Email addresses"
-                    hideMessage={Boolean(
-                      form.formState.errors.email &&
-                        !form.formState.dirtyFields.email &&
-                        form.formState.submitCount === 0
-                    )}
-                  >
+                  <FormItemLayout label="Email addresses">
                     <FormControl_Shadcn_>
                       <ExpandingTextArea
                         autoFocus
@@ -388,10 +381,10 @@ export const InviteMemberButton = () => {
                         disabled={isInviting}
                         placeholder="name@example.com, name2@example.com"
                         className="max-h-48"
-                        data-1p-ignore // 1Password
-                        data-lpignore="true" // LastPass
-                        data-form-type="other" // Dashlane
-                        data-bwignore // Bitwarden
+                        data-1p-ignore
+                        data-lpignore="true"
+                        data-form-type="other"
+                        data-bwignore
                       />
                     </FormControl_Shadcn_>
                   </FormItemLayout>
