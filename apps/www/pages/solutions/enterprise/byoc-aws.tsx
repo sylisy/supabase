@@ -1,4 +1,3 @@
-import EnterpriseLogos from '~/components/Enterprise/EnterpriseLogos'
 import BYOCEarlyAccessForm from '~/components/Forms/BYOCEarlyAccessForm'
 import DefaultLayout from '~/components/Layouts/Default'
 import SectionContainer from '~/components/Layouts/SectionContainer'
@@ -103,18 +102,19 @@ const BYOCAWSPage: NextPage = () => {
             </>
           }
           subheader={[description]}
-          image={<BYOCEarlyAccessForm />}
-          className="[&_h1]:2xl:!text-5xl bg-default border-0 lg:pb-8 [&_.ph-footer]:mt-0 [&_.ph-footer]:lg:mt-16 [&_.ph-footer]:xl:mt-32"
+          ctas={[{ label: 'Request Early Access', href: '#early-access', type: 'primary' }]}
+          className="[&_h1]:2xl:!text-5xl bg-default border-0 lg:pb-8"
           sectionContainerClassName="lg:gap-4"
-          footer={<EnterpriseLogos className="lg:max-w-xs xl:max-w-none" />}
-          footerPosition="left"
         />
 
         <PlatformSection {...platformContent} className="[&>div:last-child]:lg:!grid-cols-2" />
 
         <EnterpriseQuote {...enterpriseContent.quote} />
 
-        <SectionContainer className="pb-16 md:pb-24 grid gap-6 lg:gap-8 lg:grid-cols-2">
+        <SectionContainer
+          id="early-access"
+          className="pb-16 md:pb-24 grid gap-6 lg:gap-8 lg:grid-cols-2"
+        >
           <div className="max-w-xl flex flex-col gap-2">
             <h2 className="h3 !mb-0">Early Access Request Form</h2>
             <p className="text-foreground-lighter md:text-lg">
