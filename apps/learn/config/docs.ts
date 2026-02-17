@@ -153,28 +153,16 @@ export const courses: SidebarNavGroup = {
           title: 'Edge Functions',
           items: [
             {
-              title: 'Edge Functions Architecture',
+              title: 'Edge Functions Fundamentals',
               href: '/foundations/edge-functions-architecture',
             },
             {
-              title: 'Development Workflow',
-              href: '/foundations/development-workflow',
-            },
-            {
-              title: 'Common Patterns',
+              title: 'Edge Functions Patterns',
               href: '/foundations/common-patterns',
             },
             {
-              title: 'Database Integration',
-              href: '/foundations/database-integration',
-            },
-            {
-              title: 'AI and LLM Integration',
+              title: 'Integrate AI Services',
               href: '/foundations/ai-and-llm-integration',
-            },
-            {
-              title: 'Advanced Topics',
-              href: '/foundations/advanced-topics',
             },
           ],
         },
