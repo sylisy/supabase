@@ -224,12 +224,6 @@ const BYOCEarlyAccessForm: FC<Props> = ({ className }) => {
               className="col-span-full"
               disabled={isSubmitting}
               loading={isSubmitting}
-              onClick={() =>
-                sendTelemetryEvent({
-                  action: 'byoc_early_access_request_clicked',
-                  properties: { buttonLocation: 'BYOC Early Access Form' },
-                })
-              }
             >
               Request Early Access
             </Button>
