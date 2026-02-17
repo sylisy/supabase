@@ -94,24 +94,8 @@ export const courses: SidebarNavGroup = {
               href: '/foundations/rls-fundamentals',
             },
             {
-              title: 'Policy Patterns',
+              title: 'RLS Patterns',
               href: '/foundations/policy-patterns',
-            },
-            {
-              title: 'Auth Helper Functions',
-              href: '/foundations/auth-helper-functions',
-            },
-            {
-              title: 'Multi-Tenancy Patterns',
-              href: '/foundations/multi-tenancy-patterns',
-            },
-            {
-              title: 'Performance Optimization',
-              href: '/foundations/rls-performance-optimization',
-            },
-            {
-              title: 'Pitfalls & Debugging',
-              href: '/foundations/common-pitfalls-and-debugging',
             },
           ],
         },
