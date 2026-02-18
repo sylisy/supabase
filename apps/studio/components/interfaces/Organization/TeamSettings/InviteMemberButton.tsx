@@ -8,6 +8,7 @@ import * as z from 'zod'
 
 import { useParams } from 'common'
 import { ButtonTooltip } from 'components/ui/ButtonTooltip'
+import InformationBox from 'components/ui/InformationBox'
 import { OrganizationProjectSelector } from 'components/ui/OrganizationProjectSelector'
 import { UpgradePlanButton } from 'components/ui/UpgradePlanButton'
 import { useOrganizationCreateInvitationMutation } from 'data/organization-members/organization-invitation-create-mutation'
@@ -28,11 +29,10 @@ import {
   DialogSectionSeparator,
   DialogTitle,
   DialogTrigger,
-  ExpandingTextArea,
   FormControl_Shadcn_,
   FormField_Shadcn_,
-  DialogFooter,
   Form_Shadcn_,
+  Input_Shadcn_,
   SelectContent_Shadcn_,
   SelectGroup_Shadcn_,
   SelectItem_Shadcn_,
@@ -42,15 +42,6 @@ import {
 } from 'ui'
 import { FormItemLayout } from 'ui-patterns/form/FormItemLayout/FormItemLayout'
 import { useGetRolesManagementPermissions } from './TeamSettings.utils'
-import { UserPlus } from 'lucide-react'
-import { Admonition } from 'ui-patterns'
-
-function parseEmails(value: string): string[] {
-  return value
-    .split(',')
-    .map((e) => e.trim())
-    .filter(Boolean)
-}
 
 export const InviteMemberButton = () => {
   const { slug } = useParams()
@@ -70,7 +61,6 @@ export const InviteMemberButton = () => {
   const orgScopedRoles = allRoles?.org_scoped_roles ?? []
 
   const currentPlan = organization?.plan
-  const isFreeOrProPlan = currentPlan?.id === 'free' || currentPlan?.id === 'pro'
   const hasAccessToProjectLevelPermissions = useHasAccessToProjectLevelPermissions(slug as string)
 
   const userMemberData = members?.find((m) => m.gotrue_id === profile?.gotrue_id)
@@ -97,126 +87,61 @@ export const InviteMemberButton = () => {
       )
     )
 
-  const { mutateAsync: inviteMemberAsync, isPending: isInviting } =
-    useOrganizationCreateInvitationMutation()
-
-  const emailSchema = z
-    .string()
-    .min(1, 'At least one email address is required')
-    .refine(
-      (val) => {
-        const emails = parseEmails(val)
-        if (emails.length === 0) return false
-        return emails.every((e) => z.string().email().safeParse(e).success)
-      },
-      (val) => {
-        const emails = parseEmails(val)
-        const invalid = emails.find((e) => !z.string().email().safeParse(e).success)
-        return {
-          message: invalid
-            ? `Invalid email address: ${invalid}`
-            : 'At least one email address is required',
-        }
-      }
-    )
+  const { mutate: inviteMember, isPending: isInviting } = useOrganizationCreateInvitationMutation()
 
   const FormSchema = z.object({
-    email: emailSchema,
+    email: z.string().email('Must be a valid email address').min(1, 'Email is required'),
     role: z.string().min(1, 'Role is required'),
     applyToOrg: z.boolean(),
     projectRef: z.string(),
   })
 
   const form = useForm<z.infer<typeof FormSchema>>({
-    mode: 'onSubmit',
-    reValidateMode: 'onChange',
+    mode: 'onBlur',
+    reValidateMode: 'onBlur',
     resolver: zodResolver(FormSchema),
     defaultValues: { email: '', role: '', applyToOrg: true, projectRef: '' },
   })
 
-  const { applyToOrg, projectRef, email } = form.watch()
-
-  const emailCount = parseEmails(email ?? '').length
+  const { applyToOrg, projectRef } = form.watch()
 
   const onInviteMember = async (values: z.infer<typeof FormSchema>) => {
     if (!slug) return console.error('Slug is required')
     if (profile?.id === undefined) return console.error('Profile ID required')
 
     const developerRole = orgScopedRoles.find((role) => role.name === 'Developer')
-    const emails = parseEmails(values.email).map((e) => e.toLowerCase())
-
-    const alreadyInvited: string[] = []
-    const alreadyMembers: string[] = []
-    const toInvite: string[] = []
-
-    for (const emailAddress of emails) {
-      const existingMember = (members ?? []).find((member) => member.primary_email === emailAddress)
-      if (existingMember !== undefined) {
-        if (existingMember.invited_id) {
-          alreadyInvited.push(emailAddress)
-        } else {
-          alreadyMembers.push(emailAddress)
-        }
+    const existingMember = (members ?? []).find(
+      (member) => member.primary_email === values.email.toLowerCase()
+    )
+    if (existingMember !== undefined) {
+      if (existingMember.invited_id) {
+        return toast('User has already been invited to this organization')
       } else {
-        toInvite.push(emailAddress)
+        return toast('User is already in this organization')
       }
     }
 
-    if (alreadyInvited.length > 0) {
-      toast.error(
-        alreadyInvited.length === 1
-          ? `${alreadyInvited[0]} has already been invited to this organization`
-          : `${alreadyInvited.length} emails have already been invited to this organization`
-      )
-    }
-    if (alreadyMembers.length > 0) {
-      toast.error(
-        alreadyMembers.length === 1
-          ? `${alreadyMembers[0]} is already in this organization`
-          : `${alreadyMembers.length} emails are already in this organization`
-      )
-    }
-    if (alreadyInvited.length > 0 || alreadyMembers.length > 0) {
-      if (toInvite.length === 0) return
-    }
+    inviteMember(
+      {
+        slug,
+        email: values.email.toLowerCase(),
+        roleId: Number(values.role),
+        ...(!values.applyToOrg && values.projectRef ? { projects: [values.projectRef] } : {}),
+      },
+      {
+        onSuccess: () => {
+          toast.success('Successfully sent invitation to new member')
+          setIsOpen(!isOpen)
 
-    const projectPayload =
-      !values.applyToOrg && values.projectRef ? { projects: [values.projectRef] } : {}
-    const results = await Promise.allSettled(
-      toInvite.map((emailAddress) =>
-        inviteMemberAsync({
-          slug,
-          email: emailAddress,
-          roleId: Number(values.role),
-          ...projectPayload,
-        })
-      )
+          form.reset({
+            email: '',
+            role: developerRole?.id.toString() ?? '',
+            applyToOrg: true,
+            projectRef: '',
+          })
+        },
+      }
     )
-
-    const successCount = results.filter((r) => r.status === 'fulfilled').length
-    const failedEmails = toInvite.filter((_, i) => results[i].status === 'rejected')
-
-    if (successCount > 0) {
-      toast.success(
-        successCount === 1
-          ? 'Successfully sent invitation to new member'
-          : `Successfully sent invitations to ${successCount} new members`
-      )
-      setIsOpen(false)
-      form.reset({
-        email: '',
-        role: developerRole?.id.toString() ?? '',
-        applyToOrg: true,
-        projectRef: '',
-      })
-    }
-    if (failedEmails.length > 0) {
-      toast.error(
-        failedEmails.length === 1
-          ? `Failed to send invitation to ${failedEmails[0]}`
-          : `Failed to send invitations to ${failedEmails.length} emails`
-      )
-    }
   }
 
   useEffect(() => {
@@ -227,27 +152,12 @@ export const InviteMemberButton = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSuccess, isOpen])
 
-  const handleOpenChange = (open: boolean) => {
-    setIsOpen(open)
-  }
-
-  const handleCancel = () => {
-    form.reset({
-      email: '',
-      role: '',
-      applyToOrg: true,
-      projectRef: '',
-    })
-    setIsOpen(false)
-  }
-
   return (
-    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <ButtonTooltip
           type="primary"
           disabled={!canInviteMembers}
-          icon={<UserPlus size={14} />}
           className="pointer-events-auto flex-grow md:flex-grow-0"
           onClick={() => setIsOpen(true)}
           tooltip={{
@@ -256,43 +166,19 @@ export const InviteMemberButton = () => {
               text: !organizationMembersCreationEnabled
                 ? 'Inviting members is currently disabled'
                 : !canInviteMembers
-                  ? 'You need additional permissions to invite members to this organization'
+                  ? 'You need additional permissions to invite a member to this organization'
                   : undefined,
             },
           }}
         >
-          Invite members
+          Invite member
         </ButtonTooltip>
       </DialogTrigger>
       <DialogContent size="medium">
         <DialogHeader>
-          <DialogTitle>Invite team members</DialogTitle>
+          <DialogTitle>Invite a member to this organization</DialogTitle>
         </DialogHeader>
         <DialogSectionSeparator />
-        <Admonition
-          type="note"
-          showIcon={false}
-          title="Single Sign-On (SSO) available"
-          layout={isFreeOrProPlan ? 'vertical' : 'horizontal'}
-          className="rounded-none border-t-0 border-x-0 px-5"
-          description="Enforce login via your company identity provider for added security and access control. Available on Team plan and above."
-          actions={
-            <>
-              <Button asChild type="default">
-                <Link href={`${DOCS_URL}/guides/platform/sso`} target="_blank" rel="noreferrer">
-                  Learn more
-                </Link>
-              </Button>
-              {isFreeOrProPlan ? (
-                <UpgradePlanButton
-                  plan="Team"
-                  source="inviteMemberSSO"
-                  featureProposition="enable Single Sign-on (SSO)"
-                />
-              ) : null}
-            </>
-          }
-        />
         <Form_Shadcn_ {...form}>
           <form
             id="organization-invitation"
@@ -300,11 +186,30 @@ export const InviteMemberButton = () => {
             onSubmit={form.handleSubmit(onInviteMember)}
           >
             <DialogSection className="flex flex-col gap-y-4 pb-2">
+              {hasAccessToProjectLevelPermissions && (
+                <FormField_Shadcn_
+                  name="applyToOrg"
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItemLayout
+                      layout="flex"
+                      label="Apply role to all projects in the organization"
+                    >
+                      <FormControl_Shadcn_>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={(value) => form.setValue('applyToOrg', value)}
+                        />
+                      </FormControl_Shadcn_>
+                    </FormItemLayout>
+                  )}
+                />
+              )}
               <FormField_Shadcn_
                 name="role"
                 control={form.control}
                 render={({ field }) => (
-                  <FormItemLayout label="Role">
+                  <FormItemLayout label="Member role">
                     <FormControl_Shadcn_>
                       <Select_Shadcn_
                         value={field.value}
@@ -340,22 +245,6 @@ export const InviteMemberButton = () => {
                   </FormItemLayout>
                 )}
               />
-              {hasAccessToProjectLevelPermissions && (
-                <FormField_Shadcn_
-                  name="applyToOrg"
-                  control={form.control}
-                  render={({ field }) => (
-                    <FormItemLayout layout="flex" label="Grant this role on all projects">
-                      <FormControl_Shadcn_>
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={(value) => form.setValue('applyToOrg', value)}
-                        />
-                      </FormControl_Shadcn_>
-                    </FormItemLayout>
-                  )}
-                />
-              )}
               {!applyToOrg && (
                 <FormField_Shadcn_
                   name="projectRef"
@@ -363,7 +252,7 @@ export const InviteMemberButton = () => {
                   render={({ field }) => (
                     <FormItemLayout
                       label="Select a project"
-                      description="Project access can be adjusted after the user joins"
+                      description="You can assign roles to multiple projects once the invite is accepted"
                     >
                       <FormControl_Shadcn_>
                         <OrganizationProjectSelector
@@ -386,33 +275,59 @@ export const InviteMemberButton = () => {
                 name="email"
                 control={form.control}
                 render={({ field }) => (
-                  <FormItemLayout label="Email addresses">
+                  <FormItemLayout label="Email address">
                     <FormControl_Shadcn_>
-                      <ExpandingTextArea
+                      <Input_Shadcn_
                         autoFocus
                         {...field}
                         autoComplete="off"
                         disabled={isInviting}
-                        placeholder="name@example.com, name2@example.com"
-                        className="max-h-48"
-                        data-1p-ignore
-                        data-lpignore="true"
-                        data-form-type="other"
-                        data-bwignore
+                        placeholder="Enter email address"
                       />
                     </FormControl_Shadcn_>
                   </FormItemLayout>
                 )}
               />
+              <InformationBox
+                defaultVisibility={false}
+                title="Single Sign-on (SSO) login option available"
+                hideCollapse={false}
+                description={
+                  <div className="space-y-4 mb-1">
+                    <p>
+                      Supabase offers single sign-on (SSO) as a login option to provide additional
+                      account security for your team. This allows company administrators to enforce
+                      the use of an identity provider when logging into Supabase.
+                    </p>
+                    <p>This is only available for organizations on Team Plan or above.</p>
+                    <div className="flex items-center space-x-2">
+                      <Button asChild type="default">
+                        <Link
+                          href={`${DOCS_URL}/guides/platform/sso`}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          Learn more
+                        </Link>
+                      </Button>
+                      {(currentPlan?.id === 'free' || currentPlan?.id === 'pro') && (
+                        <UpgradePlanButton
+                          plan="Team"
+                          source="inviteMemberSSO"
+                          featureProposition="enable Single Sign-on (SSO)"
+                        />
+                      )}
+                    </div>
+                  </div>
+                }
+              />
             </DialogSection>
-            <DialogFooter className="!justify-between">
-              <Button type="default" onClick={handleCancel}>
-                Cancel
+            <DialogSectionSeparator />
+            <DialogSection className="pt-0">
+              <Button block htmlType="submit" loading={isInviting}>
+                Send invitation
               </Button>
-              <Button type="primary" htmlType="submit" loading={isInviting}>
-                {emailCount >= 2 ? 'Send invitations' : 'Send invitation'}
-              </Button>
-            </DialogFooter>
+            </DialogSection>
           </form>
         </Form_Shadcn_>
       </DialogContent>
