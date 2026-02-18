@@ -211,7 +211,7 @@ A good rule of thumb: if the items are just simple values and you don't need to 
 
 When a column should only allow a specific set of values — like a status field with `todo`, `in_progress`, and `done` — you need a way to enforce that.
 
-Postgres has a native `enum` type, but it has a significant limitation: you can add new values but you can't remove or rename existing ones without recreating the entire type. For most applications, a `text` column with a **check constraint** is simpler and more flexible:
+Postgres has a native `enum` type, but it has a significant limitation: you can add new values (and rename them in Postgres 10+), but you can't remove values without recreating the type. For most applications, a `text` column with a **check constraint** is simpler and more flexible:
 
 ```sql
 create table tasks (
