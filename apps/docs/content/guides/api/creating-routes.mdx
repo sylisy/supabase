@@ -25,7 +25,7 @@ This creates a corresponding route `todos` which can accept `GET`, `POST`, `PATC
 1. Click **Save**.
 1. Click **New Column** and create a column with the name `task` and type `text`.
 1. Click **Save**.
-1. In [Data API integrations settings](/dashboard/project/_/integrations/data_api/settings), expose specific tables from your schemas (recommended), or an entire schema like `public` or `api` for automation.
+1. In [Data API integrations settings](/dashboard/project/_/integrations/data_api/settings), you can choose what you want to expose via the Data API. You can choose specific tables like the `todos` table (recommended), or an entire schema like `public` or `api` for automation.
 
 </TabPanel>
 <TabPanel id="sql" label="SQL">
@@ -45,13 +45,9 @@ grant all on public.todos to anon, authenticated, service_role;
 </TabPanel>
 </Tabs>
 
-<Admonition type="note" title="Data API access">
+<Admonition type="note" title="What it means to expose tables or functions via the API">
 
-To access a table via the Data API, the `anon`, `authenticated`, and/or `service_role` roles need the appropriate permissions. In the Dashboard, use [Data API integrations settings](/dashboard/project/_/integrations/data_api/settings) to expose specific tables (recommended), or a full schema like `public` or `api` for automation. When using SQL, run a grant statement like:
-
-```sql
-grant all on public.your_table to anon, authenticated, service_role;
-```
+Granting privileges (like `select` or `execute`) to roles such as `anon` or `authenticated` makes those tables or functions accessible through the Data API. Behind the scenes, the API checks your Postgres permissions—only objects with explicit grants are exposed, and all other access is denied by default.
 
 </Admonition>
 
@@ -99,6 +95,7 @@ using the API URL (`SUPABASE_URL`) and Key (`SUPABASE_PUBLISHABLE_KEY`) we provi
 ```javascript
 // Initialize the JS client
 import { createClient } from '@supabase/supabase-js'
+
 const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY)
 
 // Make a request
