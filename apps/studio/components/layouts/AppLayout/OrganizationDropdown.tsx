@@ -171,7 +171,7 @@ export const OrganizationDropdown = ({
             onClick={() => close()}
           >
             <Link href="/organizations" className="flex items-center gap-2 w-full">
-              <p>All Organizations</p>
+              All Organizations
             </Link>
           </CommandItem_Shadcn_>
         </CommandGroup_Shadcn_>

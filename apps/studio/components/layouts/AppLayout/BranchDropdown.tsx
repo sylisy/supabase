@@ -138,7 +138,7 @@ export const BranchDropdown = ({
         >
           <Link
             href={`/project/${ref}/branches`}
-            className="flex items-center gap-1.5 px-3 py-2 text-xs text-foreground-light hover:text-foreground transition-colors rounded-md hover:bg-surface-200"
+            className="text-xs text-foreground-light hover:text-foreground"
             onClick={() => close()}
           >
             Manage branches
@@ -156,7 +156,7 @@ export const BranchDropdown = ({
             rel="noreferrer noopener"
             href={BRANCHING_GITHUB_DISCUSSION_LINK}
             onClick={() => close()}
-            className="flex w-full items-center px-3 py-2 text-xs text-foreground-light hover:text-foreground transition-colors rounded-md hover:bg-surface-200"
+            className="text-xs text-foreground-light hover:text-foreground"
           >
             Branching feedback
           </a>
@@ -165,7 +165,7 @@ export const BranchDropdown = ({
           type="default"
           size="small"
           block
-          className="col-span-full flex items-center  px-3 py-2 text-xs text-foreground-light hover:text-foreground transition-colors rounded-md hover:bg-surface-200"
+          className="col-span-full text-xs text-foreground-light hover:text-foreground"
           onClick={() => {
             close()
             snap.setShowCreateBranchModal(true)

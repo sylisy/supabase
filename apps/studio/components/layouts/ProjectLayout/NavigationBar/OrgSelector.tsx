@@ -63,7 +63,7 @@ export function OrgSelector() {
   const triggerButton = (
     <SidebarMenuButton
       size="lg"
-      className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground gap-2 h-auto text-left group px-1.5 py-1"
+      className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground gap-2 h-auto text-left group px-1.5 py-1 touch-manipulation"
       onClick={isMobile ? () => setOpen(true) : undefined}
     >
       <span className="flex w-8 aspect-square shrink-0 items-center justify-center rounded border bg-surface-100 text-xs font-medium text-foreground-lighter">

@@ -23,7 +23,7 @@ export function ProjectBranchSelectorTrigger({
   return (
     <SidebarMenuButton
       size="lg"
-      className="group py-1 gap-2 w-full flex h-auto text-left data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+      className="group py-1 gap-2 w-full flex h-auto text-left data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground touch-manipulation"
       onClick={onClick}
     >
       <div
@@ -40,7 +40,7 @@ export function ProjectBranchSelectorTrigger({
               : 'text-foreground hover:text-foreground-light'
           )}
           type="button"
-          tabIndex={0}
+          tabIndex={-1}
           aria-label="Go to organization"
           onClick={(event) => {
             event.preventDefault()
