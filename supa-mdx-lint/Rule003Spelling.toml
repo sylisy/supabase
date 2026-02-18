@@ -29,6 +29,7 @@ allow_list = [
     "[Bb]ackend",
     "[Bb]ackoff",
     "[Bb]lockchains?",
+    "[Bb]Burstable",
     "BootEvent",
     "BootFailure",
     "[Bb]reakpoints?",
