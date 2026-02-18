@@ -58,7 +58,7 @@ export function ProjectBranchSelectorTrigger({
         </button>
       </div>
       <div className="text-left flex-grow min-w-0">
-        <div className="w-full truncate text-foreground leading-tight min-w-[100px] max-w-[250px]">
+        <div className="w-full truncate text-foreground leading-tight max-w-[250px]">
           {displayProjectName}
         </div>
         <div
