@@ -38,7 +38,11 @@ interface OrganizationProjectSelectorSelectorProps {
     isLoading: boolean
     project?: OrgProject
   }) => ReactNode
-  renderActions?: (setOpen: (value: boolean) => void) => ReactNode
+  /** When embedded, call with setOpen and { embedded: true } to render top action row (horizontal buttons). */
+  renderActions?: (
+    setOpen: (value: boolean) => void,
+    options?: { embedded?: boolean }
+  ) => ReactNode
   onSelect?: (project: OrgProject) => void
   onInitialLoad?: (projects: OrgProject[]) => void
   isOptionDisabled?: (project: OrgProject) => boolean
@@ -166,11 +170,7 @@ export const OrganizationProjectSelector = ({
       )
     }
     if (projects.length === 0) {
-      return (
-        <p className="text-xs text-center text-foreground-lighter py-3">
-          No projects found
-        </p>
-      )
+      return <p className="text-xs text-center text-foreground-lighter py-3">No projects found</p>
     }
     if (embedded) {
       return (
@@ -192,18 +192,14 @@ export const OrganizationProjectSelector = ({
               ) : (
                 <div
                   className={cn(
-                    'w-full flex items-center',
+                    'w-full flex items-center !text-2xl',
                     checkPosition === 'left' ? 'gap-x-2' : 'justify-between',
                     project.ref !== selectedRef && checkPosition === 'left' && 'ml-6'
                   )}
                 >
-                  {checkPosition === 'left' && project.ref === selectedRef && (
-                    <Check size={16} />
-                  )}
+                  {checkPosition === 'left' && project.ref === selectedRef && <Check size={16} />}
                   {project.name}
-                  {checkPosition === 'right' && project.ref === selectedRef && (
-                    <Check size={16} />
-                  )}
+                  {checkPosition === 'right' && project.ref === selectedRef && <Check size={16} />}
                 </div>
               )}
             </CommandItem_Shadcn_>
@@ -241,13 +237,9 @@ export const OrganizationProjectSelector = ({
                   project.ref !== selectedRef && checkPosition === 'left' && 'ml-6'
                 )}
               >
-                {checkPosition === 'left' && project.ref === selectedRef && (
-                  <Check size={16} />
-                )}
+                {checkPosition === 'left' && project.ref === selectedRef && <Check size={16} />}
                 {project.name}
-                {checkPosition === 'right' && project.ref === selectedRef && (
-                  <Check size={16} />
-                )}
+                {checkPosition === 'right' && project.ref === selectedRef && <Check size={16} />}
               </div>
             )}
           </CommandItem_Shadcn_>
@@ -267,13 +259,18 @@ export const OrganizationProjectSelector = ({
       shouldFilter={false}
       className={cn(className, embedded && 'flex flex-col flex-1 min-h-0 overflow-hidden')}
     >
+      {embedded && !!renderActions && (
+        <div className="flex items-center gap-2 shrink-0 border-b p-2">
+          {renderActions(setOpen, { embedded: true })}
+        </div>
+      )}
       <CommandInput_Shadcn_
         showResetIcon
         value={search}
         onValueChange={setSearch}
         placeholder={searchPlaceholder}
         handleReset={() => setSearch('')}
-        wrapperClassName={embedded ? 'shrink-0' : undefined}
+        wrapperClassName={embedded ? 'shrink-0 border-b' : undefined}
       />
       <CommandList_Shadcn_
         className={
@@ -285,7 +282,7 @@ export const OrganizationProjectSelector = ({
         <CommandGroup_Shadcn_ className={embedded ? 'flex-1 min-h-0 overflow-hidden' : ''}>
           {renderListContent()}
         </CommandGroup_Shadcn_>
-        {!!renderActions && (
+        {!!renderActions && !embedded && (
           <>
             <div className="h-px bg-border-overlay -mx-1 shrink-0" />
             {renderActions(setOpen)}

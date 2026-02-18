@@ -83,7 +83,7 @@ export const ProjectDropdown = ({
       const isPaused = project.status === 'INACTIVE'
 
       return (
-        <Link href={href} className="w-full flex items-center justify-between">
+        <Link href={href} className="w-full flex items-center justify-between p-0.5 md:p-0">
           <span className={cn('truncate', isSelected ? 'max-w-60' : 'max-w-64')}>
             {project.name}
             {isPaused && <Badge className="ml-2">Paused</Badge>}
@@ -92,27 +92,39 @@ export const ProjectDropdown = ({
         </Link>
       )
     },
-    renderActions: () =>
+    renderActions: (_setOpen: (value: boolean) => void, options?: { embedded?: boolean }) =>
       projectCreationEnabled ? (
-        <CommandGroup_Shadcn_>
-          <CommandItem_Shadcn_
-            className="cursor-pointer w-full"
-            onSelect={() => {
-              close()
-              router.push(`/new/${selectedOrganization?.slug}`)
-            }}
-            onClick={() => close()}
-          >
+        options?.embedded ? (
+          <Button type="default" block asChild icon={<Plus size={14} strokeWidth={1.5} />}>
             <Link
               href={`/new/${selectedOrganization?.slug}`}
               onClick={() => close()}
-              className="w-full flex items-center gap-2"
+              className="shrink-0 flex items-center gap-1.5 px-3 py-2 text-xs text-foreground-light hover:text-foreground transition-colors rounded-md hover:bg-surface-200"
             >
-              <Plus size={14} strokeWidth={1.5} />
-              <p>New project</p>
+              <span>New project</span>
             </Link>
-          </CommandItem_Shadcn_>
-        </CommandGroup_Shadcn_>
+          </Button>
+        ) : (
+          <CommandGroup_Shadcn_>
+            <CommandItem_Shadcn_
+              className="cursor-pointer w-full"
+              onSelect={() => {
+                close()
+                router.push(`/new/${selectedOrganization?.slug}`)
+              }}
+              onClick={() => close()}
+            >
+              <Link
+                href={`/new/${selectedOrganization?.slug}`}
+                onClick={() => close()}
+                className="w-full flex items-center gap-2"
+              >
+                <Plus size={14} strokeWidth={1.5} />
+                <p>New project</p>
+              </Link>
+            </CommandItem_Shadcn_>
+          </CommandGroup_Shadcn_>
+        )
       ) : null,
   }
 

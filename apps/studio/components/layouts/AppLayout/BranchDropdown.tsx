@@ -53,7 +53,7 @@ const BranchLink = ({
     <Link passHref href={href}>
       <CommandItem_Shadcn_
         value={branch.name.replaceAll('"', '')}
-        className="cursor-pointer w-full flex items-center justify-between"
+        className="cursor-pointer w-full flex items-center justify-between "
         onSelect={() => {
           onClose()
           router.push(href)
@@ -126,48 +126,92 @@ export const BranchDropdown = ({
   const BRANCHING_GITHUB_DISCUSSION_LINK = 'https://github.com/orgs/supabase/discussions/18937'
   const close = embedded ? onClose ?? (() => {}) : () => setOpen(false)
 
-  const commandContent = (
-    <Command_Shadcn_
-      className={cn(className, embedded && 'flex flex-col flex-1 min-h-0 overflow-hidden')}
-    >
+  const commandContent = embedded ? (
+    <Command_Shadcn_ className={cn(className, 'flex flex-col flex-1 min-h-0 overflow-hidden')}>
+      <div className="flex items-center gap-2 shrink-0 p-2">
+        <Button
+          type="text"
+          className=""
+          block
+          asChild
+          icon={<ListTree size={14} strokeWidth={1.5} />}
+        >
+          <Link
+            href={`/project/${ref}/branches`}
+            className="flex items-center gap-1.5 px-3 py-2 text-xs text-foreground-light hover:text-foreground transition-colors rounded-md hover:bg-surface-200"
+            onClick={() => close()}
+          >
+            <span>Manage branches</span>
+          </Link>
+        </Button>
+        <Button
+          type="text"
+          className=""
+          block
+          asChild
+          icon={<MessageCircle size={14} strokeWidth={1} className="text-muted mt-0.5" />}
+        >
+          <a
+            target="_blank"
+            rel="noreferrer noopener"
+            href={BRANCHING_GITHUB_DISCUSSION_LINK}
+            onClick={() => close()}
+            className="flex items-center gap-1.5 px-3 py-2 text-xs text-foreground-light hover:text-foreground transition-colors rounded-md hover:bg-surface-200"
+          >
+            <span>Branching feedback</span>
+          </a>
+        </Button>
+      </div>
+      <div className="flex items-center gap-2 shrink-0 border-b p-2">
+        <Button
+          type="default"
+          block
+          className=" flex items-center gap-1.5 px-3 py-2 text-xs text-foreground-light hover:text-foreground transition-colors rounded-md hover:bg-surface-200"
+          onClick={() => {
+            close()
+            snap.setShowCreateBranchModal(true)
+          }}
+          icon={<Plus size={14} strokeWidth={1.5} />}
+        >
+          <span>Create branch</span>
+        </Button>
+      </div>
       {isBranchingEnabled && (
-        <CommandInput_Shadcn_
-          placeholder="Find branch..."
-          wrapperClassName={embedded ? 'shrink-0' : undefined}
-        />
+        <CommandInput_Shadcn_ placeholder="Find branch..." wrapperClassName="shrink-0 border-b" />
       )}
-      <CommandList_Shadcn_
-        className={embedded ? 'flex-1 min-h-0 overflow-y-auto !max-h-none' : undefined}
-      >
+      <CommandList_Shadcn_ className="flex flex-col flex-1 min-h-0 overflow-y-auto !max-h-none">
         {isBranchingEnabled && <CommandEmpty_Shadcn_>No branches found</CommandEmpty_Shadcn_>}
-
-        <CommandGroup_Shadcn_ className={embedded ? 'min-h-0' : undefined}>
-          {embedded ? (
-            <>
-              {branchList.map((branch) => (
-                <BranchLink
-                  key={branch.id}
-                  branch={branch}
-                  isSelected={branch.id === selectedBranch?.id || branches?.length === 0}
-                  onClose={close}
-                />
-              ))}
-            </>
-          ) : (
-            <ScrollArea className="max-h-[210px] overflow-y-auto">
-              {branchList.map((branch) => (
-                <BranchLink
-                  key={branch.id}
-                  branch={branch}
-                  isSelected={branch.id === selectedBranch?.id || branches?.length === 0}
-                  onClose={close}
-                />
-              ))}
-            </ScrollArea>
-          )}
+        <CommandGroup_Shadcn_ className="min-h-0">
+          {branchList.map((branch) => (
+            <BranchLink
+              key={branch.id}
+              branch={branch}
+              isSelected={branch.id === selectedBranch?.id || branches?.length === 0}
+              onClose={close}
+            />
+          ))}
+        </CommandGroup_Shadcn_>
+      </CommandList_Shadcn_>
+    </Command_Shadcn_>
+  ) : (
+    <Command_Shadcn_ className={className}>
+      {isBranchingEnabled && <CommandInput_Shadcn_ placeholder="Find branch..." />}
+      <CommandList_Shadcn_>
+        {isBranchingEnabled && <CommandEmpty_Shadcn_>No branches found</CommandEmpty_Shadcn_>}
+        <CommandGroup_Shadcn_>
+          <ScrollArea className="max-h-[210px] overflow-y-auto">
+            {branchList.map((branch) => (
+              <BranchLink
+                key={branch.id}
+                branch={branch}
+                isSelected={branch.id === selectedBranch?.id || branches?.length === 0}
+                onClose={close}
+              />
+            ))}
+          </ScrollArea>
         </CommandGroup_Shadcn_>
 
-        <CommandSeparator_Shadcn_ className={embedded ? 'shrink-0' : undefined} />
+        <CommandSeparator_Shadcn_ />
 
         <CommandGroup_Shadcn_>
           <CommandItem_Shadcn_
@@ -252,7 +296,7 @@ export const BranchDropdown = ({
 
   return (
     <>
-      <Link href={`/project/${ref}`} className="flex items-center gap-2 flex-shrink-0 ">
+      <Link href={`/project/${ref}`} className="flex items-center gap-2 flex-shrink-0">
         <span
           title={isBranchingEnabled ? selectedBranch?.name : 'main'}
           className="text-sm text-foreground max-w-32 lg:max-w-64 truncate"
@@ -283,6 +327,7 @@ export const BranchDropdown = ({
         <PopoverTrigger_Shadcn_ asChild>
           <Button
             type="text"
+            block
             size="tiny"
             className={cn('px-1.5 py-4 [&_svg]:w-5 [&_svg]:h-5 ml-1')}
             iconRight={<ChevronsUpDown strokeWidth={1.5} />}

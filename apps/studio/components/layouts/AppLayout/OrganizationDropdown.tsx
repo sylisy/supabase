@@ -17,7 +17,6 @@ import {
   CommandInput_Shadcn_,
   CommandItem_Shadcn_,
   CommandList_Shadcn_,
-  CommandSeparator_Shadcn_,
   Popover_Shadcn_,
   PopoverContent_Shadcn_,
   PopoverTrigger_Shadcn_,
@@ -69,86 +68,92 @@ export const OrganizationDropdown = ({
     )
   }
 
-  const commandContent = (
-    <Command_Shadcn_
-      className={cn(className, embedded && 'flex flex-col flex-1 min-h-0 overflow-hidden')}
-    >
+  const orgListItems = (wrapInScrollArea: boolean) => {
+    const list = (
+      <>
+        {organizations?.map((org) => {
+          const href = !!routeSlug
+            ? router.pathname.replace('[slug]', org.slug)
+            : `/org/${org.slug}`
+
+          return (
+            <CommandItem_Shadcn_
+              key={org.slug}
+              value={`${org.name.replaceAll('"', '')} - ${org.slug}`}
+              className="cursor-pointer w-full"
+              onSelect={() => {
+                close()
+                router.push(href)
+              }}
+              onClick={() => close()}
+            >
+              <Link href={href} className="w-full flex items-center justify-between">
+                <div className={cn('flex items-center gap-2', !wrapInScrollArea && 'p-0.5 md:p-0')}>
+                  <span>{org.name}</span>
+                  <PartnerIcon organization={org} />
+                </div>
+                {org.slug === slug && <Check size={16} />}
+              </Link>
+            </CommandItem_Shadcn_>
+          )
+        })}
+      </>
+    )
+    if (wrapInScrollArea) {
+      return (
+        <ScrollArea className={(organizations || []).length > 7 ? 'h-[210px]' : ''}>
+          {list}
+        </ScrollArea>
+      )
+    }
+    return list
+  }
+
+  const commandContent = embedded ? (
+    <Command_Shadcn_ className={cn(className, 'flex flex-col flex-1 min-h-0 overflow-hidden')}>
+      <div className="flex items-center gap-2 shrink-0 border-b p-2">
+        <Button type="text" block asChild>
+          <Link
+            href="/organizations"
+            className="flex items-center gap-1.5 px-3 py-2 text-xs text-foreground-light hover:text-foreground transition-colors rounded-md hover:bg-surface-200"
+            onClick={() => close()}
+          >
+            <span>All Organizations</span>
+          </Link>
+        </Button>
+        {organizationCreationEnabled && (
+          <Button type="default" block asChild icon={<Plus size={14} strokeWidth={1.5} />}>
+            <Link
+              href="/new"
+              className="flex items-center gap-1.5 px-3 py-2 text-xs text-foreground-light hover:text-foreground transition-colors rounded-md hover:bg-surface-200"
+              onClick={() => close()}
+            >
+              <span>New organization</span>
+            </Link>
+          </Button>
+        )}
+      </div>
       <CommandInput_Shadcn_
         placeholder="Find organization..."
-        wrapperClassName={embedded ? 'shrink-0' : undefined}
+        wrapperClassName="shrink-0 border-b"
       />
-      <CommandList_Shadcn_
-        className={embedded ? 'flex-1 min-h-0 overflow-y-auto !max-h-none' : undefined}
-      >
+      <CommandList_Shadcn_ className="flex flex-col flex-1 min-h-0 overflow-y-auto !max-h-none">
         <CommandEmpty_Shadcn_>No organizations found</CommandEmpty_Shadcn_>
-        <CommandGroup_Shadcn_ className={embedded ? 'min-h-0' : undefined}>
-          {embedded ? (
-            <>
-              {organizations?.map((org) => {
-                const href = !!routeSlug
-                  ? router.pathname.replace('[slug]', org.slug)
-                  : `/org/${org.slug}`
-
-                return (
-                  <CommandItem_Shadcn_
-                    key={org.slug}
-                    value={`${org.name.replaceAll('"', '')} - ${org.slug}`}
-                    className="cursor-pointer w-full"
-                    onSelect={() => {
-                      close()
-                      router.push(href)
-                    }}
-                    onClick={() => close()}
-                  >
-                    <Link href={href} className="w-full flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span>{org.name}</span>
-                        <PartnerIcon organization={org} />
-                      </div>
-                      {org.slug === slug && <Check size={16} />}
-                    </Link>
-                  </CommandItem_Shadcn_>
-                )
-              })}
-            </>
-          ) : (
-            <ScrollArea className={(organizations || []).length > 7 ? 'h-[210px]' : ''}>
-            {organizations?.map((org) => {
-              const href = !!routeSlug
-                ? router.pathname.replace('[slug]', org.slug)
-                : `/org/${org.slug}`
-
-              return (
-                <CommandItem_Shadcn_
-                  key={org.slug}
-                  value={`${org.name.replaceAll('"', '')} - ${org.slug}`}
-                  className="cursor-pointer w-full"
-                  onSelect={() => {
-                    close()
-                    router.push(href)
-                  }}
-                  onClick={() => close()}
-                >
-                  <Link href={href} className="w-full flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span>{org.name}</span>
-                      <PartnerIcon organization={org} />
-                    </div>
-                    {org.slug === slug && <Check size={16} />}
-                  </Link>
-                </CommandItem_Shadcn_>
-              )
-            })}
-          </ScrollArea>
-          )}
-        </CommandGroup_Shadcn_>
-        <CommandSeparator_Shadcn_ className={embedded ? 'shrink-0' : undefined} />
+        <CommandGroup_Shadcn_ className="min-h-0">{orgListItems(false)}</CommandGroup_Shadcn_>
+      </CommandList_Shadcn_>
+    </Command_Shadcn_>
+  ) : (
+    <Command_Shadcn_ className={className}>
+      <CommandInput_Shadcn_ placeholder="Find organization..." />
+      <CommandList_Shadcn_>
+        <CommandEmpty_Shadcn_>No organizations found</CommandEmpty_Shadcn_>
+        <CommandGroup_Shadcn_>{orgListItems(true)}</CommandGroup_Shadcn_>
         <CommandGroup_Shadcn_>
           <CommandItem_Shadcn_
             className="cursor-pointer w-full"
             onSelect={() => {
               close()
-              router.push(`/organizations`)
+              router.push('/organizations')
             }}
             onClick={() => close()}
           >
@@ -158,24 +163,21 @@ export const OrganizationDropdown = ({
           </CommandItem_Shadcn_>
         </CommandGroup_Shadcn_>
         {organizationCreationEnabled && (
-          <>
-            <CommandSeparator_Shadcn_ />
-            <CommandGroup_Shadcn_>
-              <CommandItem_Shadcn_
-                className="cursor-pointer w-full"
-                onSelect={() => {
-                  close()
-                  router.push(`/new`)
-                }}
-                onClick={() => close()}
-              >
-                <Link href="/new" className="flex items-center gap-2 w-full">
-                  <Plus size={14} strokeWidth={1.5} />
-                  <p>New organization</p>
-                </Link>
-              </CommandItem_Shadcn_>
-            </CommandGroup_Shadcn_>
-          </>
+          <CommandGroup_Shadcn_>
+            <CommandItem_Shadcn_
+              className="cursor-pointer w-full"
+              onSelect={() => {
+                close()
+                router.push('/new')
+              }}
+              onClick={() => close()}
+            >
+              <Link href="/new" className="flex items-center gap-2 w-full">
+                <Plus size={14} strokeWidth={1.5} />
+                <p>New organization</p>
+              </Link>
+            </CommandItem_Shadcn_>
+          </CommandGroup_Shadcn_>
         )}
       </CommandList_Shadcn_>
     </Command_Shadcn_>
