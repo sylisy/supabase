@@ -129,7 +129,7 @@ export const LayoutHeader = ({
         )}
         <div
           className={cn(
-            'flex items-center justify-between h-full pr-3 flex-1 overflow-x-auto gap-x-8 pl-4'
+            'hidden md:flex items-center justify-between h-full pr-3 flex-1 overflow-x-auto gap-x-8 pl-4'
           )}
         >
           <div className="flex md:hidden items-center text-sm not-sr-only" />
