@@ -357,28 +357,37 @@ export async function getUserActivity(author: string) {
   }
 }
 
+const CONTRIBUTE_FEEDBACK_FN = 'contribute-feedback'
+
 export async function submitSimilarThreadFeedback(
   submission: SimilarThreadFeedbackSubmission
 ): Promise<SimilarThreadFeedbackResult> {
   const supabase = createClient(supabaseUrl, supabasePublishableKey)
 
-  const { data, error } = await supabase
-    .from('contribute_similar_thread_feedback')
-    .insert({
-      parent_thread_id: submission.parentThreadId,
-      similar_thread_key: submission.similarThreadKey ?? null,
-      reaction: submission.reaction,
-      feedback: submission.feedback ?? null,
-    })
-    .select('id')
-    .single()
+  const { data, error } = await supabase.functions.invoke<{ id: string }>(
+    CONTRIBUTE_FEEDBACK_FN,
+    {
+      body: {
+        action: 'create',
+        parent_thread_id: submission.parentThreadId,
+        similar_thread_key: submission.similarThreadKey ?? null,
+        reaction: submission.reaction,
+      },
+    }
+  )
 
   if (error) {
-    console.error('[SimilarThreadFeedback] insert error:', error)
+    console.error('[SimilarThreadFeedback] create error:', error)
     return { success: false }
   }
 
-  return { success: true, id: data?.id }
+  const id = data?.id
+  if (!id) {
+    console.error('[SimilarThreadFeedback] create: no id in response')
+    return { success: false }
+  }
+
+  return { success: true, id }
 }
 
 export async function updateSimilarThreadFeedback(
@@ -388,20 +397,25 @@ export async function updateSimilarThreadFeedback(
 ): Promise<SimilarThreadFeedbackResult> {
   const supabase = createClient(supabaseUrl, supabasePublishableKey)
 
-  const { data, error } = await supabase
-    .from('contribute_similar_thread_feedback')
-    .update({ reaction, feedback })
-    .eq('id', id)
-    .select('id')
-    .single()
+  const { data, error } = await supabase.functions.invoke<{ success: boolean }>(
+    CONTRIBUTE_FEEDBACK_FN,
+    {
+      body: {
+        action: 'update',
+        id,
+        reaction,
+        feedback: feedback ?? null,
+      },
+    }
+  )
 
   if (error) {
     console.error('[SimilarThreadFeedback] update error:', error)
     return { success: false }
   }
 
-  if (!data) {
-    console.error('[SimilarThreadFeedback] update error: record not found')
+  if (!data?.success) {
+    console.error('[SimilarThreadFeedback] update: unexpected response')
     return { success: false }
   }
 

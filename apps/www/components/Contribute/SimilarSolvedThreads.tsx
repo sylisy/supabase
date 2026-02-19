@@ -33,15 +33,6 @@ import type {
 import { submitSimilarThreadFeedback, updateSimilarThreadFeedback } from '~/data/contribute'
 import { ChannelIcon } from './Icons'
 
-/**
- * Mock mode: skip real API calls, fake success for frontend design.
- * Set to false when backend RLS is fixed.
- */
-const MOCK_FEEDBACK = true
-
-/** When MOCK_FEEDBACK is true, use this to jump to a state for design. */
-type MockState = 'idle' | 'dialog'
-
 function getChannelFromUrl(url: string): ThreadSource {
   const u = url.toLowerCase()
   if (u.includes('discord')) return 'discord'
@@ -129,16 +120,11 @@ export const SimilarSolvedThreads = ({ threads, parentThreadId }: SimilarSolvedT
   const handleThumbClick = async (reaction: SimilarThreadFeedbackReaction) => {
     if (submittedReaction) return
     setIsSubmitting(true)
-    const result = MOCK_FEEDBACK
-      ? await (async () => {
-          await new Promise((r) => setTimeout(r, 400))
-          return { success: true as const, id: 'mock-feedback-id' }
-        })()
-      : await submitSimilarThreadFeedback({
-          parentThreadId,
-          reaction,
-          similarThreadKey: null,
-        })
+    const result = await submitSimilarThreadFeedback({
+      parentThreadId,
+      reaction,
+      similarThreadKey: null,
+    })
     setIsSubmitting(false)
     if (result.success) {
       setFeedbackId(result.id ?? null)
@@ -151,12 +137,11 @@ export const SimilarSolvedThreads = ({ threads, parentThreadId }: SimilarSolvedT
   const persistAndCloseDialog = async () => {
     if (!feedbackId) return
     setIsSubmitting(true)
-    const result = MOCK_FEEDBACK
-      ? await (async () => {
-          await new Promise((r) => setTimeout(r, 400))
-          return { success: true as const }
-        })()
-      : await updateSimilarThreadFeedback(feedbackId, dialogReaction, dialogFeedback.trim() || null)
+    const result = await updateSimilarThreadFeedback(
+      feedbackId,
+      dialogReaction,
+      dialogFeedback.trim() || null
+    )
     setIsSubmitting(false)
     if (result.success) {
       setSubmittedReaction(dialogReaction)
@@ -172,21 +157,6 @@ export const SimilarSolvedThreads = ({ threads, parentThreadId }: SimilarSolvedT
     setDialogOpen(open)
     if (!open && feedbackId && !isClosingProgrammatically.current) {
       persistAndCloseDialog()
-    }
-  }
-
-  const setMockState = (state: MockState) => {
-    if (!MOCK_FEEDBACK) return
-    if (state === 'idle') {
-      setSubmittedReaction(null)
-      setFeedbackId(null)
-      setDialogOpen(false)
-    } else {
-      setSubmittedReaction(null)
-      setFeedbackId('mock-feedback-id')
-      setDialogReaction('positive')
-      setDialogFeedback('')
-      setDialogOpen(true)
     }
   }
 
@@ -256,28 +226,6 @@ export const SimilarSolvedThreads = ({ threads, parentThreadId }: SimilarSolvedT
                   </Tooltip>
                 </div>
               </TooltipProvider>
-            )}
-
-            {MOCK_FEEDBACK && (
-              <div className="text-xs font-mono uppercase">
-                <span className="text-foreground-muted">Mock:</span>{' '}
-                {(['idle', 'dialog'] as const).map((s) => (
-                  <button
-                    key={s}
-                    type="button"
-                    onClick={() => setMockState(s)}
-                    className={cn(
-                      'mx-1 uppercase',
-                      (s === 'idle' && !submittedReaction && !dialogOpen) ||
-                        (s === 'dialog' && dialogOpen)
-                        ? 'text-foreground'
-                        : 'text-foreground-lighter'
-                    )}
-                  >
-                    {s}
-                  </button>
-                ))}
-              </div>
             )}
           </CardFooter>
         </>
