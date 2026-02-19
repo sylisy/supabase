@@ -364,17 +364,14 @@ export async function submitSimilarThreadFeedback(
 ): Promise<SimilarThreadFeedbackResult> {
   const supabase = createClient(supabaseUrl, supabasePublishableKey)
 
-  const { data, error } = await supabase.functions.invoke<{ id: string }>(
-    CONTRIBUTE_FEEDBACK_FN,
-    {
-      body: {
-        action: 'create',
-        parent_thread_id: submission.parentThreadId,
-        similar_thread_key: submission.similarThreadKey ?? null,
-        reaction: submission.reaction,
-      },
-    }
-  )
+  const { data, error } = await supabase.functions.invoke<{ id: string }>(CONTRIBUTE_FEEDBACK_FN, {
+    body: {
+      action: 'create',
+      parent_thread_id: submission.parentThreadId,
+      similar_thread_key: submission.similarThreadKey ?? null,
+      reaction: submission.reaction,
+    },
+  })
 
   if (error) {
     console.error('[SimilarThreadFeedback] create error:', error)
