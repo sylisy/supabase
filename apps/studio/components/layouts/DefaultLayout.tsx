@@ -76,7 +76,7 @@ export const DefaultLayout = ({
                 />
               </div>
               {/* Main Content Area */}
-              <div className="flex flex-1 w-full overflow-y-hidden pb-24 md:pb-0">
+              <div className="flex flex-1 w-full overflow-y-hidden">
                 {/* Sidebar - Only show for project pages, not account pages */}
                 {!router.pathname.startsWith('/account') && <Sidebar />}
                 {/* Main Content with Layout Sidebar */}

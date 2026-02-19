@@ -2,21 +2,39 @@ import { useParams } from 'common'
 import { AdvisorButton } from 'components/layouts/AppLayout/AdvisorButton'
 import { AssistantButton } from 'components/layouts/AppLayout/AssistantButton'
 import { InlineEditorButton } from 'components/layouts/AppLayout/InlineEditorButton'
+import { SIDEBAR_KEYS } from 'components/layouts/ProjectLayout/LayoutSidebar/LayoutSidebarProvider'
 import { AnimatePresence } from 'framer-motion'
 import { Menu, X } from 'lucide-react'
 import { useCallback, useLayoutEffect, useRef, useState } from 'react'
+import { useSidebarManagerSnapshot } from 'state/sidebar-manager-state'
 import { Button, cn } from 'ui'
 
 import { HelpDropdown } from '../LayoutHeader/HelpDropdown/HelpDropdown'
 import { useMobileSidebarSheet } from '../LayoutSidebar/MobileSidebarSheetContext'
 
 const DRAG_THRESHOLD_PX = 8
-const TOP_WHEN_SHEET_OPEN = 40
 const GAP_FROM_BOTTOM = 100
+/** Fraction of viewport the sheet does not cover when open (sheet is h-[85dvh], so gap is 15%) */
+const SHEET_OPEN_GAP_FRACTION = 0.15
 
 const FloatingBottomNavbar = ({ hideMobileMenu }: { hideMobileMenu?: boolean }) => {
   const { isOpen: isSheetOpen, setOpen: setIsSheetOpen } = useMobileSidebarSheet()
+  const { activeSidebar, openSidebar } = useSidebarManagerSnapshot()
   const { ref: projectRef } = useParams()
+
+  const handleNavClickCapture = useCallback(
+    (e: React.MouseEvent) => {
+      if (!isSheetOpen) return
+      const target = (e.target as HTMLElement).closest?.('[data-sidebar-id]')
+      const sidebarId = target?.getAttribute('data-sidebar-id')
+      if (sidebarId && activeSidebar?.id !== sidebarId) {
+        e.preventDefault()
+        e.stopPropagation()
+        openSidebar(sidebarId)
+      }
+    },
+    [isSheetOpen, activeSidebar?.id, openSidebar]
+  )
 
   const [position, setPosition] = useState<{ x: number; y: number } | null>(null)
   const dragStartRef = useRef<{
@@ -127,6 +145,8 @@ const FloatingBottomNavbar = ({ hideMobileMenu }: { hideMobileMenu?: boolean }) 
   const vw = typeof window !== 'undefined' ? window.innerWidth : 0
   const vh = typeof window !== 'undefined' ? window.innerHeight : 0
   const centerX = vw > 0 && navW > 0 ? vw / 2 - navW / 2 : 0
+  const sheetOpenGapPx = vh * SHEET_OPEN_GAP_FRACTION
+  const topWhenSheetOpen = vh > 0 ? sheetOpenGapPx / 2 - navH / 2 : 0
   const defaultYClosed = vh > 0 ? vh - GAP_FROM_BOTTOM - (navH > 0 ? navH : 56) : 0
 
   const style: React.CSSProperties = (() => {
@@ -146,7 +166,7 @@ const FloatingBottomNavbar = ({ hideMobileMenu }: { hideMobileMenu?: boolean }) 
         left: '50%',
         top: 0,
         transform: isSheetOpen
-          ? `translate(-50%, ${TOP_WHEN_SHEET_OPEN}px)`
+          ? `translate(-50%, ${topWhenSheetOpen}px)`
           : `translate(-50%, ${defaultYClosed}px)`,
       }
     }
@@ -155,7 +175,7 @@ const FloatingBottomNavbar = ({ hideMobileMenu }: { hideMobileMenu?: boolean }) 
         ...base,
         left: 0,
         top: 0,
-        transform: `translate(${centerX}px, ${TOP_WHEN_SHEET_OPEN}px)`,
+        transform: `translate(${centerX}px, ${topWhenSheetOpen}px)`,
       }
     }
     return {
@@ -175,17 +195,24 @@ const FloatingBottomNavbar = ({ hideMobileMenu }: { hideMobileMenu?: boolean }) 
         'fixed md:hidden'
       )}
       style={style}
+      onClickCapture={handleNavClickCapture}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
     >
       <AnimatePresence initial={false}>
         {!!projectRef && (
           <>
-            <AssistantButton />
-            <InlineEditorButton />
+            <span data-sidebar-id={SIDEBAR_KEYS.AI_ASSISTANT}>
+              <AssistantButton />
+            </span>
+            <span data-sidebar-id={SIDEBAR_KEYS.EDITOR_PANEL}>
+              <InlineEditorButton />
+            </span>
           </>
         )}
-        <AdvisorButton projectRef={projectRef} />
+        <span data-sidebar-id={SIDEBAR_KEYS.ADVISOR_PANEL}>
+          <AdvisorButton projectRef={projectRef} />
+        </span>
         <HelpDropdown />
         {!hideMobileMenu && (
           <Button
