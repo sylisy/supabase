@@ -171,7 +171,7 @@ const FloatingBottomNavbar = ({ hideMobileMenu }: { hideMobileMenu?: boolean }) 
     const base = {
       zIndex: isSheetOpen ? 101 : 41,
       transition,
-      touchAction: '',
+      touchAction: 'none',
     }
 
     const menuSheetOpen = isSheetOpen
