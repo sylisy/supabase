@@ -241,14 +241,14 @@ const FloatingBottomNavbarMenu = ({ hideMobileMenu }: { hideMobileMenu?: boolean
               <HelpDropdown />
             </>
           ) : (
-            <span className="px-2 text-sm">Menu</span>
+            <span className="pl-1.5 pr-1 text-sm">Menu</span>
           )}
           {showMenuButton && !hideMobileMenu && (
             <Button
               title="Menu dropdown button"
               type={sheetContent === 'menu' ? 'secondary' : 'default'}
               className={cn(
-                'flex lg:hidden mr-1 rounded-md min-w-[30px] w-[30px] h-[30px] data-[state=open]:bg-overlay-hover/30',
+                'flex lg:hidden rounded-full min-w-[30px] w-[30px] h-[30px] data-[state=open]:bg-overlay-hover/30',
                 sheetContent !== 'menu' && '!bg-surface-300'
               )}
               icon={<Menu />}
