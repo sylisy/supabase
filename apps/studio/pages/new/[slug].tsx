@@ -9,10 +9,11 @@ import { CustomPostgresVersionInput } from 'components/interfaces/ProjectCreatio
 import { DatabasePasswordInput } from 'components/interfaces/ProjectCreation/DatabasePasswordInput'
 import { DisabledWarningDueToIncident } from 'components/interfaces/ProjectCreation/DisabledWarningDueToIncident'
 import { FreeProjectLimitWarning } from 'components/interfaces/ProjectCreation/FreeProjectLimitWarning'
+import { HighAvailabilityInput } from 'components/interfaces/ProjectCreation/HighAvailabilityInput'
 import { OrganizationSelector } from 'components/interfaces/ProjectCreation/OrganizationSelector'
 import {
-  PostgresVersionSelector,
   extractPostgresVersionDetails,
+  PostgresVersionSelector,
 } from 'components/interfaces/ProjectCreation/PostgresVersionSelector'
 import { sizes } from 'components/interfaces/ProjectCreation/ProjectCreation.constants'
 import { FormSchema } from 'components/interfaces/ProjectCreation/ProjectCreation.schema'
@@ -57,9 +58,9 @@ import { useForm } from 'react-hook-form'
 import { AWS_REGIONS, type CloudProvider } from 'shared-data'
 import { toast } from 'sonner'
 import type { NextPageWithLayout } from 'types'
-import { Button, FormField_Shadcn_, Form_Shadcn_, useWatch_Shadcn_ } from 'ui'
-import ConfirmationModal from 'ui-patterns/Dialogs/ConfirmationModal'
+import { Button, Form_Shadcn_, FormField_Shadcn_, useWatch_Shadcn_ } from 'ui'
 import { Admonition } from 'ui-patterns/admonition'
+import ConfirmationModal from 'ui-patterns/Dialogs/ConfirmationModal'
 import { z } from 'zod'
 
 const sizesWithNoCostConfirmationRequired: DesiredInstanceSize[] = ['micro', 'small']
@@ -114,6 +115,7 @@ const Wizard: NextPageWithLayout = () => {
     defaultValues: {
       organization: slug,
       projectName: projectName || '',
+      highAvailability: false,
       postgresVersion: '',
       cloudProvider: PROVIDERS[defaultProvider].id,
       dbPass: '',
@@ -132,6 +134,7 @@ const Wizard: NextPageWithLayout = () => {
     cloudProvider,
     dbRegion,
     organization,
+    highAvailability,
   } = useWatch_Shadcn_({ control: form.control })
 
   // [Charis] Since the form is updated in a useEffect, there is an edge case
@@ -286,6 +289,7 @@ const Wizard: NextPageWithLayout = () => {
     const {
       cloudProvider,
       projectName,
+      highAvailability,
       dbPass,
       dbRegion,
       postgresVersion,
@@ -308,11 +312,12 @@ const Wizard: NextPageWithLayout = () => {
       ? smartGroup.find((x) => x.name === dbRegion) ?? specific.find((x) => x.name === dbRegion)
       : undefined
 
-    const data: ProjectCreateVariables = {
+    const data: ProjectCreateVariables & { highAvailability: boolean } = {
       dbPass,
       cloudProvider,
       organizationSlug: currentOrg.slug,
       name: projectName,
+      highAvailability,
       // gets ignored due to org billing subscription anyway
       dbPricingTierId: 'tier_free',
       // only set the compute size on pro+ plans. Free plans always use micro (nano in the future) size.
@@ -433,6 +438,7 @@ const Wizard: NextPageWithLayout = () => {
                 {canCreateProject && (
                   <>
                     <ProjectNameInput form={form} />
+                    <HighAvailabilityInput form={form} />
 
                     {cloudProviderEnabled && showNonProdFields && (
                       <CloudProviderSelector form={form} />
