@@ -160,7 +160,11 @@ export const useTableRowsCountQuery = <TData = TableRowsCountData>(
   const connectionString = connectionStringOverride || connectionStringReadOps
 
   return useQuery<TableRowsCountData, TableRowsCountError, TData>({
-    queryKey: tableRowKeys.tableRowsCount(projectRef, { table: { id: tableId }, ...args }),
+    queryKey: tableRowKeys.tableRowsCount(projectRef, {
+      table: { id: tableId },
+      connectionString,
+      ...args,
+    }),
     queryFn: ({ signal }) =>
       getTableRowsCount({ queryClient, projectRef, connectionString, tableId, ...args }, signal),
     enabled:

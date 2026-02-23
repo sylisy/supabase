@@ -143,7 +143,7 @@ export const useForeignKeyConstraintsQuery = <TData = ForeignKeyConstraintsData>
   const connectionString = connectionStringOverride || connectionStringReadOps
 
   return useQuery<ForeignKeyConstraintsData, ForeignKeyConstraintsError, TData>({
-    queryKey: databaseKeys.foreignKeyConstraints(projectRef, schema),
+    queryKey: databaseKeys.foreignKeyConstraints(projectRef, schema, { connectionString }),
     queryFn: ({ signal }) =>
       getForeignKeyConstraints({ projectRef, connectionString, schema }, signal),
     enabled:

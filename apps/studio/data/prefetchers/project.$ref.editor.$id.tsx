@@ -66,12 +66,8 @@ export function usePrefetchEditorTablePage() {
   const router = useRouter()
   const queryClient = useQueryClient()
   const { data: project } = useSelectedProjectQuery()
+  const { connectionString } = useConnectionStringForReadOps()
   const roleImpersonationState = useRoleImpersonationStateSnapshot()
-
-  const { connectionString: connectionStringReadOps, type } = useConnectionStringForReadOps()
-  const connectionString = connectionStringReadOps ?? project?.connectionString
-
-  console.log('usePrefetchEditorTablePage', { type })
 
   return useCallback(
     ({ id: _id, filters, sorts }: { id?: string; filters?: Filter[]; sorts?: Sort[] }) => {
