@@ -7,8 +7,10 @@ export const LOCAL_STORAGE_KEYS = {
   SIDEBAR_BEHAVIOR: 'supabase-sidebar-behavior',
   EDITOR_PANEL_STATE: 'supabase-editor-panel-state',
   PROJECTS_VIEW: 'projects-view',
+  PROJECTS_FILTER: 'projects-filter',
   FEEDBACK_WIDGET_CONTENT: 'feedback-widget-content',
   FEEDBACK_WIDGET_SCREENSHOT: 'feedback-widget-screenshot',
+  INCIDENT_BANNER_DISMISSED: (id: string) => `incident-banner-dismissed-${id}`,
   MAINTENANCE_BANNER_DISMISSED: (id: string) => `maintenance-banner-dismissed-${id}`,
 
   UI_PREVIEW_API_SIDE_PANEL: 'supabase-ui-api-side-panel',
@@ -19,6 +21,7 @@ export const LOCAL_STORAGE_KEYS = {
   UI_PREVIEW_BRANCHING_2_0: 'supabase-ui-branching-2-0',
   UI_PREVIEW_ADVISOR_RULES: 'supabase-ui-advisor-rules',
   UI_PREVIEW_QUEUE_OPERATIONS: 'supabase-ui-queue-operations',
+  UI_PREVIEW_TABLE_FILTER_BAR: 'supabase-ui-table-filter-bar',
 
   NEW_LAYOUT_NOTICE_ACKNOWLEDGED: 'new-layout-notice-acknowledge',
   TABS_INTERFACE_ACKNOWLEDGED: 'tabs-interface-acknowledge',
@@ -97,6 +100,8 @@ export const LOCAL_STORAGE_KEYS = {
 
   // Observability banner dismissed
   OBSERVABILITY_BANNER_DISMISSED: (ref: string) => `observability-banner-dismissed-${ref}`,
+  TABLE_EDITOR_NEW_FILTER_BANNER_DISMISSED: (ref: string) =>
+    `table-editor-new-filter-banner-dismissed-${ref}`,
 
   /**
    * COMMON
@@ -134,6 +139,7 @@ const LOCAL_STORAGE_KEYS_ALLOWLIST = [
   LOCAL_STORAGE_KEYS.UI_PREVIEW_CLS,
   LOCAL_STORAGE_KEYS.UI_PREVIEW_UNIFIED_LOGS,
   LOCAL_STORAGE_KEYS.UI_PREVIEW_QUEUE_OPERATIONS,
+  LOCAL_STORAGE_KEYS.UI_PREVIEW_TABLE_FILTER_BAR,
   LOCAL_STORAGE_KEYS.LAST_SIGN_IN_METHOD,
   LOCAL_STORAGE_KEYS.HIDE_PROMO_TOAST,
   LOCAL_STORAGE_KEYS.BLOG_VIEW,
