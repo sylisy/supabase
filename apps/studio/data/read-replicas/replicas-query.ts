@@ -73,7 +73,9 @@ export const useConnectionStringForReadOps = () => {
     projectRef: project?.ref,
   })
 
-  const readReplicas = databases.filter((x) => x.identifier !== project?.ref)
+  const readReplicas = databases.filter(
+    (x) => x.identifier !== project?.ref && x.status === 'ACTIVE_HEALTHY'
+  )
   const readReplica = readReplicas.some((x) => x.region === project?.region)
     ? readReplicas.find((x) => x.region === project?.region)
     : readReplicas[0]
