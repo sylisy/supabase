@@ -1,4 +1,5 @@
 import { QueryInsightsHealth } from './QueryInsightsHealth/QueryInsightsHealth'
+import { QueryInsightsChart } from './QueryInsightsChart/QueryInsightsChart'
 
 interface QueryInsightsProps {
   dateRange?: {
@@ -13,7 +14,7 @@ export const QueryInsights = ({ dateRange, onDateRangeChange }: QueryInsightsPro
   return (
     <div>
       <QueryInsightsHealth data={[]} isLoading={false} />
-      {/* Chart here */}
+      <QueryInsightsChart />
       {/* Table here */}
     </div>
   )
