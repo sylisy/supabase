@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { ArrowUpRight, Plus } from 'lucide-react'
 import { Badge, Button, Tabs_Shadcn_, TabsList_Shadcn_, TabsTrigger_Shadcn_, cn } from 'ui'
 import { GenericSkeletonLoader } from 'ui-patterns/ShimmeringLoader'
+import TwoOptionToggle from 'components/ui/TwoOptionToggle'
 
 import type { QueryPerformanceRow } from '../../QueryPerformance/QueryPerformance.types'
 import { useQueryInsightsIssues } from '../hooks/useQueryInsightsIssues'
@@ -41,11 +42,11 @@ export const QueryInsightsTable = ({ data, isLoading }: QueryInsightsTableProps)
   return (
     <div className="flex flex-col flex-1 min-h-0">
       {/* Header bar */}
-      <div className="flex items-center justify-between px-6 border-b flex-shrink-0">
+      <div className="flex items-center justify-between px-6 border-b flex-shrink-0 h-10">
         <div className="flex items-center">
           {mode === 'triage' ? (
             <Tabs_Shadcn_ value={filter} onValueChange={(v) => setFilter(v as IssueFilter)}>
-              <TabsList_Shadcn_ className="flex gap-x-4 rounded-none !mt-0 pt-0">
+              <TabsList_Shadcn_ className="flex gap-x-4 rounded-none !mt-0 pt-0 !border-none">
                 <TabsTrigger_Shadcn_
                   value="all"
                   className="text-xs py-3 border-b-[1px] font-mono uppercase"
@@ -80,24 +81,13 @@ export const QueryInsightsTable = ({ data, isLoading }: QueryInsightsTableProps)
         </div>
 
         {/* Mode toggle */}
-        <div className="flex items-center gap-0">
-          <Button
-            type={mode === 'triage' ? 'primary' : 'default'}
-            size="tiny"
-            className="rounded-r-none"
-            onClick={() => setMode('triage')}
-          >
-            Triage
-          </Button>
-          <Button
-            type={mode === 'explorer' ? 'primary' : 'default'}
-            size="tiny"
-            className="rounded-l-none"
-            onClick={() => setMode('explorer')}
-          >
-            Explorer
-          </Button>
-        </div>
+        <TwoOptionToggle
+          width={75}
+          options={['explorer', 'triage']}
+          activeOption={mode}
+          borderOverride="border"
+          onClickOption={setMode}
+        />
       </div>
 
       {/* Content area */}
