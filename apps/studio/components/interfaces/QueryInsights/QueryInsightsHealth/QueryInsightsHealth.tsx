@@ -4,6 +4,7 @@ import { HEALTH_COLORS, HEALTH_LEVELS, getHealthLevel } from './QueryInsightsHea
 import type { QueryPerformanceRow } from '../../QueryPerformance/QueryPerformance.types'
 import { QueryInsightsHealthMetric } from './QueryInsightsHealthMetric'
 import { cn } from 'ui'
+import { useMemo } from 'react'
 
 interface QueryInsightsHealthProps {
   data: QueryPerformanceRow[]
@@ -17,6 +18,22 @@ export const QueryInsightsHealth = ({ data, isLoading }: QueryInsightsHealthProp
   const color = HEALTH_COLORS[level]
   const label = HEALTH_LEVELS[level].label
 
+  const avgP95 = useMemo(() => {
+    const totalCalls = data.reduce((sum, r) => sum + r.calls, 0)
+    const weightedMean =
+      totalCalls > 0 ? data.reduce((sum, r) => sum + r.mean_time * r.calls, 0) / totalCalls : 0
+    return Math.round(weightedMean)
+  }, [data])
+
+  const totalCalls = useMemo(() => data.reduce((sum, r) => sum + r.calls, 0), [data])
+  const totalRowsRead = useMemo(() => data.reduce((sum, r) => sum + r.rows_read, 0), [data])
+  const cacheHitRate = useMemo(() => {
+    const hits = data.reduce((sum, r) => sum + (r._total_cache_hits ?? 0), 0)
+    const misses = data.reduce((sum, r) => sum + (r._total_cache_misses ?? 0), 0)
+    const total = hits + misses
+    return total > 0 ? ((hits / total) * 100).toFixed(2) + '%' : '–'
+  }, [data])
+
   return (
     <div className="w-full border-b flex items-center">
       <div className="px-6 py-3 flex items-center gap-3">
@@ -26,21 +43,43 @@ export const QueryInsightsHealth = ({ data, isLoading }: QueryInsightsHealthProp
             background: `conic-gradient(${color} ${score * 3.6}deg, hsl(var(--border-default)) ${score * 3.6}deg)`,
           }}
         >
-          <div className="h-10 w-10 rounded-full bg-studio flex items-center justify-center text-base font-medium" style={{ color }}>
+          <div
+            className="h-10 w-10 rounded-full bg-studio flex items-center justify-center text-base font-medium"
+            style={{ color }}
+          >
             {score}
           </div>
         </div>
         <div className="flex flex-col">
-          <span className="text-xs text-foreground-lighter uppercase font-mono tracking-wider">Health Score</span>
-          <span className="text-xl text-foreground-light" style={{ color }}>{label}</span>
+          <span className="text-xs text-foreground-lighter uppercase font-mono tracking-wider">
+            Health Score
+          </span>
+          <span className="text-xl text-foreground-light" style={{ color }}>
+            {label}
+          </span>
         </div>
       </div>
       <div className="flex-1 border-l h-full">
         <div className="grid grid-cols-2">
-          <QueryInsightsHealthMetric label="Average P95" value={0} className="border-b" />
-          <QueryInsightsHealthMetric label="Total Calls" value={0} className="border-l border-b" />
-          <QueryInsightsHealthMetric label="Total Rows Read" value={0} />
-          <QueryInsightsHealthMetric label="Cache Hit Rate" value={0} className="border-l" />
+          <QueryInsightsHealthMetric
+            label="Avg Latency"
+            value={`${avgP95}ms`}
+            className="border-b"
+          />
+          <QueryInsightsHealthMetric
+            label="Total Calls"
+            value={totalCalls.toLocaleString()}
+            className="border-l border-b"
+          />
+          <QueryInsightsHealthMetric
+            label="Total Rows Read"
+            value={totalRowsRead.toLocaleString()}
+          />
+          <QueryInsightsHealthMetric
+            label="Cache Hit Rate"
+            value={cacheHitRate}
+            className="border-l"
+          />
         </div>
       </div>
     </div>

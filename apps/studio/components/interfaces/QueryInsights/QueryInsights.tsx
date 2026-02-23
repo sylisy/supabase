@@ -1,6 +1,22 @@
+import { useMemo } from 'react'
+import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
+
+import { useParams } from 'common'
+import useLogsQuery from 'hooks/analytics/useLogsQuery'
+import { useSelectedProjectQuery } from 'hooks/misc/useSelectedProject'
+import { getSupamonitorLogsQuery } from '../QueryPerformance/QueryPerformance.constants'
+import {
+  parseSupamonitorLogs,
+  transformLogsToChartData,
+  aggregateLogsByQuery,
+} from '../QueryPerformance/WithSupamonitor/WithSupamonitor.utils'
+
 import { QueryInsightsHealth } from './QueryInsightsHealth/QueryInsightsHealth'
 import { QueryInsightsChart } from './QueryInsightsChart/QueryInsightsChart'
 import { QueryInsightsTable } from './QueryInsightsTable/QueryInsightsTable'
+
+dayjs.extend(utc)
 
 interface QueryInsightsProps {
   dateRange?: {
@@ -12,11 +28,47 @@ interface QueryInsightsProps {
 }
 
 export const QueryInsights = ({ dateRange, onDateRangeChange }: QueryInsightsProps) => {
+  const { ref } = useParams()
+
+  const effectiveDateRange = useMemo(() => {
+    if (dateRange) {
+      return {
+        iso_timestamp_start: dateRange.period_start.date,
+        iso_timestamp_end: dateRange.period_end.date,
+      }
+    }
+    const end = dayjs.utc()
+    const start = end.subtract(1, 'hour')
+    return {
+      iso_timestamp_start: start.toISOString(),
+      iso_timestamp_end: end.toISOString(),
+    }
+  }, [dateRange])
+
+  const sql = useMemo(
+    () =>
+      getSupamonitorLogsQuery(
+        effectiveDateRange.iso_timestamp_start,
+        effectiveDateRange.iso_timestamp_end
+      ),
+    [effectiveDateRange]
+  )
+
+  const { logData, isLoading, error } = useLogsQuery(ref as string, {
+    sql,
+    iso_timestamp_start: effectiveDateRange.iso_timestamp_start,
+    iso_timestamp_end: effectiveDateRange.iso_timestamp_end,
+  })
+
+  const parsedLogs = useMemo(() => parseSupamonitorLogs(logData || []), [logData])
+  const chartData = useMemo(() => transformLogsToChartData(parsedLogs), [parsedLogs])
+  const aggregatedData = useMemo(() => aggregateLogsByQuery(parsedLogs), [parsedLogs])
+
   return (
     <div className="flex flex-col flex-1 min-h-0">
-      <QueryInsightsHealth data={[]} isLoading={false} />
-      <QueryInsightsChart />
-      <QueryInsightsTable />
+      <QueryInsightsHealth data={aggregatedData} isLoading={isLoading} />
+      <QueryInsightsChart chartData={chartData} isLoading={isLoading} />
+      <QueryInsightsTable data={aggregatedData} isLoading={isLoading} />
     </div>
   )
 }
