@@ -39,7 +39,7 @@ export const JITAccess = () => {
     <PageSection id="jit-access">
       <PageSectionMeta>
         <PageSectionSummary>
-          <PageSectionTitle>Just-in-Time Access</PageSectionTitle>
+          <PageSectionTitle>Just-in-Time (JIT)</PageSectionTitle>
         </PageSectionSummary>
         <DocsButton href={`${DOCS_URL}/guides/platform/jit-access`} />
       </PageSectionMeta>
@@ -48,7 +48,7 @@ export const JITAccess = () => {
           <CardContent className="space-y-4">
             <FormLayout
               layout="flex-row-reverse"
-              label="Enable Just-in-Time Access"
+              label="JIT access"
               description="Allow time-limited database access with approval workflows. Add users who can request access."
             >
               <div className="flex items-center justify-end mt-2.5">
