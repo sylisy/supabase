@@ -1,3 +1,4 @@
+import { Badge } from 'ui'
 import {
   PageSection,
   PageSectionContent,
@@ -14,7 +15,10 @@ const CustomAuthProviders = () => {
     <PageSection id="custom-providers">
       <PageSectionMeta>
         <PageSectionSummary>
-          <PageSectionTitle>Custom Providers</PageSectionTitle>
+          <div className="flex items-center gap-x-2">
+            <PageSectionTitle>Custom Providers</PageSectionTitle>
+            <Badge variant="success">New</Badge>
+          </div>
           <PageSectionDescription>
             Configure OAuth/OIDC providers for this project using your own issuer or endpoints.
           </PageSectionDescription>

@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useParams } from 'common'
-import { Radio, RefreshCcw, Signal, X } from 'lucide-react'
-import { useEffect, useMemo } from 'react'
+import { X } from 'lucide-react'
+import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import {
@@ -29,10 +29,13 @@ import {
   SheetTitle,
 } from 'ui'
 import { FormItemLayout } from 'ui-patterns/form/FormItemLayout/FormItemLayout'
+import { MultiSelector } from 'ui-patterns/multi-select'
 import * as z from 'zod'
 
+import { useProjectEndpointQuery } from '../../../../data/config/project-endpoint-query'
 import { FormSectionLabel } from '../../../ui/Forms/FormSection'
 import type { CustomProvider } from './customProviders.types'
+import { CUSTOM_PROVIDER_SCOPE_OPTIONS } from './customProviders.utils'
 
 interface CreateOrUpdateCustomProviderSheetProps {
   visible: boolean
@@ -79,7 +82,6 @@ const initialValues = {
   jwks_uri: '',
   discovery_url: '',
   scopes: '',
-  callback_url: '',
   client_id: '',
   client_secret: '',
 }
@@ -92,6 +94,7 @@ export const CreateOrUpdateCustomProviderSheet = ({
 }: CreateOrUpdateCustomProviderSheetProps) => {
   const isEditMode = !!providerToEdit
   const { ref: projectRef } = useParams()
+  const { data: endpointData } = useProjectEndpointQuery({ projectRef })
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: initialValues,
@@ -106,6 +109,13 @@ export const CreateOrUpdateCustomProviderSheet = ({
           provider_type: providerToEdit.provider_type,
           client_id: providerToEdit.client_id,
           client_secret: '********',
+          issuer: providerToEdit.issuer,
+          authorization_url: providerToEdit.authorization_url,
+          token_url: providerToEdit.token_url,
+          userinfo_url: providerToEdit.userinfo_url,
+          jwks_uri: providerToEdit.jwks_uri,
+          discovery_url: providerToEdit.discovery_url,
+          scopes: providerToEdit.scopes,
         })
       } else {
         form.reset(initialValues)
@@ -392,7 +402,7 @@ export const CreateOrUpdateCustomProviderSheet = ({
               )}
             </SheetSection>
             <Separator />
-            <SheetSection className="flex-grow px-5 space-y-6">
+            <SheetSection className="flex-grow px-5 space-y-4">
               <FormField_Shadcn_
                 control={form.control}
                 name="client_id"
@@ -404,7 +414,6 @@ export const CreateOrUpdateCustomProviderSheet = ({
                   </FormItemLayout>
                 )}
               />
-
               <FormField_Shadcn_
                 control={form.control}
                 name="client_secret"
@@ -418,21 +427,53 @@ export const CreateOrUpdateCustomProviderSheet = ({
               />
             </SheetSection>
             <Separator />
-            <SheetSection className="flex-grow px-5 space-y-6">
+            <SheetSection className="flex-grow px-5 space-y-4">
               <FormField_Shadcn_
                 control={form.control}
                 name="scopes"
-                render={({ field }) => (
-                  <FormItemLayout label="Scopes">
-                    <FormControl_Shadcn_>
-                      <Input_Shadcn_ {...field} placeholder="read:user, user:email" />
-                    </FormControl_Shadcn_>
-                  </FormItemLayout>
-                )}
+                render={({ field }) => {
+                  const scopeValues = field.value
+                    ? field.value
+                        .split(',')
+                        .map((s) => s.trim())
+                        .filter(Boolean)
+                    : []
+                  return (
+                    <FormItemLayout
+                      label="Scopes"
+                      description="Space-separated list. Common: openid, email, profile"
+                    >
+                      <FormControl_Shadcn_>
+                        <MultiSelector
+                          values={scopeValues}
+                          onValuesChange={(values) => field.onChange(values.join(', '))}
+                        >
+                          <MultiSelector.Trigger
+                            badgeLimit="wrap"
+                            label={
+                              scopeValues.length === 0 ? 'read:user, user:email' : 'add scopes...'
+                            }
+                            mode="inline-combobox"
+                          />
+                          <MultiSelector.Content>
+                            <MultiSelector.Input placeholder="Search or type a scope" />
+                            <MultiSelector.List creatable>
+                              {CUSTOM_PROVIDER_SCOPE_OPTIONS.map((scope) => (
+                                <MultiSelector.Item key={scope} value={scope}>
+                                  {scope}
+                                </MultiSelector.Item>
+                              ))}
+                            </MultiSelector.List>
+                          </MultiSelector.Content>
+                        </MultiSelector>
+                      </FormControl_Shadcn_>
+                    </FormItemLayout>
+                  )
+                }}
               />
             </SheetSection>
             <Separator />
-            <SheetSection className="flex-grow px-5 space-y-6">
+            <SheetSection className="flex-grow px-5 space-y-4">
               <FormField_Shadcn_
                 control={form.control}
                 name="callback_url"
@@ -445,8 +486,8 @@ export const CreateOrUpdateCustomProviderSheet = ({
                       <Input
                         {...field}
                         copy
-                        value={`https://${projectRef}.supabase.co/auth/v1/callback`}
-                        placeholder={`https://${projectRef}.supabase.co/auth/v1/callback`}
+                        value={`${endpointData?.endpoint}/auth/v1/callback`}
+                        placeholder={`${endpointData?.endpoint}/auth/v1/callback`}
                       />
                     </FormControl_Shadcn_>
                   </FormItemLayout>

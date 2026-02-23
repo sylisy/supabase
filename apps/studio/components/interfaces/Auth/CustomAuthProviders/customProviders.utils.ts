@@ -23,6 +23,19 @@ export const CUSTOM_PROVIDER_ENABLED_OPTIONS = [
   { name: 'Disabled', value: 'false', icon: null },
 ]
 
+/** Common OAuth/OIDC scope options for custom providers (select or add custom) */
+export const CUSTOM_PROVIDER_SCOPE_OPTIONS = [
+  'openid',
+  'email',
+  'profile',
+  'read:user',
+  'user:email',
+  'read:users',
+  'offline_access',
+  'address',
+  'phone',
+]
+
 export function filterCustomProviders({
   providers,
   searchString,
@@ -48,54 +61,3 @@ export function filterCustomProviders({
     return matchesSearch && matchesType && matchesEnabled
   })
 }
-
-// Mock data for development
-export const MOCK_CUSTOM_PROVIDERS: CustomProvider[] = [
-  {
-    id: '550e8400-e29b-41d4-a716-446655440001',
-    provider_type: 'oidc',
-    identifier: 'custom:company-sso',
-    name: 'Company SSO',
-    client_id: 'client_abc123',
-    scopes: 'read:user',
-    pkce_enabled: true,
-    enabled: true,
-    email_optional: false,
-    issuer: 'https://accounts.company.com',
-    discovery_url: 'https://accounts.company.com/.well-known/openid-configuration',
-    skip_nonce_check: false,
-    created_at: '2024-01-15T10:30:00Z',
-    updated_at: '2024-01-15T10:30:00Z',
-  },
-  {
-    id: '550e8400-e29b-41d4-a716-446655440002',
-    provider_type: 'oauth2',
-    identifier: 'custom:custom-auth',
-    name: 'Custom Auth Provider',
-    client_id: 'client_xyz789',
-    scopes: 'email, profile, read:user',
-    pkce_enabled: true,
-    enabled: true,
-    email_optional: false,
-    authorization_url: 'https://auth.example.com/oauth/authorize',
-    token_url: 'https://auth.example.com/oauth/token',
-    userinfo_url: 'https://auth.example.com/oauth/userinfo',
-    created_at: '2024-02-01T14:20:00Z',
-    updated_at: '2024-02-01T14:20:00Z',
-  },
-  {
-    id: '550e8400-e29b-41d4-a716-446655440003',
-    provider_type: 'oidc',
-    identifier: 'custom:partner-login',
-    name: 'Partner Login',
-    client_id: 'client_partner456',
-    scopes: 'read:user, user:email',
-    pkce_enabled: false,
-    enabled: false,
-    email_optional: true,
-    issuer: 'https://partner.example.com',
-    skip_nonce_check: false,
-    created_at: '2024-01-20T08:15:00Z',
-    updated_at: '2024-01-22T16:45:00Z',
-  },
-]

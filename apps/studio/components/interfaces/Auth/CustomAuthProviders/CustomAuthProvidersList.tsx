@@ -1,11 +1,10 @@
 import { useParams } from 'common'
 import AlertError from 'components/ui/AlertError'
-import { ButtonTooltip } from 'components/ui/ButtonTooltip'
 import { FilterPopover } from 'components/ui/FilterPopover'
+import { UpgradePlanButton } from 'components/ui/UpgradePlanButton'
 import { useAuthConfigQuery } from 'data/auth/auth-config-query'
 import { useSelectedOrganizationQuery } from 'hooks/misc/useSelectedOrganization'
 import { Edit, MoreVertical, Plus, Search, Trash, X } from 'lucide-react'
-import Link from 'next/link'
 import { parseAsBoolean, parseAsStringLiteral, useQueryState } from 'nuqs'
 import { useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
@@ -31,7 +30,6 @@ import {
 } from 'ui'
 import { GenericSkeletonLoader } from 'ui-patterns/ShimmeringLoader'
 
-import { UpgradePlanButton } from '../../../ui/UpgradePlanButton'
 import { CreateOrUpdateCustomProviderSheet } from './CreateOrUpdateCustomProviderSheet'
 import type { CustomProvider } from './customProviders.types'
 import {
@@ -40,7 +38,6 @@ import {
   filterCustomProviders,
   getCustomProviderLimit,
   getNextPlanForCustomProviders,
-  MOCK_CUSTOM_PROVIDERS,
 } from './customProviders.utils'
 import { DeleteCustomProviderModal } from './DeleteCustomProviderModal'
 import { NewCustomProviderBanner } from './NewCustomProviderBanner'
@@ -66,12 +63,16 @@ type CustomProvidersSortOrder = CustomProvidersSort extends `${string}:${infer O
 
 export const CustomAuthProvidersList = () => {
   const { ref: projectRef } = useParams()
+
   const { data: organization } = useSelectedOrganizationQuery()
-  const { data: _authConfig, isPending: isAuthConfigLoading } = useAuthConfigQuery({ projectRef })
+  const { data: authConfig, isPending: isAuthConfigLoading } = useAuthConfigQuery({ projectRef })
   const isCustomProvidersEnabled = true
   const providerLimit = getCustomProviderLimit(organization?.plan?.id)
   const nextPlan = getNextPlanForCustomProviders(organization?.plan?.id)
   // const isCustomProvidersEnabled = !!authConfig?.OAUTH_CUSTOM_PROVIDERS_ENABLED
+
+  console.log('authConfig', authConfig)
+
   const [newCustomProvider, setNewCustomProvider] = useState<
     (CustomProvider & { client_secret?: string }) | undefined
   >(undefined)
@@ -81,7 +82,7 @@ export const CustomAuthProvidersList = () => {
   const [filteredEnabledStatuses, setFilteredEnabledStatuses] = useState<string[]>([])
 
   // Mock data - in real implementation this would come from API
-  const customProviders = useMemo(() => MOCK_CUSTOM_PROVIDERS, [])
+  const customProviders: any[] = useMemo(() => [], [])
   const providerCount = customProviders.length
   const atProviderLimit = providerLimit !== Infinity && providerCount >= providerLimit
   const isLoading = false
@@ -191,6 +192,20 @@ export const CustomAuthProvidersList = () => {
   const isCreateOrUpdateSheetVisible = isCreateMode || isEditMode
   const canCreateProvider = isCustomProvidersEnabled && !atProviderLimit
 
+  const NewProviderButton = () => {
+    return (
+      <Button
+        type="primary"
+        disabled={!canCreateProvider}
+        icon={<Plus />}
+        onClick={() => setShowCreateSheet(true)}
+        className="flex-grow"
+      >
+        New Provider
+      </Button>
+    )
+  }
+
   if (isAuthConfigLoading || (isCustomProvidersEnabled && isLoading)) {
     return <GenericSkeletonLoader />
   }
@@ -253,36 +268,32 @@ export const CustomAuthProvidersList = () => {
             )}
           </div>
           <div className="flex items-center gap-x-2">
-            <HoverCard openDelay={0}>
-              <HoverCardTrigger>
-                <Button
-                  type="primary"
-                  disabled={!canCreateProvider}
-                  icon={<Plus />}
-                  onClick={() => setShowCreateSheet(true)}
-                  className="flex-grow"
+            {!isCustomProvidersEnabled || atProviderLimit ? (
+              <HoverCard openDelay={0}>
+                <HoverCardTrigger>
+                  <NewProviderButton />
+                </HoverCardTrigger>
+                <HoverCardContent
+                  side="bottom"
+                  align="end"
+                  className="text-xs flex flex-col gap-y-2 bg-alternative items-start"
                 >
-                  New Provider
-                </Button>
-              </HoverCardTrigger>
-              <HoverCardContent
-                side="bottom"
-                align="end"
-                className="text-xs flex flex-col gap-y-2 bg-alternative items-start"
-              >
-                {!isCustomProvidersEnabled ? (
-                  'Custom providers must be enabled in settings'
-                ) : (
-                  <>
-                    <p>You've reached the limit of {providerLimit} providers for your plan.</p>
-                    <UpgradePlanButton
-                      source={`customAuthProviders-${organization?.plan.id}`}
-                      plan={nextPlan ?? 'Pro'}
-                    />
-                  </>
-                )}
-              </HoverCardContent>
-            </HoverCard>
+                  {!isCustomProvidersEnabled ? (
+                    'Custom providers must be enabled in settings'
+                  ) : (
+                    <>
+                      <p>You've reached the limit of {providerLimit} providers for your plan.</p>
+                      <UpgradePlanButton
+                        source={`customAuthProviders-${organization?.plan.id}`}
+                        plan={nextPlan ?? 'Pro'}
+                      />
+                    </>
+                  )}
+                </HoverCardContent>
+              </HoverCard>
+            ) : (
+              <NewProviderButton />
+            )}
           </div>
         </div>
 
