@@ -137,33 +137,36 @@ const ObservabilityMenu = () => {
       items: [
         ...(showOverview
           ? [
-            {
-              name: 'Overview',
-              key: 'observability',
-              url: `/project/${ref}/observability${preservedQueryParams}`,
-            },
-          ]
+              {
+                name: 'Overview',
+                key: 'observability',
+                url: `/project/${ref}/observability${preservedQueryParams}`,
+              },
+            ]
           : []),
         ...(isSupamonitorEnabled
-          ? [{
-            name: 'Query Insights',
-            key: 'query-insights',
-            url: `/project/${ref}/observability/query-insights${preservedQueryParams}`,
-          }]
-          : [{
-            name: 'Query Performance',
-            key: 'query-performance',
-            url: `/project/${ref}/observability/query-performance${preservedQueryParams}`,
-          }]
-        ),
+          ? [
+              {
+                name: 'Query Insights',
+                key: 'query-insights',
+                url: `/project/${ref}/observability/query-insights${preservedQueryParams}`,
+              },
+            ]
+          : [
+              {
+                name: 'Query Performance',
+                key: 'query-performance',
+                url: `/project/${ref}/observability/query-performance${preservedQueryParams}`,
+              },
+            ]),
         ...(IS_PLATFORM
           ? [
-            {
-              name: 'API Gateway',
-              key: 'api-overview',
-              url: `/project/${ref}/observability/api-overview${preservedQueryParams}`,
-            },
-          ]
+              {
+                name: 'API Gateway',
+                key: 'api-overview',
+                url: `/project/${ref}/observability/api-overview${preservedQueryParams}`,
+              },
+            ]
           : []),
       ],
     },
@@ -173,57 +176,57 @@ const ObservabilityMenu = () => {
       items: [
         ...(IS_PLATFORM
           ? [
-            {
-              name: 'Database',
-              key: 'database',
-              url: `/project/${ref}/observability/database${preservedQueryParams}`,
-            },
-          ]
+              {
+                name: 'Database',
+                key: 'database',
+                url: `/project/${ref}/observability/database${preservedQueryParams}`,
+              },
+            ]
           : []),
         ...(postgrestReportEnabled
           ? [
-            {
-              name: 'Data API',
-              key: 'postgrest',
-              url: `/project/${ref}/observability/postgrest${preservedQueryParams}`,
-            },
-          ]
+              {
+                name: 'Data API',
+                key: 'postgrest',
+                url: `/project/${ref}/observability/postgrest${preservedQueryParams}`,
+              },
+            ]
           : []),
         ...(authEnabled
           ? [
-            {
-              name: 'Auth',
-              key: 'auth',
-              url: `/project/${ref}/observability/auth${preservedQueryParams}`,
-            },
-          ]
+              {
+                name: 'Auth',
+                key: 'auth',
+                url: `/project/${ref}/observability/auth${preservedQueryParams}`,
+              },
+            ]
           : []),
         ...(edgeFnEnabled
           ? [
-            {
-              name: 'Edge Functions',
-              key: 'edge-functions',
-              url: `/project/${ref}/observability/edge-functions${preservedQueryParams}`,
-            },
-          ]
+              {
+                name: 'Edge Functions',
+                key: 'edge-functions',
+                url: `/project/${ref}/observability/edge-functions${preservedQueryParams}`,
+              },
+            ]
           : []),
         ...(storageEnabled
           ? [
-            {
-              name: 'Storage',
-              key: 'storage',
-              url: `/project/${ref}/observability/storage${preservedQueryParams}`,
-            },
-          ]
+              {
+                name: 'Storage',
+                key: 'storage',
+                url: `/project/${ref}/observability/storage${preservedQueryParams}`,
+              },
+            ]
           : []),
         ...(realtimeEnabled
           ? [
-            {
-              name: 'Realtime',
-              key: 'realtime',
-              url: `/project/${ref}/observability/realtime${preservedQueryParams}`,
-            },
-          ]
+              {
+                name: 'Realtime',
+                key: 'realtime',
+                url: `/project/${ref}/observability/realtime${preservedQueryParams}`,
+              },
+            ]
           : []),
       ],
     },
