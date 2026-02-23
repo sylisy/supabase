@@ -4,12 +4,14 @@ interface QueryInsightsHealthMetricProps {
   label: string
   value: number | string | undefined
   className?: string
+  isLoading?: boolean
 }
 
 export const QueryInsightsHealthMetric = ({
   label,
   value,
   className,
+  isLoading,
 }: QueryInsightsHealthMetricProps) => {
   return (
     <div
@@ -19,7 +21,11 @@ export const QueryInsightsHealthMetric = ({
       )}
     >
       <span className="text-foreground-lighter tracking-wider truncate">{label}</span>
-      <span className="text-foreground font-medium tabular-nums">{value}</span>
+      {isLoading ? (
+        <div className="h-3 w-12 rounded bg-surface-300 animate-pulse" />
+      ) : (
+        <span className="text-foreground font-medium tabular-nums">{value}</span>
+      )}
     </div>
   )
 }

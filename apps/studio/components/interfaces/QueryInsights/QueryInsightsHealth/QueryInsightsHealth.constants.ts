@@ -13,7 +13,7 @@ export type HealthLevel = 'healthy' | 'warning' | 'critical'
 
 export const HEALTH_LEVELS: Record<HealthLevel, { label: string; min: number }> = {
   healthy: { label: 'Healthy', min: 70 },
-  warning: { label: 'Needs Attention', min: 40 },
+  warning: { label: 'Needs attention', min: 40 },
   critical: { label: 'Critical', min: 0 },
 }
 
