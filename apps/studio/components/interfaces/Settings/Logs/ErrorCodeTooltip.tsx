@@ -5,7 +5,7 @@ import { Badge, Tooltip, TooltipContent, TooltipTrigger } from 'ui'
 import { ShimmeringLoader } from 'ui-patterns/ShimmeringLoader'
 
 const SERVICE_DOCS_URLS: Partial<Record<Service, string>> = {
-  [Service.Auth]: 'https://supabase.com/docs/guides/auth/auth-error-codes',
+  [Service.Auth]: 'https://supabase.com/docs/guides/auth/debugging/error-codes',
 }
 
 interface ErrorCodeTooltipProps {
