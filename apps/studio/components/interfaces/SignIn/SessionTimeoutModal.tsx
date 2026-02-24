@@ -55,8 +55,8 @@ export const SessionTimeoutModal = ({
         <AlertDialogHeader>
           <AlertDialogTitle>Session expired</AlertDialogTitle>
           <AlertDialogDescription asChild>
-            <div className="space-y-3">
-              <p>Your session has expired. Sign in again to continue.</p>
+            <div className="space-y-4">
+              <p>Please sign in again to continue.</p>
               <AlertCollapsible trigger="Having trouble?">
                 <div className="space-y-3 text-foreground-light">
                   <p>
@@ -74,11 +74,11 @@ export const SessionTimeoutModal = ({
                     >
                       Contact support
                     </SupportLink>{' '}
-                    or{' '}
+                    and include a{' '}
                     <InlineLink href="https://github.com/orgs/supabase/discussions/36540">
-                      generate a HAR file
+                      HAR file
                     </InlineLink>{' '}
-                    from your session to help us debug.
+                    from your session to help us investigate.
                   </p>
                 </div>
               </AlertCollapsible>
