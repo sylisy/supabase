@@ -30,17 +30,12 @@ export const SessionTimeoutModal = ({
       confirmLabel="Sign in again"
       onCancel={onClose}
       onConfirm={redirectToSignIn}
-      alert={{
-        base: { variant: 'warning' },
-        title: 'Your session has timed out',
-        description:
-          'Please try signing in again. If you are not able to sign in again, please contact Support.',
-      }}
     >
       <div className="space-y-4 text-sm text-foreground-light">
+        <p>Please try signing in again. If you are not able to sign in, try these steps:</p>
         <ul className="list-disc pl-1.5 list-inside space-y-1 text-sm text-foreground-light">
           <li>Try with a different browser</li>
-          <li>Disable browser extensions that block network requests</li>
+          <li>Disable extensions that block network requests</li>
           <li>
             <button
               title="Clear storage and reload"
@@ -60,21 +55,18 @@ export const SessionTimeoutModal = ({
           </li>
         </ul>
         <p>
-          If none of these steps work, please{' '}
+          If none of these steps work, {' '}
           <SupportLink
             className={InlineLinkClassName}
             queryParams={{ subject: 'Session timed out' }}
           >
             contact support
           </SupportLink>
-          .
-        </p>
-        <p>
-          Consider{' '}
+          . Consider{' '}
           <InlineLink href="https://github.com/orgs/supabase/discussions/36540">
             generating a HAR file
           </InlineLink>{' '}
-          from your session to help Support pinpoint the issue.
+          from your session to help us pinpoint the issue.
         </p>
       </div>
     </ConfirmationModal>
