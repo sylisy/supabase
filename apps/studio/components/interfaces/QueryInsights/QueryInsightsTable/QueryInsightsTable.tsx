@@ -1,11 +1,28 @@
 import { useMemo, useState, useRef, useCallback, useEffect } from 'react'
 import { Search, X, ArrowDown, ArrowUp, ChevronDown, TextSearch } from 'lucide-react'
 import DataGrid, { Column, DataGridHandle, Row } from 'react-data-grid'
-import { Button, Tabs_Shadcn_, TabsList_Shadcn_, TabsTrigger_Shadcn_, cn, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from 'ui'
+import {
+  Button,
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetTitle,
+  Tabs_Shadcn_,
+  TabsList_Shadcn_,
+  TabsTrigger_Shadcn_,
+  TabsContent_Shadcn_,
+  cn,
+  copyToClipboard,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from 'ui'
 import { Input } from 'ui-patterns/DataInputs/Input'
 import { GenericSkeletonLoader } from 'ui-patterns/ShimmeringLoader'
 import TwoOptionToggle from 'components/ui/TwoOptionToggle'
 import { parseAsString, useQueryStates } from 'nuqs'
+import { toast } from 'sonner'
 
 import type { QueryPerformanceRow } from '../../QueryPerformance/QueryPerformance.types'
 import { useQueryInsightsIssues } from '../hooks/useQueryInsightsIssues'
@@ -14,6 +31,14 @@ import { getQueryType, getTableName, getColumnName, formatDuration } from './Que
 import { QueryInsightsTableRow } from './QueryInsightsTableRow'
 import { ArrowUpRight, Plus } from 'lucide-react'
 import { ISSUE_DOT_COLORS, ISSUE_ICONS, QUERY_INSIGHTS_EXPLORER_COLUMNS, NON_SORTABLE_COLUMNS } from './QueryInsightsTable.constants'
+import { QueryDetail } from '../../QueryPerformance/QueryDetail'
+import { QueryIndexes } from '../../QueryPerformance/QueryIndexes'
+import { buildQueryExplanationPrompt } from '../../QueryPerformance/QueryPerformance.ai'
+import { useExecuteSqlMutation } from 'data/sql/execute-sql-mutation'
+import { useSelectedProjectQuery } from 'hooks/misc/useSelectedProject'
+import { wrapWithRollback } from 'data/sql/utils/transaction'
+import type { QueryPlanRow } from 'components/interfaces/ExplainVisualizer/ExplainVisualizer.types'
+import type { ClassifiedQuery } from '../QueryInsightsHealth/QueryInsightsHealth.types'
 
 interface QueryInsightsTableProps {
   data: QueryPerformanceRow[]
@@ -29,9 +54,33 @@ export const QueryInsightsTable = ({ data, isLoading }: QueryInsightsTableProps)
   })
   const [searchQuery, setSearchQuery] = useState(urlSearch || '')
   const [selectedRow, setSelectedRow] = useState<number>()
+  const [selectedTriageRow, setSelectedTriageRow] = useState<number | undefined>()
+  const [sheetView, setSheetView] = useState<'details' | 'indexes'>('details')
   const gridRef = useRef<DataGridHandle>(null)
   const dataGridContainerRef = useRef<HTMLDivElement>(null)
+  const triageContainerRef = useRef<HTMLDivElement>(null)
   const [sort, setSort] = useState<{ column: string; order: 'asc' | 'desc' } | null>(null)
+
+  // Inline explain state
+  const [explainOpenQuery, setExplainOpenQuery] = useState<string | null>(null)
+  const [explainResults, setExplainResults] = useState<Record<string, QueryPlanRow[]>>({})
+  const [explainLoadingQuery, setExplainLoadingQuery] = useState<string | null>(null)
+  const explainQueryRef = useRef<string | null>(null)
+
+  const { data: project } = useSelectedProjectQuery()
+
+  const { mutate: executeExplain } = useExecuteSqlMutation({
+    onSuccess(data) {
+      const query = explainQueryRef.current
+      if (query) {
+        setExplainResults((prev) => ({ ...prev, [query]: data.result }))
+      }
+      setExplainLoadingQuery(null)
+    },
+    onError() {
+      setExplainLoadingQuery(null)
+    },
+  })
 
   const triageItems = useMemo(() => classified.filter((q) => q.issueType !== null), [classified])
 
@@ -91,6 +140,37 @@ export const QueryInsightsTable = ({ data, isLoading }: QueryInsightsTableProps)
     },
     [classified, searchQuery, sort]
   )
+
+  // Computed active sheet row
+  const activeSheetRow: ClassifiedQuery | undefined = useMemo(() => {
+    if (mode === 'triage') {
+      return selectedTriageRow !== undefined ? filteredTriageItems[selectedTriageRow] : undefined
+    }
+    return selectedRow !== undefined ? (explorerItems[selectedRow] as ClassifiedQuery) : undefined
+  }, [mode, selectedTriageRow, selectedRow, filteredTriageItems, explorerItems])
+
+  const handleCopyMarkdown = (item: ClassifiedQuery) => {
+    const { query, prompt } = buildQueryExplanationPrompt(item)
+    const markdown = `${prompt}\n\nSQL Query:\n\`\`\`sql\n${query}\n\`\`\``
+    copyToClipboard(markdown, () => toast.success('Copied to clipboard'))
+  }
+
+  const handleExplain = (query: string) => {
+    const isOpen = explainOpenQuery === query
+    if (isOpen) {
+      setExplainOpenQuery(null)
+      return
+    }
+    setExplainOpenQuery(query)
+    if (explainResults[query]) return // already cached
+    explainQueryRef.current = query
+    setExplainLoadingQuery(query)
+    executeExplain({
+      projectRef: project?.ref,
+      connectionString: project?.connectionString,
+      sql: wrapWithRollback(`EXPLAIN ANALYZE ${query}`),
+    })
+  }
 
   const columns = useMemo(() => {
     return QUERY_INSIGHTS_EXPLORER_COLUMNS.map((col) => {
@@ -366,7 +446,7 @@ export const QueryInsightsTable = ({ data, isLoading }: QueryInsightsTableProps)
             <GenericSkeletonLoader />
           </div>
         ) : mode === 'triage' ? (
-          <div className="flex flex-col">
+          <div ref={triageContainerRef} className="flex flex-col">
             {filteredTriageItems.length === 0 ? (
               <div className="py-8 text-center">
                 <p className="text-sm text-foreground-lighter">
@@ -382,6 +462,19 @@ export const QueryInsightsTable = ({ data, isLoading }: QueryInsightsTableProps)
                     key={idx}
                     item={item}
                     type="triage"
+                    onRowClick={() => {
+                      setSelectedTriageRow(idx)
+                      setSheetView('details')
+                    }}
+                    onCopyMarkdown={() => handleCopyMarkdown(item)}
+                    onCreateIndex={() => {
+                      setSelectedTriageRow(idx)
+                      setSheetView('indexes')
+                    }}
+                    onExplain={() => handleExplain(item.query)}
+                    isExplainLoading={explainLoadingQuery === item.query}
+                    isExplainOpen={explainOpenQuery === item.query}
+                    explainRows={explainResults[item.query]}
                   />
                 ))}
 
@@ -423,6 +516,7 @@ export const QueryInsightsTable = ({ data, isLoading }: QueryInsightsTableProps)
                         event.stopPropagation()
                         if (typeof idx === 'number' && idx >= 0) {
                           setSelectedRow(idx)
+                          setSheetView('details')
                           gridRef.current?.scrollToCell({ idx: 0, rowIdx: idx })
                         }
                       }}
@@ -447,6 +541,71 @@ export const QueryInsightsTable = ({ data, isLoading }: QueryInsightsTableProps)
           </div>
         )}
       </div>
+
+      <Sheet
+        open={activeSheetRow !== undefined}
+        onOpenChange={(open) => {
+          if (!open) {
+            setSelectedTriageRow(undefined)
+            setSelectedRow(undefined)
+          }
+        }}
+        modal={false}
+      >
+        <SheetTitle className="sr-only">Query details</SheetTitle>
+        <SheetDescription className="sr-only">Query Insights Details &amp; Indexes</SheetDescription>
+        <SheetContent
+          side="right"
+          className="flex flex-col h-full bg-studio border-l lg:!w-[calc(100vw-802px)] max-w-[700px] w-full"
+          hasOverlay={false}
+          onInteractOutside={(event) => {
+            if (
+              dataGridContainerRef.current?.contains(event.target as Node) ||
+              triageContainerRef.current?.contains(event.target as Node)
+            ) {
+              event.preventDefault()
+            }
+          }}
+        >
+          <Tabs_Shadcn_
+            value={sheetView}
+            className="flex flex-col h-full"
+            onValueChange={(v: any) => setSheetView(v)}
+          >
+            <div className="px-5 border-b">
+              <TabsList_Shadcn_ className="px-0 flex gap-x-4 min-h-[46px] border-b-0 [&>button]:h-[47px]">
+                <TabsTrigger_Shadcn_
+                  value="details"
+                  className="px-0 pb-0 data-[state=active]:bg-transparent !shadow-none"
+                >
+                  Query details
+                </TabsTrigger_Shadcn_>
+                <TabsTrigger_Shadcn_
+                  value="indexes"
+                  className="px-0 pb-0 data-[state=active]:bg-transparent !shadow-none"
+                >
+                  Indexes
+                </TabsTrigger_Shadcn_>
+              </TabsList_Shadcn_>
+            </div>
+            <TabsContent_Shadcn_ value="details" className="mt-0 flex-grow min-h-0 overflow-y-auto">
+              {activeSheetRow && (
+                <QueryDetail
+                  selectedRow={activeSheetRow}
+                  onClickViewSuggestion={() => setSheetView('indexes')}
+                  onClose={() => {
+                    setSelectedTriageRow(undefined)
+                    setSelectedRow(undefined)
+                  }}
+                />
+              )}
+            </TabsContent_Shadcn_>
+            <TabsContent_Shadcn_ value="indexes" className="mt-0 flex-grow min-h-0 overflow-y-auto">
+              {activeSheetRow && <QueryIndexes selectedRow={activeSheetRow} />}
+            </TabsContent_Shadcn_>
+          </Tabs_Shadcn_>
+        </SheetContent>
+      </Sheet>
     </div>
   )
 }
