@@ -9,27 +9,44 @@ import { CHART_TABS, LEGEND_ITEMS, CHART_TYPE } from './QueryInsightsChart.const
 import { formatTime } from './QueryInsightsChart.utils'
 import { CHART_COLORS } from 'components/ui/Charts/Charts.constants'
 
+const SEL_COLOR = 'hsl(var(--chart-blue))'
+
 interface QueryInsightsChartProps {
   chartData: ChartDataPoint[]
+  selectedChartData?: ChartDataPoint[]
   isLoading: boolean
 }
 
-export const QueryInsightsChart = ({ chartData, isLoading }: QueryInsightsChartProps) => {
+export const QueryInsightsChart = ({ chartData, selectedChartData, isLoading }: QueryInsightsChartProps) => {
   const [selectedMetric, setSelectedMetric] = useState('query_latency')
   const [hiddenSeries, setHiddenSeries] = useState<Set<string>>(new Set())
   const { resolvedTheme } = useTheme()
   const isDarkMode = resolvedTheme?.includes('dark')
 
   const data = useMemo(() => {
-    return chartData.map((d) => ({
-      time: d.period_start > 1e13 ? Math.floor(d.period_start / 1000) : d.period_start,
-      p50: d.p50_time,
-      p95: d.p95_time,
-      rows_read: d.rows_read,
-      calls: d.calls,
-      cache_hits: d.cache_hits,
-    }))
-  }, [chartData])
+    const normalize = (ts: number) => (ts > 1e13 ? Math.floor(ts / 1000) : ts)
+
+    const selByTime = new Map(
+      (selectedChartData ?? []).map((d) => [normalize(d.period_start), d])
+    )
+
+    return chartData.map((d) => {
+      const t = normalize(d.period_start)
+      const sel = selByTime.get(t)
+      return {
+        time: t,
+        p50: d.p50_time,
+        p95: d.p95_time,
+        rows_read: d.rows_read,
+        calls: d.calls,
+        cache_hits: d.cache_hits,
+        sel_p50: sel?.p50_time ?? undefined,
+        sel_rows_read: sel?.rows_read ?? undefined,
+        sel_calls: sel?.calls ?? undefined,
+        sel_cache_hits: sel?.cache_hits ?? undefined,
+      }
+    })
+  }, [chartData, selectedChartData])
 
   const filteredData = useMemo(() => {
     if (hiddenSeries.size === 0) return data
@@ -55,6 +72,10 @@ export const QueryInsightsChart = ({ chartData, isLoading }: QueryInsightsChartP
   }
 
   const isSeriesVisible = (dataKey: string) => !hiddenSeries.has(dataKey)
+
+  const hasSelection = !!selectedChartData && selectedChartData.length > 0
+  const selDataKey =
+    selectedMetric === 'query_latency' ? 'sel_p50' : `sel_${selectedMetric}`
 
   return (
     <div className="bg-surface-100 border-b min-h-[320px]">
@@ -101,6 +122,27 @@ export const QueryInsightsChart = ({ chartData, isLoading }: QueryInsightsChartP
                 </button>
               )
             )}
+            {hasSelection && (
+              <button
+                type="button"
+                onClick={() => toggleSeries(selDataKey)}
+                className={cn(
+                  'flex items-center gap-1.5 text-[11px] transition-colors cursor-pointer',
+                  isSeriesVisible(selDataKey)
+                    ? 'text-foreground hover:text-foreground-light'
+                    : 'text-foreground-muted'
+                )}
+              >
+                <span
+                  className={cn(
+                    'h-1.5 w-1.5 rounded-sm transition-opacity',
+                    !isSeriesVisible(selDataKey) && 'opacity-30'
+                  )}
+                  style={{ backgroundColor: SEL_COLOR }}
+                />
+                Selected query
+              </button>
+            )}
           </div>
           <div className="w-full py-4 flex flex-col">
             <div className="w-full h-[180px] px-0">
@@ -126,6 +168,12 @@ export const QueryInsightsChart = ({ chartData, isLoading }: QueryInsightsChartP
                             <stop offset="100%" stopColor={item.color} stopOpacity={0} />
                           </linearGradient>
                         ))}
+                        {hasSelection && (
+                          <linearGradient id="gradient-sel_p50" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor={SEL_COLOR} stopOpacity={0.35} />
+                            <stop offset="100%" stopColor={SEL_COLOR} stopOpacity={0} />
+                          </linearGradient>
+                        )}
                       </defs>
                       <XAxis
                         dataKey="time"
@@ -171,6 +219,20 @@ export const QueryInsightsChart = ({ chartData, isLoading }: QueryInsightsChartP
                           fillOpacity={isSeriesVisible(item.dataKey) ? 1 : 0}
                         />
                       ))}
+                      {hasSelection && (
+                        <Area
+                          type={CHART_TYPE}
+                          dataKey="sel_p50"
+                          stroke={SEL_COLOR}
+                          strokeWidth={2}
+                          fill="url(#gradient-sel_p50)"
+                          dot={false}
+                          name="Selected query"
+                          connectNulls={false}
+                          strokeOpacity={isSeriesVisible('sel_p50') ? 1 : 0}
+                          fillOpacity={isSeriesVisible('sel_p50') ? 1 : 0}
+                        />
+                      )}
                     </AreaChart>
                   ) : (
                     <AreaChart
@@ -191,6 +253,12 @@ export const QueryInsightsChart = ({ chartData, isLoading }: QueryInsightsChartP
                             <stop offset="100%" stopColor={item.color} stopOpacity={0} />
                           </linearGradient>
                         ))}
+                        {hasSelection && (
+                          <linearGradient id={`gradient-${selDataKey}`} x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor={SEL_COLOR} stopOpacity={0.35} />
+                            <stop offset="100%" stopColor={SEL_COLOR} stopOpacity={0} />
+                          </linearGradient>
+                        )}
                       </defs>
                       <Tooltip
                         content={<QueryInsightsChartTooltip />}
@@ -236,6 +304,20 @@ export const QueryInsightsChart = ({ chartData, isLoading }: QueryInsightsChartP
                           fillOpacity={isSeriesVisible(item.dataKey) ? 1 : 0}
                         />
                       ))}
+                      {hasSelection && (
+                        <Area
+                          type={CHART_TYPE}
+                          dataKey={selDataKey}
+                          stroke={SEL_COLOR}
+                          strokeWidth={2}
+                          fill={`url(#gradient-${selDataKey})`}
+                          dot={false}
+                          name="Selected query"
+                          connectNulls={false}
+                          strokeOpacity={isSeriesVisible(selDataKey) ? 1 : 0}
+                          fillOpacity={isSeriesVisible(selDataKey) ? 1 : 0}
+                        />
+                      )}
                     </AreaChart>
                   )}
                 </ResponsiveContainer>

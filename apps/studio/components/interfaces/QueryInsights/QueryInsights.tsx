@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 
@@ -60,15 +60,31 @@ export const QueryInsights = ({ dateRange, onDateRangeChange }: QueryInsightsPro
     iso_timestamp_end: effectiveDateRange.iso_timestamp_end,
   })
 
+  const [selectedQuery, setSelectedQuery] = useState<string | null>(null)
+
   const parsedLogs = useMemo(() => parseSupamonitorLogs(logData || []), [logData])
   const chartData = useMemo(() => transformLogsToChartData(parsedLogs), [parsedLogs])
+  const selectedChartData = useMemo(
+    () =>
+      selectedQuery
+        ? transformLogsToChartData(
+            parsedLogs.filter((log) => log.query?.replace(/\s+/g, ' ').trim() === selectedQuery)
+          )
+        : undefined,
+    [parsedLogs, selectedQuery]
+  )
   const aggregatedData = useMemo(() => aggregateLogsByQuery(parsedLogs), [parsedLogs])
 
   return (
     <div className="flex flex-col flex-1 min-h-0">
       <QueryInsightsHealth data={aggregatedData} isLoading={isLoading} />
-      <QueryInsightsChart chartData={chartData} isLoading={isLoading} />
-      <QueryInsightsTable data={aggregatedData} isLoading={isLoading} />
+      <QueryInsightsChart chartData={chartData} selectedChartData={selectedChartData} isLoading={isLoading} />
+      <QueryInsightsTable
+        data={aggregatedData}
+        isLoading={isLoading}
+        currentSelectedQuery={selectedQuery}
+        onCurrentSelectQuery={setSelectedQuery}
+      />
     </div>
   )
 }

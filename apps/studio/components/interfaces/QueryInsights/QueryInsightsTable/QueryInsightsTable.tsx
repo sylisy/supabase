@@ -1,5 +1,5 @@
 import { useMemo, useState, useRef, useCallback, useEffect } from 'react'
-import { Search, X, ArrowDown, ArrowUp, ChevronDown, TextSearch } from 'lucide-react'
+import { Search, X, ArrowDown, ArrowUp, ChevronDown, TextSearch, ArrowRight, Loader2 } from 'lucide-react'
 import DataGrid, { Column, DataGridHandle, Row } from 'react-data-grid'
 import {
   Button,
@@ -21,6 +21,8 @@ import {
 import { Input } from 'ui-patterns/DataInputs/Input'
 import { GenericSkeletonLoader } from 'ui-patterns/ShimmeringLoader'
 import TwoOptionToggle from 'components/ui/TwoOptionToggle'
+import { ButtonTooltip } from 'components/ui/ButtonTooltip'
+import { ExplainVisualizer } from 'components/interfaces/ExplainVisualizer/ExplainVisualizer'
 import { parseAsString, useQueryStates } from 'nuqs'
 import { toast } from 'sonner'
 
@@ -29,7 +31,6 @@ import { useQueryInsightsIssues } from '../hooks/useQueryInsightsIssues'
 import type { Mode, IssueFilter } from './QueryInsightsTable.types'
 import { getQueryType, getTableName, getColumnName, formatDuration } from './QueryInsightsTable.utils'
 import { QueryInsightsTableRow } from './QueryInsightsTableRow'
-import { ArrowUpRight, Plus } from 'lucide-react'
 import { ISSUE_DOT_COLORS, ISSUE_ICONS, QUERY_INSIGHTS_EXPLORER_COLUMNS, NON_SORTABLE_COLUMNS } from './QueryInsightsTable.constants'
 import { QueryDetail } from '../../QueryPerformance/QueryDetail'
 import { QueryIndexes } from '../../QueryPerformance/QueryIndexes'
@@ -43,9 +44,16 @@ import type { ClassifiedQuery } from '../QueryInsightsHealth/QueryInsightsHealth
 interface QueryInsightsTableProps {
   data: QueryPerformanceRow[]
   isLoading: boolean
+  currentSelectedQuery?: string | null
+  onCurrentSelectQuery?: (query: string | null) => void
 }
 
-export const QueryInsightsTable = ({ data, isLoading }: QueryInsightsTableProps) => {
+export const QueryInsightsTable = ({
+  data,
+  isLoading,
+  currentSelectedQuery,
+  onCurrentSelectQuery,
+}: QueryInsightsTableProps) => {
   const { classified, errors, indexIssues, slowQueries } = useQueryInsightsIssues(data)
   const [mode, setMode] = useState<Mode>('triage')
   const [filter, setFilter] = useState<IssueFilter>('all')
@@ -242,7 +250,7 @@ export const QueryInsightsTable = ({ data, isLoading }: QueryInsightsTableProps)
           if (col.id === 'query') {
             const IssueIcon = row.issueType ? ISSUE_ICONS[row.issueType] : null
             return (
-              <div className="w-full flex items-center gap-x-3 px-6">
+              <div className="w-full flex items-center gap-x-3 px-6 group">
                 {row.issueType && IssueIcon && (
                   <div
                     className={cn(
@@ -254,9 +262,22 @@ export const QueryInsightsTable = ({ data, isLoading }: QueryInsightsTableProps)
                     <IssueIcon size={14} className={ISSUE_DOT_COLORS[row.issueType].color} />
                   </div>
                 )}
-                <span className="text-xs font-mono text-foreground truncate">
+                <span className="text-xs font-mono text-foreground truncate flex-1">
                   {row.queryType ?? '–'} <span className="text-foreground-lighter">in</span> {getTableName(row.query)}, {getColumnName(row.query)}
                 </span>
+                <ButtonTooltip
+                  tooltip={{ content: { text: 'Query details' } }}
+                  icon={<ArrowRight size={14} />}
+                  size="tiny"
+                  type="default"
+                  onClick={(e: React.MouseEvent) => {
+                    e.stopPropagation()
+                    setSelectedRow(props.rowIdx)
+                    setSheetView('details')
+                    gridRef.current?.scrollToCell({ idx: 0, rowIdx: props.rowIdx })
+                  }}
+                  className="p-1 flex-shrink-0 group-hover:flex hidden"
+                />
               </div>
             )
           }
@@ -300,22 +321,6 @@ export const QueryInsightsTable = ({ data, isLoading }: QueryInsightsTableProps)
                 ) : (
                   <p className="text-muted">&ndash;</p>
                 )}
-              </div>
-            )
-          }
-
-          if (col.id === 'actions') {
-            return (
-              <div className="w-full flex items-center justify-end gap-1 px-6">
-                <Button type="text" size="tiny" className="px-1">
-                  –
-                </Button>
-                <Button type="text" size="tiny" className="px-1">
-                  <Plus size={14} />
-                </Button>
-                <Button type="text" size="tiny" className="px-1">
-                  <ArrowUpRight size={14} />
-                </Button>
               </div>
             )
           }
@@ -473,8 +478,6 @@ export const QueryInsightsTable = ({ data, isLoading }: QueryInsightsTableProps)
                     }}
                     onExplain={() => handleExplain(item.query)}
                     isExplainLoading={explainLoadingQuery === item.query}
-                    isExplainOpen={explainOpenQuery === item.query}
-                    explainRows={explainResults[item.query]}
                   />
                 ))}
 
@@ -500,9 +503,11 @@ export const QueryInsightsTable = ({ data, isLoading }: QueryInsightsTableProps)
               rows={explorerItems}
               rowClass={(_, idx) => {
                 const isSelected = idx === selectedRow
+                const query = explorerItems[idx]?.query
+                const isCharted = currentSelectedQuery ? currentSelectedQuery === query : false
                 return [
-                  `${isSelected ? 'bg-surface-300 dark:bg-surface-300' : 'bg-200 hover:bg-surface-200'} cursor-pointer`,
-                  `${isSelected ? '[&>div:first-child]:border-l-4 border-l-secondary [&>div]:!border-l-foreground' : ''}`,
+                  `${isSelected ? 'bg-surface-300 dark:bg-surface-300' : isCharted ? 'bg-surface-200 dark:bg-surface-200' : 'bg-200 hover:bg-surface-200'} cursor-pointer`,
+                  `${isSelected ? '[&>div:first-child]:border-l-4 border-l-secondary [&>div]:!border-l-foreground' : isCharted ? '[&>div:first-child]:border-l-4 [&>div]:border-l-brand' : ''}`,
                   '[&>.rdg-cell]:box-border [&>.rdg-cell]:outline-none [&>.rdg-cell]:shadow-none',
                 ].join(' ')
               }}
@@ -515,9 +520,10 @@ export const QueryInsightsTable = ({ data, isLoading }: QueryInsightsTableProps)
                       onClick={(event) => {
                         event.stopPropagation()
                         if (typeof idx === 'number' && idx >= 0) {
-                          setSelectedRow(idx)
-                          setSheetView('details')
-                          gridRef.current?.scrollToCell({ idx: 0, rowIdx: idx })
+                          const query = explorerItems[idx]?.query
+                          if (query && onCurrentSelectQuery) {
+                            onCurrentSelectQuery(currentSelectedQuery === query ? null : query)
+                          }
                         }
                       }}
                     />
@@ -604,6 +610,41 @@ export const QueryInsightsTable = ({ data, isLoading }: QueryInsightsTableProps)
               {activeSheetRow && <QueryIndexes selectedRow={activeSheetRow} />}
             </TabsContent_Shadcn_>
           </Tabs_Shadcn_>
+        </SheetContent>
+      </Sheet>
+
+      <Sheet
+        open={explainOpenQuery !== null}
+        onOpenChange={(open) => {
+          if (!open) setExplainOpenQuery(null)
+        }}
+        modal={false}
+      >
+        <SheetTitle className="sr-only">EXPLAIN ANALYZE</SheetTitle>
+        <SheetDescription className="sr-only">Explain Analyze Output</SheetDescription>
+        <SheetContent
+          side="bottom"
+          className="bg-studio border-t max-h-[60vh] flex flex-col"
+          hasOverlay={false}
+        >
+          <div className="flex items-center justify-between px-6 py-3 border-b flex-shrink-0">
+            <p className="text-sm font-medium">EXPLAIN ANALYZE</p>
+            <Button
+              type="text"
+              size="tiny"
+              icon={<X size={14} />}
+              onClick={() => setExplainOpenQuery(null)}
+            />
+          </div>
+          <div className="flex-1 min-h-0 overflow-y-auto">
+            {explainLoadingQuery ? (
+              <div className="px-6 py-4 flex items-center gap-2 text-sm text-foreground-light">
+                <Loader2 size={14} className="animate-spin" /> Running EXPLAIN ANALYZE...
+              </div>
+            ) : explainOpenQuery && explainResults[explainOpenQuery]?.length > 0 ? (
+              <ExplainVisualizer rows={explainResults[explainOpenQuery]} />
+            ) : null}
+          </div>
         </SheetContent>
       </Sheet>
     </div>

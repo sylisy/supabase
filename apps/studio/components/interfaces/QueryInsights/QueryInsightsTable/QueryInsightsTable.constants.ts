@@ -30,7 +30,6 @@ export const QUERY_INSIGHTS_EXPLORER_COLUMNS = [
   { id: 'calls', name: 'Calls', description: undefined, minWidth: 100 },
   { id: 'mean_time', name: 'Mean', description: undefined, minWidth: 100 },
   { id: 'application_name', name: 'App', description: undefined, minWidth: 150 },
-  { id: 'actions', name: 'Actions', description: undefined, minWidth: 120 },
 ] as const
 
-export const NON_SORTABLE_COLUMNS = ['query', 'actions'] as const
+export const NON_SORTABLE_COLUMNS = ['query'] as const

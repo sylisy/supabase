@@ -3,8 +3,6 @@ import { Button, cn } from 'ui'
 import type { ClassifiedQuery } from '../QueryInsightsHealth/QueryInsightsHealth.types'
 import { ISSUE_DOT_COLORS, ISSUE_ICONS } from './QueryInsightsTable.constants'
 import { formatDuration, getTableName, getColumnName } from './QueryInsightsTable.utils'
-import { ExplainVisualizer } from 'components/interfaces/ExplainVisualizer/ExplainVisualizer'
-import type { QueryPlanRow } from 'components/interfaces/ExplainVisualizer/ExplainVisualizer.types'
 
 interface QueryInsightsTableRowProps {
   item: ClassifiedQuery
@@ -14,8 +12,6 @@ interface QueryInsightsTableRowProps {
   onCreateIndex?: () => void
   onExplain?: () => void
   isExplainLoading?: boolean
-  explainRows?: QueryPlanRow[]
-  isExplainOpen?: boolean
 }
 
 export const QueryInsightsTableRow = ({
@@ -26,17 +22,14 @@ export const QueryInsightsTableRow = ({
   onCreateIndex,
   onExplain,
   isExplainLoading,
-  explainRows,
-  isExplainOpen,
 }: QueryInsightsTableRowProps) => {
   const IssueIcon = item.issueType ? ISSUE_ICONS[item.issueType] : null
 
   return (
-    <>
-      <div
-        className="flex items-center gap-4 px-6 py-4 border-b hover:bg-surface-100 cursor-pointer group"
-        onClick={onRowClick}
-      >
+    <div
+      className="flex items-center gap-4 px-6 py-4 border-b hover:bg-surface-100 cursor-pointer group"
+      onClick={onRowClick}
+    >
         {item.issueType && IssueIcon && (
           <div
             className={cn(
@@ -89,7 +82,7 @@ export const QueryInsightsTableRow = ({
               onCopyMarkdown?.()
             }}
           >
-            MD
+            Copy Prompt
           </Button>
           {item.issueType === 'error' && (
             <Button type="default" size="tiny" onClick={(e) => e.stopPropagation()}>
@@ -120,19 +113,6 @@ export const QueryInsightsTableRow = ({
             </Button>
           )}
         </div>
-      </div>
-
-      {isExplainOpen && (
-        <div className="border-b bg-studio">
-          {isExplainLoading ? (
-            <div className="px-6 py-4 flex items-center gap-2 text-sm text-foreground-light">
-              <Loader2 size={14} className="animate-spin" /> Running EXPLAIN ANALYZE...
-            </div>
-          ) : explainRows && explainRows.length > 0 ? (
-            <ExplainVisualizer rows={explainRows} />
-          ) : null}
-        </div>
-      )}
-    </>
+    </div>
   )
 }
