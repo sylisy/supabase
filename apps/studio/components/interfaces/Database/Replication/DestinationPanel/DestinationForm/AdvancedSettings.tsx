@@ -61,8 +61,8 @@ export const AdvancedSettings = ({
                         flushing a batch.
                       </p>
                       <p>
-                        Lower values reduce replication latency; higher values improve batching
-                        efficiency.
+                        Lower values reduce replication latency, while higher values improve
+                        batching efficiency.
                       </p>
                     </>
                   }
@@ -126,7 +126,7 @@ export const AdvancedSettings = ({
                         Number of parallel connections each table copy can use during initial sync.
                       </p>
                       <p>
-                        Higher values can copy large tables faster, but consume more database
+                        More connections can copy large tables faster, but consume more database
                         connections.
                       </p>
                     </>
@@ -158,24 +158,17 @@ export const AdvancedSettings = ({
                     <>
                       <p>Behavior when the replication slot is invalidated.</p>
                       <p>
-                        `error` blocks startup for manual recovery. `recreate` rebuilds the slot and
-                        restarts replication from scratch.
+                        <strong>Options:</strong> <code>error</code> blocks startup for manual
+                        recovery. <code>recreate</code> rebuilds the slot and restarts replication
+                        from scratch.
                       </p>
                     </>
                   }
                 >
                   <FormControl_Shadcn_>
-                    <Select_Shadcn_
-                      value={field.value ?? '__default__'}
-                      onValueChange={(value) =>
-                        field.onChange(value === '__default__' ? undefined : value)
-                      }
-                    >
-                      <SelectTrigger_Shadcn_>
-                        {field.value === undefined ? 'Default: error' : field.value}
-                      </SelectTrigger_Shadcn_>
+                    <Select_Shadcn_ value={field.value ?? 'error'} onValueChange={field.onChange}>
+                      <SelectTrigger_Shadcn_>{field.value ?? 'error'}</SelectTrigger_Shadcn_>
                       <SelectContent_Shadcn_>
-                        <SelectItem_Shadcn_ value="__default__">Default (error)</SelectItem_Shadcn_>
                         <SelectItem_Shadcn_ value="error">error</SelectItem_Shadcn_>
                         <SelectItem_Shadcn_ value="recreate">recreate</SelectItem_Shadcn_>
                       </SelectContent_Shadcn_>
@@ -202,7 +195,9 @@ export const AdvancedSettings = ({
                     description={
                       <>
                         <p>Size of the BigQuery Storage Write API connection pool.</p>
-                        <p>Higher values allow more parallel writes, but consume more resources.</p>
+                        <p>
+                          More connections allow more parallel writes, but consume more resources.
+                        </p>
                       </>
                     }
                   >
@@ -243,8 +238,8 @@ export const AdvancedSettings = ({
                           tables.
                         </p>
                         <p>
-                          Lower values improve freshness; higher values can reduce query cost and
-                          latency.
+                          Lower values improve freshness, while higher values can reduce query cost
+                          and latency.
                         </p>
                       </>
                     }
