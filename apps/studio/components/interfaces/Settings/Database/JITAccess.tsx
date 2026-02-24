@@ -42,30 +42,58 @@ import { InlineLink } from 'components/ui/InlineLink'
 import { Admonition } from 'ui-patterns/admonition'
 import { FormLayout } from 'ui-patterns/form/Layout/FormLayout'
 
-// Prototype: structured JIT status (single source of truth for label + badge)
-type JitStatus = { active: number; expired: number; ipRestricted?: boolean }
+// Prototype: JIT state is an array of rules; display is derived from it
+type JitRole = { expired: boolean; ipRestricted: boolean; role: string }
 
-function getJitStatusDisplay(status: JitStatus): {
+function getJitStatusDisplay(roles: JitRole[]): {
   label: string
   variant: 'default' | 'success' | 'warning'
 } {
-  const { active, expired, ipRestricted } = status
-  const parts: string[] = []
-  if (active > 0) parts.push(expired > 0 ? `${active} active, ${expired} expired` : 'Active')
-  else if (expired > 0) parts.push('Expired')
-  if (ipRestricted) parts.push('IP restricted')
-  const label = parts.length ? parts.join(' · ') : 'No sessions'
+  const activeCount = roles.filter((r) => !r.expired).length
+  const expiredCount = roles.filter((r) => r.expired).length
+  const activeIp = roles.some((r) => !r.expired && r.ipRestricted)
+  const expiredIp = roles.some((r) => r.expired && r.ipRestricted)
 
-  if (active > 0 && expired === 0 && !ipRestricted) return { label, variant: 'success' }
-  if (active === 0 && expired > 0) return { label, variant: 'warning' }
+  const activePart = activeCount ? `${activeCount} active${activeIp ? ' · IP' : ''}` : null
+  const expiredPart = expiredCount ? `${expiredCount} expired${expiredIp ? ' · IP' : ''}` : null
+  const label = [activePart, expiredPart].filter(Boolean).join(', ') || 'No sessions'
+
+  if (activeCount > 0 && expiredCount === 0) return { label, variant: 'success' }
+  if (activeCount === 0 && expiredCount > 0) return { label, variant: 'warning' }
   return { label, variant: 'default' }
 }
 
-type JITUser = { id: string; email: string; name?: string; roles: number; status: JitStatus }
+type JITUser = { id: string; email: string; name?: string; roles: JitRole[] }
 const MOCK_USERS: JITUser[] = [
-  { id: '1', email: 'alice@example.com', name: 'Alice', roles: 2, status: { active: 1, expired: 1 } },
-  { id: '2', email: 'bob@example.com', roles: 1, status: { active: 0, expired: 1 } },
-  { id: '3', email: 'carol@example.com', name: 'Carol', roles: 1, status: { active: 1, expired: 0, ipRestricted: true } },
+  {
+    id: '1',
+    email: 'alice@example.com',
+    name: 'Alice',
+    roles: [
+      { expired: false, ipRestricted: false, role: 'fake_db_role' },
+      { expired: true, ipRestricted: false, role: 'other_role' },
+    ],
+  },
+  {
+    id: '2',
+    email: 'bob@example.com',
+    roles: [{ expired: true, ipRestricted: false, role: 'fake_db_role' }],
+  },
+  {
+    id: '3',
+    email: 'carol@example.com',
+    name: 'Carol',
+    roles: [{ expired: false, ipRestricted: true, role: 'fake_db_role' }],
+  },
+  {
+    id: '4',
+    email: 'dave@example.com',
+    name: 'Dave',
+    roles: [
+      { expired: false, ipRestricted: true, role: 'fake_db_role' },
+      { expired: true, ipRestricted: false, role: 'other_role' },
+    ],
+  },
 ]
 // Prototype: mock Postgres version
 const isPostgresVersionOutdated = false
@@ -77,7 +105,7 @@ export const JITAccess = () => {
   const [selectedUser, setSelectedUser] = useState<JITUser | null>(null)
   // const [users, setUsers] = useState<JITUser[]>([])
   const [users, setUsers] = useState<JITUser[]>(MOCK_USERS)
-  const selectedStatusDisplay = selectedUser ? getJitStatusDisplay(selectedUser.status) : null
+  const selectedStatusDisplay = selectedUser ? getJitStatusDisplay(selectedUser.roles) : null
 
   return (
     <PageSection id="jit-access">
@@ -175,65 +203,66 @@ export const JITAccess = () => {
                     </TableRow>
                   ) : (
                     users.map((user) => {
-                      const statusDisplay = getJitStatusDisplay(user.status)
+                      const statusDisplay = getJitStatusDisplay(user.roles)
                       return (
-                      <TableRow
-                        key={user.id}
-                        className="relative cursor-pointer inset-focus"
-                        onClick={(event) => {
-                          if ((event.target as HTMLElement).closest('button')) return
-                          setSelectedUser(user)
-                        }}
-                        onKeyDown={(event) => {
-                          if ((event.target as HTMLElement).closest('button')) return
-                          if (event.key === 'Enter' || event.key === ' ') {
-                            event.preventDefault()
+                        <TableRow
+                          key={user.id}
+                          className="relative cursor-pointer inset-focus"
+                          onClick={(event) => {
+                            if ((event.target as HTMLElement).closest('button')) return
                             setSelectedUser(user)
-                          }
-                        }}
-                        tabIndex={0}
-                      >
-                        <TableCell className="text-sm">
-                          {user.name && <p> {user.name} </p>}
-                          <p className="text-foreground-lighter">
-                            {user.email}
-                          </p>
-                        </TableCell>
-                        <TableCell className="text-foreground-light text-sm">
-                          {user.roles} role{user.roles > 1 ? 's' : ''}
-                        </TableCell>
-                        <TableCell className="text-foreground-light text-sm">
-                          <Badge variant={statusDisplay.variant}>{statusDisplay.label}</Badge>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button
-                                icon={<EllipsisVertical />}
-                                aria-label="More actions"
-                                type="default"
-                                size="tiny"
-                                className="w-7"
-                              />
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" side="bottom" className="w-40">
+                          }}
+                          onKeyDown={(event) => {
+                            if ((event.target as HTMLElement).closest('button')) return
+                            if (event.key === 'Enter' || event.key === ' ') {
+                              event.preventDefault()
+                              setSelectedUser(user)
+                            }
+                          }}
+                          tabIndex={0}
+                        >
+                          <TableCell className="text-sm">
+                            {user.name && <p> {user.name} </p>}
+                            <p className="text-foreground-lighter">
+                              {user.email}
+                            </p>
+                          </TableCell>
+                          <TableCell className="text-foreground-light text-sm">
+                            {user.roles.length} role{user.roles.length > 1 ? 's' : ''}
+                          </TableCell>
+                          <TableCell className="text-foreground-light text-sm">
+                            <Badge variant={statusDisplay.variant}>{statusDisplay.label}</Badge>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button
+                                  icon={<EllipsisVertical />}
+                                  aria-label="More actions"
+                                  type="default"
+                                  size="tiny"
+                                  className="w-7"
+                                />
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" side="bottom" className="w-40">
 
-                              <DropdownMenuItem
-                                className="gap-x-2"
-                                onClick={() => setSelectedUser(user)}
-                              >
-                                <Eye size={14} className="text-foreground-lighter" />
-                                Inspect
-                              </DropdownMenuItem>
-                              <DropdownMenuItem className="gap-x-2" onClick={() => { }}>
-                                <Trash2 size={14} className="text-foreground-lighter" />
-                                Delete
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
-                    )})
+                                <DropdownMenuItem
+                                  className="gap-x-2"
+                                  onClick={() => setSelectedUser(user)}
+                                >
+                                  <Eye size={14} className="text-foreground-lighter" />
+                                  Inspect
+                                </DropdownMenuItem>
+                                <DropdownMenuItem className="gap-x-2" onClick={() => { }}>
+                                  <Trash2 size={14} className="text-foreground-lighter" />
+                                  Delete
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TableCell>
+                        </TableRow>
+                      )
+                    })
                   )}
                 </TableBody>
               </Table>
@@ -270,7 +299,7 @@ export const JITAccess = () => {
                       <div className="grid grid-cols-4 items-center gap-4">
                         <span className="text-sm text-foreground-light">Roles</span>
                         <span className="col-span-3 text-sm">
-                          {selectedUser.roles} role{selectedUser.roles > 1 ? 's' : ''}
+                          {selectedUser.roles.length} role{selectedUser.roles.length > 1 ? 's' : ''}
                         </span>
                       </div>
                       <div className="grid grid-cols-4 items-center gap-4">
