@@ -541,6 +541,7 @@ export const JITAccess = () => {
   const { ref: projectRef } = useParams()
 
   const [enabled, setEnabled] = useState(false)
+  // const [users, setUsers] = useState<JITUserRule[]>([])
   const [users, setUsers] = useState<JITUserRule[]>(MOCK_USERS)
   const [sheetOpen, setSheetOpen] = useState(false)
   const [sheetMode, setSheetMode] = useState<SheetMode>('add')
