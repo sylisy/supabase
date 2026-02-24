@@ -27,7 +27,7 @@ function classifyQuery(row: QueryPerformanceRow): { issueType: IssueType; hint: 
   if (row.mean_time > SLOW_QUERY_THRESHOLD_MS) {
     return {
       issueType: 'slow',
-      hint: `Avg execution time is ${Math.round(row.mean_time)}ms`,
+      hint: `Abnormally slow query detected`,
     }
   }
 
