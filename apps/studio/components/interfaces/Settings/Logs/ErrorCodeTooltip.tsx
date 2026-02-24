@@ -29,10 +29,7 @@ export const ErrorCodeTooltip = ({ errorCode, service, children }: ErrorCodeTool
   const [isOpen, setIsOpen] = useState(false)
   const { resolvedTheme } = useTheme()
 
-  const { data, isPending } = useErrorCodesQuery(
-    { code: errorCode, service },
-    { enabled: isOpen }
-  )
+  const { data, isPending } = useErrorCodesQuery({ code: errorCode, service }, { enabled: isOpen })
 
   const errors = data?.errors?.nodes?.filter((e) => !!e.message) ?? []
 
