@@ -23,16 +23,18 @@ async function validateDestination(
   let config: components['schemas']['ValidateReplicationDestinationBody']['config']
 
   if ('bigQuery' in destinationConfig) {
-    const { projectId, datasetId, serviceAccountKey, maxStalenessMins } = destinationConfig.bigQuery
+    const { projectId, datasetId, serviceAccountKey, connectionPoolSize, maxStalenessMins } =
+      destinationConfig.bigQuery
 
     config = {
       big_query: {
         project_id: projectId,
         dataset_id: datasetId,
         service_account_key: serviceAccountKey,
+        ...(connectionPoolSize !== undefined ? { connection_pool_size: connectionPoolSize } : {}),
         ...(maxStalenessMins !== undefined ? { max_staleness_mins: maxStalenessMins } : {}),
       },
-    }
+    } as components['schemas']['ValidateReplicationDestinationBody']['config']
   } else if ('iceberg' in destinationConfig) {
     const {
       projectRef: icebergProjectRef,

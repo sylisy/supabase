@@ -176,10 +176,16 @@ export const DestinationForm = ({
       maxFillMs: pipelineData?.config?.batch?.max_fill_ms ?? undefined,
       maxTableSyncWorkers: pipelineData?.config?.max_table_sync_workers ?? undefined,
       maxCopyConnectionsPerTable: pipelineData?.config?.max_copy_connections_per_table ?? undefined,
+      invalidatedSlotBehavior:
+        (pipelineData?.config as { invalidated_slot_behavior?: 'error' | 'recreate' } | undefined)
+          ?.invalidated_slot_behavior ?? undefined,
       // BigQuery fields
       projectId: isBigQueryConfig ? config.big_query.project_id : '',
       datasetId: isBigQueryConfig ? config.big_query.dataset_id : '',
       serviceAccountKey: isBigQueryConfig ? config.big_query.service_account_key : '',
+      connectionPoolSize:
+        (config as { big_query?: { connection_pool_size?: number } } | undefined)?.big_query
+          ?.connection_pool_size ?? undefined,
       maxStalenessMins: isBigQueryConfig ? config.big_query.max_staleness_mins : undefined, // Default: null
       // Analytics Bucket fields
       warehouseName: isIcebergConfig ? config.iceberg.supabase.warehouse_name : '',
@@ -305,6 +311,7 @@ export const DestinationForm = ({
         maxFillMs: data.maxFillMs,
         maxTableSyncWorkers: data.maxTableSyncWorkers,
         maxCopyConnectionsPerTable: data.maxCopyConnectionsPerTable,
+        invalidatedSlotBehavior: data.invalidatedSlotBehavior,
       }),
     ])
 
@@ -372,6 +379,9 @@ export const DestinationForm = ({
             datasetId: data.datasetId ?? '',
             serviceAccountKey: data.serviceAccountKey ?? '',
           }
+          if (data.connectionPoolSize !== undefined) {
+            bigQueryConfig.connectionPoolSize = data.connectionPoolSize
+          }
           if (!!data.maxStalenessMins) {
             bigQueryConfig.maxStalenessMins = data.maxStalenessMins
           }
@@ -422,6 +432,7 @@ export const DestinationForm = ({
             publicationName: data.publicationName,
             maxTableSyncWorkers: data.maxTableSyncWorkers,
             maxCopyConnectionsPerTable: data.maxCopyConnectionsPerTable,
+            invalidatedSlotBehavior: data.invalidatedSlotBehavior,
             ...(hasBatchFields ? { batch: batchConfig } : {}),
           },
           sourceId,
@@ -455,6 +466,9 @@ export const DestinationForm = ({
             projectId: data.projectId ?? '',
             datasetId: data.datasetId ?? '',
             serviceAccountKey: data.serviceAccountKey ?? '',
+          }
+          if (data.connectionPoolSize !== undefined) {
+            bigQueryConfig.connectionPoolSize = data.connectionPoolSize
           }
           if (!!data.maxStalenessMins) {
             bigQueryConfig.maxStalenessMins = data.maxStalenessMins
@@ -504,6 +518,7 @@ export const DestinationForm = ({
             publicationName: data.publicationName,
             maxTableSyncWorkers: data.maxTableSyncWorkers,
             maxCopyConnectionsPerTable: data.maxCopyConnectionsPerTable,
+            invalidatedSlotBehavior: data.invalidatedSlotBehavior,
             ...(hasBatchFields ? { batch: batchConfig } : {}),
           },
         })

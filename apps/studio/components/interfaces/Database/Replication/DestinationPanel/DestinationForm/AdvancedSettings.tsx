@@ -11,6 +11,10 @@ import {
   FormField_Shadcn_,
   Input_Shadcn_,
   PrePostTab,
+  SelectContent_Shadcn_,
+  SelectItem_Shadcn_,
+  Select_Shadcn_,
+  SelectTrigger_Shadcn_,
 } from 'ui'
 import { FormItemLayout } from 'ui-patterns/form/FormItemLayout/FormItemLayout'
 import { DestinationType } from '../DestinationPanel.types'
@@ -142,6 +146,81 @@ export const AdvancedSettings = ({
                 </FormItemLayout>
               )}
             />
+
+            <FormField_Shadcn_
+              control={form.control}
+              name="invalidatedSlotBehavior"
+              render={({ field }) => (
+                <FormItemLayout
+                  label="Invalidated slot behavior"
+                  layout="horizontal"
+                  description={
+                    <>
+                      <p>Behavior when the replication slot is invalidated.</p>
+                      <p>
+                        `error` blocks startup for manual recovery. `recreate` rebuilds the slot and
+                        restarts replication from scratch.
+                      </p>
+                    </>
+                  }
+                >
+                  <FormControl_Shadcn_>
+                    <Select_Shadcn_
+                      value={field.value ?? '__default__'}
+                      onValueChange={(value) =>
+                        field.onChange(value === '__default__' ? undefined : value)
+                      }
+                    >
+                      <SelectTrigger_Shadcn_>
+                        {field.value === undefined ? 'Default: error' : field.value}
+                      </SelectTrigger_Shadcn_>
+                      <SelectContent_Shadcn_>
+                        <SelectItem_Shadcn_ value="__default__">Default (error)</SelectItem_Shadcn_>
+                        <SelectItem_Shadcn_ value="error">error</SelectItem_Shadcn_>
+                        <SelectItem_Shadcn_ value="recreate">recreate</SelectItem_Shadcn_>
+                      </SelectContent_Shadcn_>
+                    </Select_Shadcn_>
+                  </FormControl_Shadcn_>
+                </FormItemLayout>
+              )}
+            />
+
+            {/* BigQuery-specific: Max staleness */}
+            {type === 'BigQuery' && (
+              <FormField_Shadcn_
+                control={form.control}
+                name="connectionPoolSize"
+                render={({ field }) => (
+                  <FormItemLayout
+                    label={
+                      <div className="flex flex-col gap-y-2">
+                        <span>Connection pool size</span>
+                        <Badge className="w-min">BigQuery only</Badge>
+                      </div>
+                    }
+                    layout="horizontal"
+                    description={
+                      <>
+                        <p>Size of the BigQuery Storage Write API connection pool.</p>
+                        <p>Higher values allow more parallel writes, but consume more resources.</p>
+                      </>
+                    }
+                  >
+                    <FormControl_Shadcn_>
+                      <PrePostTab postTab="connections">
+                        <Input_Shadcn_
+                          {...field}
+                          type="number"
+                          value={field.value ?? ''}
+                          onChange={handleNumberChange(field)}
+                          placeholder="Default: 4"
+                        />
+                      </PrePostTab>
+                    </FormControl_Shadcn_>
+                  </FormItemLayout>
+                )}
+              />
+            )}
 
             {/* BigQuery-specific: Max staleness */}
             {type === 'BigQuery' && (

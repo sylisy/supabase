@@ -22,6 +22,9 @@ export const buildDestinationConfigForValidation = ({
         projectId: data.projectId ?? '',
         datasetId: data.datasetId ?? '',
         serviceAccountKey: data.serviceAccountKey ?? '',
+        ...(data.connectionPoolSize !== undefined
+          ? { connectionPoolSize: data.connectionPoolSize }
+          : {}),
         ...(data.maxStalenessMins !== undefined ? { maxStalenessMins: data.maxStalenessMins } : {}),
       },
     }
