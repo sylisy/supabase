@@ -1,6 +1,8 @@
 import { UserPlus } from 'lucide-react'
+import Link from 'next/link'
 import { useState } from 'react'
 
+import { useParams } from 'common'
 import { DocsButton } from 'components/ui/DocsButton'
 import { DOCS_URL } from 'lib/constants'
 import {
@@ -36,12 +38,14 @@ const MOCK_USERS: JITUser[] = [
   { id: '2', email: 'bob@example.com', addedAt: '2025-02-12' },
 ]
 // Prototype: mock Postgres version
-const isPostgresVersionOutdated = true
+const isPostgresVersionOutdated = false
+
 
 export const JITAccess = () => {
+  const { ref: projectRef } = useParams()
   const [enabled, setEnabled] = useState(false)
-  // const [users, setUsers] = useState<JITUser[]>(MOCK_USERS)
-  const [users, setUsers] = useState<JITUser[]>()
+  // const [users, setUsers] = useState<JITUser[]>([])
+  const [users, setUsers] = useState<JITUser[]>(MOCK_USERS)
 
   return (
     <PageSection id="jit-access">
@@ -59,7 +63,8 @@ export const JITAccess = () => {
               label="JIT access"
               description="Allow time-limited database access to specific project members."
             >
-              <div className="flex items-center justify-end mt-2.5">
+              {/* Swich and tooltip */}
+              <div className="flex items-center justify-end">
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <div>
@@ -73,7 +78,7 @@ export const JITAccess = () => {
                   </TooltipTrigger>
                   {isPostgresVersionOutdated && (
                     <TooltipContent side="bottom">
-                      Upgrade your Postgres plan to use JIT access.
+                      Upgrade Postgres to use JIT
                     </TooltipContent>
                   )}
                 </Tooltip>
@@ -82,14 +87,21 @@ export const JITAccess = () => {
           </CardContent>
 
           {!enabled && !users?.length && isPostgresVersionOutdated && (
-
             <Admonition
               type="note"
               layout="horizontal"
-              title="Upgrade Postgres to use JIT access"
-              description="Upgrade your Postgres plan to use JIT access. This will allow you to grant time-limited access to the database to specific users."
+              title="Postgres upgrade required"
+              description="Just-in-time access requires a newer Postgres version. Upgrade your project to enable JIT."
               className="mb-0 rounded-none border-0"
-              actions={<Button type="default">Upgrade Postgres</Button>}
+              actions={
+                projectRef ? (
+                  <Button type="default" asChild>
+                    <Link href={`/project/${projectRef}/settings/infrastructure`}>
+                      Upgrade Postgres
+                    </Link>
+                  </Button>
+                ) : undefined
+              }
             />
           )}
 
@@ -106,7 +118,7 @@ export const JITAccess = () => {
                   Add user
                 </Button>
               </div>
-              <Table className="border-t">
+              <Table className="border-y">
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-[280px]">Email</TableHead>
@@ -117,10 +129,14 @@ export const JITAccess = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
+                  {/* Empty state */}
                   {users.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={3} className="text-foreground-light text-sm py-8">
-                        No users added yet. Add a user to allow them to request JIT access.
+                    <TableRow className="[&>td]:hover:bg-inherit">
+                      <TableCell colSpan={3}>
+                        <p className="text-sm text-foreground">No users yet</p>
+                        <p className="text-sm text-foreground-lighter">
+                          Add a user above to allow JIT access.
+                        </p>
                       </TableCell>
                     </TableRow>
                   ) : (
