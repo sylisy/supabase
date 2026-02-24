@@ -12,6 +12,7 @@ module.exports = config({
     './../../packages/ui/src/**/*.{tsx,ts,js}',
     './../../packages/ui-patterns/src/**/*.{tsx,ts,js}',
     './../../packages/supa-mock/src/**/*.{tsx,ts,js}',
+    './../../packages/marketing/src/**/*.{tsx,ts,js}',
   ],
   theme: {
     extend: {
