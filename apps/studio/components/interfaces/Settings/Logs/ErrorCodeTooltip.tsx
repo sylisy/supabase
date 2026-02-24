@@ -11,6 +11,7 @@ import {
   HoverCard_Shadcn_,
   HoverCardContent_Shadcn_,
   HoverCardTrigger_Shadcn_,
+  InfoIcon,
 } from 'ui'
 import { ShimmeringLoader } from 'ui-patterns/ShimmeringLoader'
 
@@ -44,18 +45,7 @@ export const ErrorCodeTooltip = ({ errorCode, service, children }: ErrorCodeTool
       <HoverCardTrigger_Shadcn_ asChild>
         <span className="inline-flex items-center gap-1 cursor-default">
           {children}
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 16 16"
-            fill="currentColor"
-            className="w-3.5 h-3.5 text-foreground-lighter shrink-0"
-          >
-            <path
-              fillRule="evenodd"
-              clipRule="evenodd"
-              d="M15 8A7 7 0 1 1 1 8a7 7 0 0 1 14 0ZM9 5a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM6.75 8a.75.75 0 0 0 0 1.5h.75v1.75a.75.75 0 0 0 1.5 0v-2.5A.75.75 0 0 0 8.25 8h-1.5Z"
-            />
-          </svg>
+          <InfoIcon hideBackground className="w-3.5 h-3.5 shrink-0 fill-foreground-muted" />
         </span>
       </HoverCardTrigger_Shadcn_>
       <HoverCardContent_Shadcn_ side="top" align="center" className="w-[360px] p-0 overflow-hidden">
@@ -99,7 +89,7 @@ export const ErrorCodeTooltip = ({ errorCode, service, children }: ErrorCodeTool
               </div>
               <Button type="default" size="tiny" asChild>
                 <Link href={docsUrl} target="_blank" rel="noreferrer">
-                  Continue reading
+                  Go to docs
                 </Link>
               </Button>
             </div>
