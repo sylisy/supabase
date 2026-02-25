@@ -362,8 +362,12 @@ function RoleRuleEditor({
   const checkboxId = `jit-role-${role.id}`
 
   return (
-    <div className={`px-4 py-3 ${grant.enabled ? 'bg-surface-100' : 'bg-background'}`}>
-      <label htmlFor={checkboxId} className="flex items-start gap-3 cursor-pointer select-none">
+    <div className={`${grant.enabled ? 'bg-surface-100' : 'bg-background'}`}>
+      <label
+        htmlFor={checkboxId}
+        className={`flex w-full items-start gap-3 px-4 py-3 cursor-pointer select-none ${!grant.enabled && 'transition-colors duration-100 hover:bg-surface-100/50'
+          }`}
+      >
         <Checkbox_Shadcn_
           id={checkboxId}
           checked={grant.enabled}
@@ -382,7 +386,7 @@ function RoleRuleEditor({
       </label>
 
       {grant.enabled && (
-        <div className="space-y-4 pl-7 pt-3">
+        <div className="space-y-4 px-4 pb-3 pl-[46px]">
           {isSuperuserRole && (
             <Admonition
               type="warning"
@@ -776,7 +780,7 @@ export const JITAccess = () => {
                                   <Pencil size={14} className="text-foreground-lighter" />
                                   Edit
                                 </DropdownMenuItem>
-                                <DropdownMenuItem className="gap-x-2" onClick={() => {}}>
+                                <DropdownMenuItem className="gap-x-2" onClick={() => { }}>
                                   <Trash2 size={14} className="text-foreground-lighter" />
                                   Delete
                                 </DropdownMenuItem>
