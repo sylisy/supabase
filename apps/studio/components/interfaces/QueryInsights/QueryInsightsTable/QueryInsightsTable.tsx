@@ -77,7 +77,10 @@ export const QueryInsightsTable = ({
   const gridRef = useRef<DataGridHandle>(null)
   const dataGridContainerRef = useRef<HTMLDivElement>(null)
   const triageContainerRef = useRef<HTMLDivElement>(null)
-  const [sort, setSort] = useState<{ column: string; order: 'asc' | 'desc' } | null>(null)
+  const [sort, setSort] = useState<{ column: string; order: 'asc' | 'desc' } | null>({
+    column: 'prop_total_time',
+    order: 'desc',
+  })
 
   // Explain state
   const [explainResults, setExplainResults] = useState<Record<string, QueryPlanRow[]>>({})
@@ -153,9 +156,6 @@ export const QueryInsightsTable = ({
 
           return 0
         })
-      } else {
-        // Default sort by calls descending
-        items.sort((a, b) => b.calls - a.calls)
       }
 
       return items
