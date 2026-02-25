@@ -179,7 +179,7 @@ const DefaultLayoutContent = ({
         }}
       >
         {mobileSheetContent === 'search' ? (
-          <CommandWrapper className="h-full flex flex-col">
+          <CommandWrapper className="h-full flex flex-col bg-background">
             <CommandMenuInnerContent />
           </CommandWrapper>
         ) : mobileSheetContent === 'menu' ? (

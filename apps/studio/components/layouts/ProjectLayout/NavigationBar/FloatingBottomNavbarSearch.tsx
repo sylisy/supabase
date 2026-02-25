@@ -238,7 +238,10 @@ const FloatingBottomNavbarSearch = ({ hideMobileMenu }: { hideMobileMenu?: boole
                     text: 'Search',
                   },
                 }}
-                onClick={() => setSheetContent('search')}
+                onClick={() => {
+                  clearActiveSidebar()
+                  setSheetContent('search')
+                }}
               >
                 <Search size={16} strokeWidth={1} />
               </ButtonTooltip>
@@ -270,7 +273,10 @@ const FloatingBottomNavbarSearch = ({ hideMobileMenu }: { hideMobileMenu?: boole
                 'focus-visible:!outline-4 focus-visible:outline-offset-1 focus-visible:outline-brand-600',
                 'transition'
               )}
-              onClick={() => setSheetContent('search')}
+              onClick={() => {
+                clearActiveSidebar()
+                setSheetContent('search')
+              }}
               aria-label="Search"
             >
               <div className="flex items-center space-x-2">
