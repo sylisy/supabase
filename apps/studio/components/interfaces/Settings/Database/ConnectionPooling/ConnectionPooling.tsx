@@ -95,8 +95,8 @@ export const ConnectionPooling = () => {
     computeInstance?.variant.name ?? capitalize(project?.infra_compute_size) ?? 'Nano'
   const poolingOptimizations =
     POOLING_OPTIMIZATIONS[
-      (computeInstance?.variant.identifier as keyof typeof POOLING_OPTIMIZATIONS) ??
-        (project?.infra_compute_size === 'nano' ? 'ci_nano' : 'ci_micro')
+    (computeInstance?.variant.identifier as keyof typeof POOLING_OPTIMIZATIONS) ??
+    (project?.infra_compute_size === 'nano' ? 'ci_nano' : 'ci_micro')
     ]
   const defaultPoolSize = poolingOptimizations.poolSize ?? 15
   const defaultMaxClientConn = poolingOptimizations.maxClientConn ?? 200
@@ -220,15 +220,14 @@ export const ConnectionPooling = () => {
             {isSuccessPgbouncerConfig && (
               <>
                 <div className="flex flex-row gap-2 justify-between w-full">
-                  <p className="text-foreground text-sm">Applies to</p>
-                  {disablePoolModeSelection ? (
-                    <Badge>Shared Pooler</Badge>
-                  ) : (
-                    <div className="flex flex-row gap-1">
-                      <Badge>Shared Pooler</Badge>
-                      <Badge>Dedicated Pooler</Badge>
-                    </div>
-                  )}
+                  <div className="flex flex-col text-sm">
+                    <h5 className="text-foreground font-normal">Connection poolers</h5>
+                    <p className="text-foreground-lighter">Configuration is shared across all connection poolers.</p>
+                  </div>
+                  <div className="flex flex-row gap-1 items-center">
+                    <Badge>Shared</Badge>
+                    {!disablePoolModeSelection && <Badge>Dedicated</Badge>}
+                  </div>
                 </div>
                 <Separator className="bg-border -mx-6 w-[calc(100%+3rem)] my-4" />
                 <Form_Shadcn_ {...form}>
@@ -243,7 +242,7 @@ export const ConnectionPooling = () => {
                       render={({ field }) => (
                         <FormItemLayout
                           layout="flex-row-reverse"
-                          label="Pool size"
+                          label="Connection pool size"
                           description={
                             <p>
                               The maximum number of connections made to the underlying Postgres
