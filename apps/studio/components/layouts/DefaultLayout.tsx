@@ -8,8 +8,7 @@ import { useEffect, useState, type PropsWithChildren } from 'react'
 import { useAppStateSnapshot } from 'state/app-state'
 import { sidebarManagerState, useSidebarManagerSnapshot } from 'state/sidebar-manager-state'
 import { ResizablePanel, ResizablePanelGroup, SidebarProvider } from 'ui'
-import { CommandWrapper } from 'ui-patterns'
-import MobileSheetNav from 'ui-patterns/MobileSheetNav/MobileSheetNav'
+import { CommandWrapper, MobileSheetNav } from 'ui-patterns'
 
 import { CommandMenuInnerContent } from '../interfaces/App/CommandMenu/CommandMenu'
 import { BannerStack } from '../ui/BannerStack/BannerStack'
@@ -171,7 +170,7 @@ const DefaultLayoutContent = ({
       </div>
       <MobileSheetNav
         open={mobileSheetContent !== null}
-        onOpenChange={(open) => {
+        onOpenChange={(open: boolean) => {
           if (!open) {
             setMobileSheetContent(null)
             sidebarManagerState.closeActive()

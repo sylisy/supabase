@@ -7,8 +7,10 @@ import { useSelectedProjectQuery } from 'hooks/misc/useSelectedProject'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/router'
 import { parseAsString, useQueryState } from 'nuqs'
-import { PropsWithChildren, useEffect } from 'react'
+import { useEffect, type PropsWithChildren } from 'react'
 import { useRegisterSidebar, useSidebarManagerSnapshot } from 'state/sidebar-manager-state'
+
+import { getSupportLinkQueryParams } from '../LayoutHeader/HelpDropdown/HelpDropdown.utils'
 
 const AdvisorPanel = dynamic(() =>
   import('components/ui/AdvisorPanel/AdvisorPanel').then((m) => m.AdvisorPanel)
@@ -49,7 +51,23 @@ export const LayoutSidebarProvider = ({ children }: PropsWithChildren) => {
   useRegisterSidebar(SIDEBAR_KEYS.AI_ASSISTANT, () => <AIAssistant />, {}, 'i', !!project)
   useRegisterSidebar(SIDEBAR_KEYS.EDITOR_PANEL, () => <EditorPanel />, {}, 'e', !!project)
   useRegisterSidebar(SIDEBAR_KEYS.ADVISOR_PANEL, () => <AdvisorPanel />, {}, undefined, true)
-  useRegisterSidebar(SIDEBAR_KEYS.HELP_PANEL, () => <HelpPanel />, {}, undefined, true)
+  useRegisterSidebar(
+    SIDEBAR_KEYS.HELP_PANEL,
+    () => (
+      <HelpPanel
+        onClose={() => null}
+        projectRef={project?.ref}
+        supportLinkQueryParams={getSupportLinkQueryParams(
+          project,
+          org,
+          router.query.ref as string | undefined
+        )}
+      />
+    ),
+    {},
+    undefined,
+    true
+  )
 
   useEffect(() => {
     if (!!project) {

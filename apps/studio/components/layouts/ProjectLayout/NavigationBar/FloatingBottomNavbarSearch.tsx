@@ -1,6 +1,7 @@
 import { useParams } from 'common'
 import { AdvisorButton } from 'components/layouts/AppLayout/AdvisorButton'
 import { AssistantButton } from 'components/layouts/AppLayout/AssistantButton'
+import HelpButton from 'components/layouts/AppLayout/HelpButton'
 import { InlineEditorButton } from 'components/layouts/AppLayout/InlineEditorButton'
 import { SIDEBAR_KEYS } from 'components/layouts/ProjectLayout/LayoutSidebar/LayoutSidebarProvider'
 import { AnimatePresence } from 'framer-motion'
@@ -202,6 +203,11 @@ const FloatingBottomNavbarSearch = ({ hideMobileMenu }: { hideMobileMenu?: boole
     }
   })()
 
+  const handleSetSheetContent = (content: string) => {
+    clearActiveSidebar()
+    setSheetContent(content)
+  }
+
   return (
     <nav
       ref={navRef}
@@ -224,27 +230,25 @@ const FloatingBottomNavbarSearch = ({ hideMobileMenu }: { hideMobileMenu?: boole
         )}
       >
         <AnimatePresence initial={false}>
-          {isSheetOpen ? (
+          <ButtonTooltip
+            type={sheetContent === 'search' ? 'secondary' : 'outline'}
+            size="tiny"
+            id="search-trigger"
+            className={cn(
+              'rounded-full w-[32px] h-[32px] flex items-center justify-center p-0 text-foreground-light',
+              sheetContent === 'search' && 'text-background'
+            )}
+            tooltip={{
+              content: {
+                text: 'Search',
+              },
+            }}
+            onClick={() => handleSetSheetContent('search')}
+          >
+            <Search size={16} strokeWidth={1} />
+          </ButtonTooltip>
+          {isSheetOpen && (
             <>
-              <ButtonTooltip
-                type={sheetContent === 'search' ? 'secondary' : 'outline'}
-                size="tiny"
-                id="search-trigger"
-                className={cn(
-                  'rounded-full w-[32px] h-[32px] flex items-center justify-center p-0'
-                )}
-                tooltip={{
-                  content: {
-                    text: 'Search',
-                  },
-                }}
-                onClick={() => {
-                  clearActiveSidebar()
-                  setSheetContent('search')
-                }}
-              >
-                <Search size={16} strokeWidth={1} />
-              </ButtonTooltip>
               {!!projectRef && (
                 <>
                   <span data-sidebar-id={SIDEBAR_KEYS.AI_ASSISTANT}>
@@ -258,45 +262,27 @@ const FloatingBottomNavbarSearch = ({ hideMobileMenu }: { hideMobileMenu?: boole
               <span data-sidebar-id={SIDEBAR_KEYS.ADVISOR_PANEL}>
                 <AdvisorButton projectRef={projectRef} />
               </span>
-              <HelpDropdown />
+              <span data-sidebar-id={SIDEBAR_KEYS.HELP_PANEL}>
+                <HelpButton />
+              </span>
             </>
-          ) : (
-            <button
-              type="button"
-              className={cn(
-                'group',
-                'flex-grow h-[30px] rounded-md',
-                'p-1',
-                'flex items-center justify-between',
-                'bg-transparent border-none text-foreground-lighter',
-                'hover:bg-opacity-100 hover:border-strong hover:text-foreground-light',
-                'focus-visible:!outline-4 focus-visible:outline-offset-1 focus-visible:outline-brand-600',
-                'transition'
-              )}
-              onClick={() => {
-                clearActiveSidebar()
-                setSheetContent('search')
-              }}
-              aria-label="Search"
-            >
-              <div className="flex items-center space-x-2">
-                <Search size={18} strokeWidth={2} />
-              </div>
-            </button>
           )}
           {showMenuButton && !hideMobileMenu && (
-            <Button
+            <ButtonTooltip
               title="Menu dropdown button"
+              id="menu"
               type={sheetContent === 'menu' ? 'secondary' : 'default'}
               className={cn(
                 'flex lg:hidden rounded-full min-w-[30px] w-[30px] h-[30px] data-[state=open]:bg-overlay-hover/30',
                 sheetContent !== 'menu' && '!bg-surface-300'
               )}
-              icon={<Menu />}
-              onClick={() => {
-                clearActiveSidebar()
-                setSheetContent('menu')
+              tooltip={{
+                content: {
+                  text: 'Menu',
+                },
               }}
+              icon={<Menu />}
+              onClick={() => handleSetSheetContent('menu')}
             />
           )}
         </AnimatePresence>
@@ -314,10 +300,7 @@ const FloatingBottomNavbarSearch = ({ hideMobileMenu }: { hideMobileMenu?: boole
             !isSheetOpen && 'hidden'
           )}
           icon={<X />}
-          onClick={() => {
-            clearActiveSidebar()
-            setSheetContent(null)
-          }}
+          onClick={() => handleSetSheetContent(null)}
         />
       </AnimatePresence>
     </nav>
