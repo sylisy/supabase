@@ -567,12 +567,19 @@ export const JITAccess = () => {
   const [sheetMode, setSheetMode] = useState<SheetMode>('add')
   const [editingUserId, setEditingUserId] = useState<string | null>(null)
   const [draft, setDraft] = useState<JITUserRuleDraft>(() => createDraft())
+  const [showInlineValidation, setShowInlineValidation] = useState(false)
 
   const enabledRoleCount = useMemo(
     () => draft.grants.filter((grant) => grant.enabled).length,
     [draft.grants]
   )
-  const canSave = Boolean(draft.memberId) && enabledRoleCount > 0
+  const inlineValidation = useMemo(
+    () => ({
+      member: draft.memberId ? undefined : 'Select a user to grant JIT access.',
+      roles: enabledRoleCount > 0 ? undefined : 'Select at least one role.',
+    }),
+    [draft.memberId, enabledRoleCount]
+  )
 
   const closeSheet = () => {
     setSheetOpen(false)
@@ -582,6 +589,7 @@ export const JITAccess = () => {
     setSheetMode('add')
     setEditingUserId(null)
     setDraft(createDraft())
+    setShowInlineValidation(false)
     setSheetOpen(true)
   }
 
@@ -589,6 +597,7 @@ export const JITAccess = () => {
     setSheetMode('edit')
     setEditingUserId(user.id)
     setDraft(draftFromRule(user))
+    setShowInlineValidation(false)
     setSheetOpen(true)
   }
 
@@ -603,7 +612,8 @@ export const JITAccess = () => {
   }
 
   const handleSave = () => {
-    if (!canSave) return
+    setShowInlineValidation(true)
+    if (inlineValidation.member || inlineValidation.roles) return
 
     const ruleId = sheetMode === 'edit' && editingUserId ? editingUserId : `rule-${Date.now()}`
     const nextRule = createRuleFromMember(ruleId, draft.memberId, draft.grants, MOCK_MEMBERS)
@@ -766,7 +776,7 @@ export const JITAccess = () => {
                                   <Pencil size={14} className="text-foreground-lighter" />
                                   Edit
                                 </DropdownMenuItem>
-                                <DropdownMenuItem className="gap-x-2" onClick={() => { }}>
+                                <DropdownMenuItem className="gap-x-2" onClick={() => {}}>
                                   <Trash2 size={14} className="text-foreground-lighter" />
                                   Delete
                                 </DropdownMenuItem>
@@ -802,7 +812,9 @@ export const JITAccess = () => {
                 <FormItemLayout layout="vertical" isReactForm={false} label="User">
                   <Select_Shadcn_
                     value={draft.memberId}
-                    onValueChange={(value) => setDraft((prev) => ({ ...prev, memberId: value }))}
+                    onValueChange={(value) => {
+                      setDraft((prev) => ({ ...prev, memberId: value }))
+                    }}
                   >
                     <SelectTrigger_Shadcn_>
                       <SelectValue_Shadcn_ placeholder="Select a member" />
@@ -822,6 +834,10 @@ export const JITAccess = () => {
                       ))}
                     </SelectContent_Shadcn_>
                   </Select_Shadcn_>
+
+                  {showInlineValidation && inlineValidation.member && (
+                    <p className="mt-2 text-xs text-destructive">{inlineValidation.member}</p>
+                  )}
                 </FormItemLayout>
 
                 <FormItemLayout layout="vertical" isReactForm={false} label="Roles and settings">
@@ -853,6 +869,10 @@ export const JITAccess = () => {
                     </InlineLink>{' '}
                     before granting JIT access. Narrow roles limit the impact of temporary access.
                   </p>
+
+                  {showInlineValidation && inlineValidation.roles && (
+                    <p className="text-xs text-destructive">{inlineValidation.roles}</p>
+                  )}
                 </FormItemLayout>
               </div>
             </ScrollArea>
@@ -861,7 +881,7 @@ export const JITAccess = () => {
               <Button type="default" onClick={closeSheet}>
                 Cancel
               </Button>
-              <Button type="primary" onClick={handleSave} disabled={!canSave}>
+              <Button type="primary" onClick={handleSave}>
                 {sheetMode === 'edit' ? 'Update access' : 'Grant access'}
               </Button>
             </SheetFooter>
