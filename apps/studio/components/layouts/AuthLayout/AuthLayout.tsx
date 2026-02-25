@@ -65,12 +65,7 @@ const AuthProductMenu = () => {
     authenticationPerformance,
   })
 
-  return (
-    <ProductMenu
-      page={page}
-      menu={menu}
-    />
-  )
+  return <ProductMenu page={page} menu={menu} />
 }
 
 const AuthLayout = ({ children }: PropsWithChildren<{}>) => {

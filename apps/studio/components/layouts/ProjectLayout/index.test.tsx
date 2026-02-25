@@ -4,11 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { STUDIO_PAGE_TITLE_SEPARATOR } from '@/lib/page-title'
 
-const {
-  mockRouter,
-  mockSetSelectedDatabaseId,
-  mockSetMobileMenuOpen,
-} = vi.hoisted(() => ({
+const { mockRouter, mockSetSelectedDatabaseId, mockSetMobileMenuOpen } = vi.hoisted(() => ({
   mockRouter: {
     pathname: '/project/[ref]/observability/query-performance',
     asPath: '/project/default/observability/query-performance',

@@ -21,7 +21,14 @@ const normalizeTitleSegment = (value?: string) => {
 }
 
 export const buildStudioPageTitle = (parts: StudioPageTitleParts) => {
-  const orderedParts = [parts.entity, parts.section, parts.surface, parts.project, parts.org, parts.brand]
+  const orderedParts = [
+    parts.entity,
+    parts.section,
+    parts.surface,
+    parts.project,
+    parts.org,
+    parts.brand,
+  ]
 
   const segments: string[] = []
 
@@ -37,4 +44,3 @@ export const buildStudioPageTitle = (parts: StudioPageTitleParts) => {
 
   return segments.join(STUDIO_PAGE_TITLE_SEPARATOR)
 }
-

@@ -78,8 +78,7 @@ const DatabaseLayout = ({ children, title }: PropsWithChildren<DatabaseLayoutPro
   const router = useRouter()
   const page = router.pathname.split('/')[4]
   const routeSectionTitle = page !== undefined ? DATABASE_SECTION_TITLE_BY_ROUTE[page] : undefined
-  const resolvedTitle =
-    title && title !== 'Database' ? title : routeSectionTitle ?? title
+  const resolvedTitle = title && title !== 'Database' ? title : routeSectionTitle ?? title
 
   return (
     <ProjectLayout

@@ -30,7 +30,9 @@ const LogsLayout = ({ title, children }: PropsWithChildren<LogsLayoutProps>) => 
 
   if (!canUseLogsExplorer) {
     if (isLoading) {
-      return <ProjectLayout isLoading title={resolvedTitle} product="Logs & Analytics"></ProjectLayout>
+      return (
+        <ProjectLayout isLoading title={resolvedTitle} product="Logs & Analytics"></ProjectLayout>
+      )
     }
 
     if (!isLoading && !canUseLogsExplorer) {

@@ -11,7 +11,9 @@ describe('buildStudioPageTitle', () => {
         org: 'Acme Org',
         brand: 'Supabase',
       })
-    ).toBe(`Database${STUDIO_PAGE_TITLE_SEPARATOR}Acme Project${STUDIO_PAGE_TITLE_SEPARATOR}Acme Org${STUDIO_PAGE_TITLE_SEPARATOR}Supabase`)
+    ).toBe(
+      `Database${STUDIO_PAGE_TITLE_SEPARATOR}Acme Project${STUDIO_PAGE_TITLE_SEPARATOR}Acme Org${STUDIO_PAGE_TITLE_SEPARATOR}Supabase`
+    )
   })
 
   it('includes entity and section when provided', () => {
@@ -36,7 +38,9 @@ describe('buildStudioPageTitle', () => {
         project: 'Acme Project',
         brand: 'Supabase',
       })
-    ).toBe(`Authentication${STUDIO_PAGE_TITLE_SEPARATOR}Acme Project${STUDIO_PAGE_TITLE_SEPARATOR}Supabase`)
+    ).toBe(
+      `Authentication${STUDIO_PAGE_TITLE_SEPARATOR}Acme Project${STUDIO_PAGE_TITLE_SEPARATOR}Supabase`
+    )
   })
 
   it('deduplicates adjacent segments case-insensitively', () => {
@@ -48,7 +52,9 @@ describe('buildStudioPageTitle', () => {
         org: 'Acme Org',
         brand: 'Supabase',
       })
-    ).toBe(`Database${STUDIO_PAGE_TITLE_SEPARATOR}Acme Project${STUDIO_PAGE_TITLE_SEPARATOR}Acme Org${STUDIO_PAGE_TITLE_SEPARATOR}Supabase`)
+    ).toBe(
+      `Database${STUDIO_PAGE_TITLE_SEPARATOR}Acme Project${STUDIO_PAGE_TITLE_SEPARATOR}Acme Org${STUDIO_PAGE_TITLE_SEPARATOR}Supabase`
+    )
   })
 
   it('normalizes whitespace in each segment', () => {
@@ -58,7 +64,9 @@ describe('buildStudioPageTitle', () => {
         surface: '  Edge    Functions ',
         brand: ' Supabase ',
       })
-    ).toBe(`hello world${STUDIO_PAGE_TITLE_SEPARATOR}Edge Functions${STUDIO_PAGE_TITLE_SEPARATOR}Supabase`)
+    ).toBe(
+      `hello world${STUDIO_PAGE_TITLE_SEPARATOR}Edge Functions${STUDIO_PAGE_TITLE_SEPARATOR}Supabase`
+    )
   })
 
   it('truncates very long segments', () => {
@@ -84,4 +92,3 @@ describe('buildStudioPageTitle', () => {
     ).toBe(`Settings${STUDIO_PAGE_TITLE_SEPARATOR}Supabase Studio`)
   })
 })
-
