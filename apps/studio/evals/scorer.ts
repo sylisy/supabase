@@ -3,8 +3,7 @@ import { LLMClassifierFromTemplate } from 'autoevals'
 import { EvalCase, EvalScorer } from 'braintrust'
 import { stripIndent } from 'common-tags'
 import { extractUrls } from 'lib/helpers'
-import { extractIdentifiers } from 'lib/sql-identifier-quoting'
-import { isQuotedInSql, needsQuoting } from 'lib/sql-identifier-quoting'
+import { extractIdentifiers, isQuotedInSql, needsQuoting } from 'lib/sql-identifier-quoting'
 import { parse } from 'libpg-query'
 
 const LLM_AS_A_JUDGE_MODEL = 'gpt-5.2-2025-12-11'
@@ -76,10 +75,11 @@ function extractTextOnly(steps: AssistantEvalOutput['steps']): string {
     .join('\n')
 }
 
-export const toolUsageScorer: EvalScorer<AssistantEvalInput, AssistantEvalOutput, Expected> = async ({
-  output,
-  expected,
-}) => {
+export const toolUsageScorer: EvalScorer<
+  AssistantEvalInput,
+  AssistantEvalOutput,
+  Expected
+> = async ({ output, expected }) => {
   if (!expected.requiredTools) return null
 
   const presentCount = expected.requiredTools.filter((tool) =>
@@ -94,7 +94,11 @@ export const toolUsageScorer: EvalScorer<AssistantEvalInput, AssistantEvalOutput
   }
 }
 
-export const sqlSyntaxScorer: EvalScorer<AssistantEvalInput, AssistantEvalOutput, Expected> = async ({ output }) => {
+export const sqlSyntaxScorer: EvalScorer<
+  AssistantEvalInput,
+  AssistantEvalOutput,
+  Expected
+> = async ({ output }) => {
   if (output.sqlQueries === undefined || output.sqlQueries.length === 0) {
     return null
   }
@@ -137,7 +141,11 @@ const concisenessEvaluator = LLMClassifierFromTemplate<{ input: string }>({
   model: LLM_AS_A_JUDGE_MODEL,
 })
 
-export const concisenessScorer: EvalScorer<AssistantEvalInput, AssistantEvalOutput, Expected> = async ({ input, output }) => {
+export const concisenessScorer: EvalScorer<
+  AssistantEvalInput,
+  AssistantEvalOutput,
+  Expected
+> = async ({ input, output }) => {
   return await concisenessEvaluator({
     input: input.prompt,
     output: serializeSteps(output.steps),
@@ -161,10 +169,11 @@ const completenessEvaluator = LLMClassifierFromTemplate<{ input: string }>({
   model: LLM_AS_A_JUDGE_MODEL,
 })
 
-export const completenessScorer: EvalScorer<AssistantEvalInput, AssistantEvalOutput, Expected> = async ({
-  input,
-  output,
-}) => {
+export const completenessScorer: EvalScorer<
+  AssistantEvalInput,
+  AssistantEvalOutput,
+  Expected
+> = async ({ input, output }) => {
   return await completenessEvaluator({
     input: input.prompt,
     output: serializeSteps(output.steps),
@@ -189,10 +198,11 @@ const goalCompletionEvaluator = LLMClassifierFromTemplate<{ input: string }>({
   model: LLM_AS_A_JUDGE_MODEL,
 })
 
-export const goalCompletionScorer: EvalScorer<AssistantEvalInput, AssistantEvalOutput, Expected> = async ({
-  input,
-  output,
-}) => {
+export const goalCompletionScorer: EvalScorer<
+  AssistantEvalInput,
+  AssistantEvalOutput,
+  Expected
+> = async ({ input, output }) => {
   return await goalCompletionEvaluator({
     input: input.prompt,
     output: serializeSteps(output.steps),
@@ -220,7 +230,11 @@ const docsFaithfulnessEvaluator = LLMClassifierFromTemplate<{ docs: string }>({
   model: LLM_AS_A_JUDGE_MODEL,
 })
 
-export const docsFaithfulnessScorer: EvalScorer<AssistantEvalInput, AssistantEvalOutput, Expected> = async ({ output }) => {
+export const docsFaithfulnessScorer: EvalScorer<
+  AssistantEvalInput,
+  AssistantEvalOutput,
+  Expected
+> = async ({ output }) => {
   // Skip scoring if no docs were retrieved
   if (!output.docs || output.docs.length === 0) {
     return null
@@ -261,11 +275,11 @@ const correctnessEvaluator = LLMClassifierFromTemplate<{ input: string; expected
   model: LLM_AS_A_JUDGE_MODEL,
 })
 
-export const correctnessScorer: EvalScorer<AssistantEvalInput, AssistantEvalOutput, Expected> = async ({
-  input,
-  output,
-  expected,
-}) => {
+export const correctnessScorer: EvalScorer<
+  AssistantEvalInput,
+  AssistantEvalOutput,
+  Expected
+> = async ({ input, output, expected }) => {
   // Skip scoring if no ground truth is provided
   if (!expected.correctAnswer) {
     return null
@@ -278,10 +292,11 @@ export const correctnessScorer: EvalScorer<AssistantEvalInput, AssistantEvalOutp
   })
 }
 
-export const sqlIdentifierQuotingScorer: EvalScorer<AssistantEvalInput, AssistantEvalOutput, Expected> = async ({
-  input,
-  output,
-}) => {
+export const sqlIdentifierQuotingScorer: EvalScorer<
+  AssistantEvalInput,
+  AssistantEvalOutput,
+  Expected
+> = async ({ input, output }) => {
   // Skip if no SQL queries
   if (!output.sqlQueries?.length) {
     return null
@@ -324,7 +339,11 @@ export const sqlIdentifierQuotingScorer: EvalScorer<AssistantEvalInput, Assistan
   }
 }
 
-export const urlValidityScorer: EvalScorer<AssistantEvalInput, AssistantEvalOutput, Expected> = async ({ output }) => {
+export const urlValidityScorer: EvalScorer<
+  AssistantEvalInput,
+  AssistantEvalOutput,
+  Expected
+> = async ({ output }) => {
   const responseText = extractTextOnly(output.steps)
   const urls = extractUrls(responseText, { excludeCodeBlocks: true, excludeTemplates: true })
 

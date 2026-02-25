@@ -1,8 +1,9 @@
+import assert from 'node:assert'
 import { openai } from '@ai-sdk/openai'
 import { Eval } from 'braintrust'
 import { generateAssistantResponse } from 'lib/ai/generate-assistant-response'
 import { getMockTools } from 'lib/ai/tools/mock-tools'
-import assert from 'node:assert'
+
 import { dataset } from './dataset'
 import { buildAssistantEvalOutput } from './output'
 import {
@@ -48,4 +49,3 @@ Eval('Assistant', {
     urlValidityScorer,
   ],
 })
-
