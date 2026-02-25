@@ -11,6 +11,8 @@ import {
 import { traced, wrapAISDK, type Span } from 'braintrust'
 import { source } from 'common-tags'
 import type { AiOptInLevel } from 'hooks/misc/useOrgOptedIntoAi'
+import { buildAssistantEvalOutput } from 'evals/output'
+import type { AssistantEvalInput, AssistantEvalOutput } from 'evals/scorer'
 import { IS_TRACING_ENABLED } from 'lib/ai/braintrust-logger'
 import {
   CHAT_PROMPT,
@@ -151,7 +153,7 @@ export async function generateAssistantResponse({
       ...(providerOptions && { providerOptions }),
       tools,
       ...(abortSignal && { abortSignal }),
-      onFinish: ({ steps }) => {
+      onFinish: ({ steps, finishReason }) => {
         for (const step of steps) {
           for (const toolCall of step.toolCalls) {
             if (toolCall.toolName === 'rename_chat') {
@@ -160,6 +162,9 @@ export async function generateAssistantResponse({
             }
           }
         }
+        span?.log({
+          output: buildAssistantEvalOutput(finishReason, steps) satisfies AssistantEvalOutput,
+        })
       },
     } satisfies Parameters<typeof ai.streamText>[0]
 
@@ -170,7 +175,7 @@ export async function generateAssistantResponse({
       .join('\n')
 
     span?.log({
-      input: lastUserText,
+      input: { prompt: lastUserText ?? '' } satisfies AssistantEvalInput,
       metadata: {
         projectRef,
         chatId,
