@@ -1,4 +1,4 @@
-import { createContext, useContext, useMemo, type ReactNode } from 'react'
+import { createContext, useContext, useMemo, useState, type ReactNode } from 'react'
 
 import type { MockProject, MockProjectContextType, SupaMockOrganization } from '../types'
 
@@ -42,7 +42,7 @@ export function MockProjectProvider({
   organizations = [],
   children,
 }: MockProjectProviderProps) {
-  const project = useMemo<MockProject>(
+  const initialProject = useMemo<MockProject>(
     () => ({
       ...DEFAULT_PROJECT,
       ...(projectName && { name: projectName }),
@@ -63,11 +63,21 @@ export function MockProjectProvider({
           },
         }),
     }),
-    [projectName, organizationName, organizationPlan, branchName]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
   )
 
+  const [project, setProjectState] = useState<MockProject>(initialProject)
+  const [dashboardReady, setDashboardReady] = useState(false)
+
+  const setProject = (patch: Partial<MockProject>) =>
+    setProjectState((prev) => ({ ...prev, ...patch }))
+
+  const revealDashboard = () => setDashboardReady(true)
+  const hideDashboard = () => setDashboardReady(false)
+
   return (
-    <MockProjectContext.Provider value={{ project, organizations }}>
+    <MockProjectContext.Provider value={{ project, organizations, dashboardReady, setProject, revealDashboard, hideDashboard }}>
       {children}
     </MockProjectContext.Provider>
   )

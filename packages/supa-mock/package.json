@@ -19,6 +19,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "framer-motion": "^11.0.3",
     "icons": "workspace:*",
     "lucide-react": "*",
     "ui": "workspace:*",

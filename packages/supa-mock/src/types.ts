@@ -5,6 +5,16 @@ export interface SupaMockOrganization {
   slug: string
 }
 
+export type FloatingScreenType = 'cli'
+
+export interface FloatingScreenConfig {
+  type: FloatingScreenType
+  title?: string
+  initialPosition?: { x: number; y: number }
+  width?: number
+  height?: number
+}
+
 export interface SupaMockProps {
   defaultScreen?: string
   className?: string
@@ -13,6 +23,7 @@ export interface SupaMockProps {
   organizationPlan?: string
   branchName?: string
   organizations?: SupaMockOrganization[]
+  floatingScreens?: FloatingScreenConfig[]
 }
 
 export interface MockRoute {
@@ -52,6 +63,10 @@ export interface MockUser {
 export interface MockProjectContextType {
   project: MockProject
   organizations: SupaMockOrganization[]
+  dashboardReady: boolean
+  setProject: (patch: Partial<MockProject>) => void
+  revealDashboard: () => void
+  hideDashboard: () => void
 }
 
 export interface MockUserContextType {

@@ -2322,6 +2322,9 @@ importers:
 
   packages/supa-mock:
     dependencies:
+      framer-motion:
+        specifier: ^11.0.3
+        version: 11.11.17(@emotion/is-prop-valid@1.2.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       icons:
         specifier: workspace:*
         version: link:../icons

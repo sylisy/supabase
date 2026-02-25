@@ -26,7 +26,18 @@ const Hero = () => {
                 </div>
               </div>
             </div>
-            <SupaMock defaultScreen="/dashboard/project" />
+            <SupaMock
+              defaultScreen="/dashboard/project"
+              floatingScreens={[
+                {
+                  type: 'cli',
+                  title: 'supabase — zsh',
+                  initialPosition: { x: 44, y: 44 },
+                  width: 460,
+                  height: 500,
+                },
+              ]}
+            />
           </div>
         </div>
       </SectionContainer>
