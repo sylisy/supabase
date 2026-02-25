@@ -4,11 +4,10 @@ import { ButtonTooltip } from 'components/ui/ButtonTooltip'
 import { useStripeSyncInstallMutation } from 'data/database-integrations/stripe/stripe-sync-install-mutation'
 import { useStripeSyncUninstallMutation } from 'data/database-integrations/stripe/stripe-sync-uninstall-mutation'
 import { useSchemasQuery } from 'data/database/schemas-query'
-import { formatRelative } from 'date-fns'
 import { useAsyncCheckPermissions } from 'hooks/misc/useCheckPermissions'
 import { useSelectedProjectQuery } from 'hooks/misc/useSelectedProject'
 import { useTrack } from 'lib/telemetry/track'
-import { AlertCircle, BadgeCheck, Check, ExternalLink, RefreshCwIcon } from 'lucide-react'
+import { AlertCircle, Check, ExternalLink, RefreshCwIcon } from 'lucide-react'
 import Link from 'next/link'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -81,8 +80,6 @@ export const StripeSyncInstallationPage = () => {
     '*'
   )
 
-  const isSyncing = isSyncRunning(syncState)
-
   const installed = isInstalled(installationStatus)
   const installError = hasInstallError(installationStatus)
   const uninstallError = hasUninstallError(installationStatus)
@@ -148,8 +145,6 @@ export const StripeSyncInstallationPage = () => {
     }
   }
 
-  const tableEditorUrl = `/project/${project?.ref}/editor?schema=stripe`
-
   const alert = useMemo(() => {
     if (uninstallError) {
       return (
@@ -194,52 +189,8 @@ export const StripeSyncInstallationPage = () => {
       )
     }
 
-    if (syncState && installed && !uninstalling) {
-      return (
-        <Admonition type="default" showIcon={false}>
-          <div className="flex items-center justify-between gap-2">
-            {isSyncing ? (
-              <>
-                <div className="flex items-center gap-2 animate-pulse">
-                  <RefreshCwIcon size={14} />
-                  <div>Sync in progress...</div>
-                </div>
-                <div className="text-foreground-light text-sm">
-                  Started {formatRelative(new Date(syncState.started_at!), new Date())}
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="flex items-center gap-2">
-                  <BadgeCheck size={14} className="text-brand" />
-                  <div>All up to date</div>
-                  <Button asChild type="text">
-                    <Link href={tableEditorUrl}>View data</Link>
-                  </Button>
-                </div>
-                <div className="text-foreground-light text-sm">
-                  Last synced {formatRelative(new Date(syncState.closed_at!), new Date())}
-                </div>
-              </>
-            )}
-          </div>
-        </Admonition>
-      )
-    }
-
     return null
-  }, [
-    uninstallError,
-    installError,
-    syncState,
-    isSyncing,
-    installed,
-    isUninstallRequested,
-    tableEditorUrl,
-    uninstalling,
-    handleOpenInstallSheet,
-    handleUninstall,
-  ])
+  }, [uninstallError, installError, isUninstallRequested, handleOpenInstallSheet, handleUninstall])
 
   const statusDisplay = useMemo(() => {
     if (uninstallError) {
@@ -274,14 +225,6 @@ export const StripeSyncInstallationPage = () => {
         </span>
       )
     }
-    if (isSyncing && installed) {
-      return (
-        <span className="flex items-center gap-2 text-foreground-light text-sm">
-          <RefreshCwIcon size={14} className="animate-spin text-foreground-lighter" />
-          Sync in progress...
-        </span>
-      )
-    }
     if (installed) {
       return (
         <span className="flex items-center gap-2 text-foreground-light text-sm">
@@ -292,7 +235,7 @@ export const StripeSyncInstallationPage = () => {
     return (
       <span className="flex items-center gap-2 text-foreground-light text-sm">Not installed</span>
     )
-  }, [uninstallError, uninstalling, installError, installing, isSyncing, installed])
+  }, [uninstallError, uninstalling, installError, installing, installed])
 
   // Track install failures
   useEffect(() => {
