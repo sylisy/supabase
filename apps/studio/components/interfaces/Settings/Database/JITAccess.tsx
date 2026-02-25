@@ -364,7 +364,7 @@ function RoleRuleEditor({
     <div className={`${grant.enabled ? 'bg-surface-100' : 'bg-background'}`}>
       <label
         htmlFor={checkboxId}
-        className={`grid w-full grid-cols-[16px_minmax(0,1fr)] items-start gap-x-3 px-4 py-3 cursor-pointer select-none transition-colors duration-100 ${grant.enabled ? 'hover:bg-surface-200/40' : 'hover:bg-surface-100/50'
+        className={`grid w-full grid-cols-[16px_minmax(0,1fr)] items-start gap-x-3 px-4 py-3 cursor-pointer select-none transition-colors ${grant.enabled ? 'hover:bg-surface-200/40' : 'hover:bg-surface-100/50'
           }`}
       >
         <Checkbox_Shadcn_
@@ -375,7 +375,7 @@ function RoleRuleEditor({
           className="mt-0.5"
         />
         <div className="min-w-0 flex-1">
-          <code className="text-code-inline !bg-surface-300 !border-control !tracking-normal">{role.label}</code>
+          <code className="text-code-inline dark:!bg-surface-300 dark:!border-control !tracking-normal">{role.label}</code>
         </div>
       </label>
 
