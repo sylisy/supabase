@@ -22,7 +22,7 @@ export const QueryInsightsChartTooltip = ({ active, payload }: TooltipProps<numb
             <span className="text-foreground-lighter ml-1 flex-grow">{entry.name}</span>
             <span className="ml-3.5">
               {typeof entry.value === 'number'
-                ? isTimeMetric(entry.dataKey)
+                ? isTimeMetric(typeof entry.dataKey === 'string' ? entry.dataKey : '')
                   ? formatDuration(entry.value)
                   : entry.value.toLocaleString()
                 : entry.value}
