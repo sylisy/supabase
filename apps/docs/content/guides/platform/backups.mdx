@@ -48,7 +48,7 @@ export PROJECT_REF="your-project-ref"
 curl -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
   "https://api.supabase.com/v1/projects/$PROJECT_REF/database/backups"
 
-# Restore from a PITR backup (replace ISO timestamp with desired restore point)
+# Restore from a PITR backup (replace Unix timestamp with desired restore point)
 curl -X POST "https://api.supabase.com/v1/projects/$PROJECT_REF/database/backups/restore-pitr" \
   -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
   -H "Content-Type: application/json" \
