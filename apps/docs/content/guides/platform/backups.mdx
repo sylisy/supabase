@@ -3,21 +3,13 @@ title: 'Database Backups'
 description: 'Learn about backups for your Supabase project.'
 ---
 
-Database backups are an integral part of any disaster recovery plan. Disasters come in many shapes and sizes—from accidentally deleting a table column, to the database crashing, to a natural calamity wiping out the underlying hardware. You can never fully eliminate the risks and impact of these scenarios, but you can minimize or mitigate them. Database backups act as a form of insurance policy. They are essentially snapshots of the database at various points in time. When disaster strikes, you can use database backups to restore the project to any of these points in time, averting the crisis.
-
 We automatically back up all Free, Pro, Team, and Enterprise Plan projects on a daily basis. You can find backups in the [**Database** > **Backups**](/dashboard/project/_/database/backups/scheduled) section of the Dashboard.
 
-Pro Plan projects can access the last 7 days of daily backups. Team Plan projects can access the last 14 days of daily backups, while Enterprise Plan projects can access up to 30 days of daily backups. If you need more frequent backups, consider enabling [Point-in-Time Recovery](#point-in-time-recovery).
+Pro Plan projects can access the last 7 days of daily backups. Team Plan projects can access the last 14 days of daily backups, while Enterprise Plan projects can access up to 30 days of daily backups. If you need more frequent backups, consider enabling [Point-in-Time Recovery](#point-in-time-recovery). We recommend that free tier plan projects regularly export their data using the [Supabase CLI `db dump` command](/docs/reference/cli/supabase-db-dump) and maintain off-site backups.
 
 <Admonition type="caution">
 
 When you delete a project, we permanently remove all associated data, including any backups stored in S3. This action is irreversible, so consider it carefully before proceeding.
-
-</Admonition>
-
-<Admonition type="note">
-
-Database backups do not include objects you store via the Storage API, as the database only includes metadata about these objects. Restoring an old backup does not restore objects you deleted after that backup.
 
 </Admonition>
 
@@ -27,9 +19,13 @@ For security purposes, daily backups do not store passwords for custom roles, an
 
 </Admonition>
 
-## Backup and restore process
+<Admonition type="note">
 
-We use the Postgres utility [pg_dumpall](https://www.postgresql.org/docs/current/app-pg-dumpall.html) to perform daily backups. We generate an SQL file, zip it up, and send it to storage servers for safekeeping.
+Database backups do not include objects you store via the Storage API, as the database only includes metadata about these objects. Restoring an old backup does not restore objects you deleted after that backup.
+
+</Admonition>
+
+## Backup and restore process
 
 You can access daily backups in the [**Database** > **Backups**](/dashboard/project/_/database/backups/scheduled) section of the Dashboard and restore a project to any one of the backups.
 
@@ -78,7 +74,7 @@ Pro, Team and Enterprise Plan projects can enable PITR as an add-on.
 Projects that want to use PITR must also use at least a Small compute add-on to ensure smooth functioning.
 
 </Admonition>
-{/* TODO: Maybe sub-head */}
+
 <Accordion
   type="default"
   openBehaviour="multiple"
@@ -124,7 +120,7 @@ The latest restore point of the project could be significantly behind the curren
 
 ![PITR: Calendar view](/docs/img/backups-pitr-calendar-view.png)
 
-A date and time picker appears when you press the **Start a restore** button. The process only proceed if the selected date and time fall within the earliest and latest recovery points.
+A date and time picker appears when you click the **Start a restore** button. The process only proceeds if the selected date and time fall within the earliest and latest recovery points.
 
 ![PITR: Confirmation modal](/docs/img/backups-pitr-confirmation-modal.png)
 
