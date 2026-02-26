@@ -196,6 +196,7 @@ export const Pagination = ({ enableForeignRowsQuery = true }: PaginationProps) =
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isError, snap.enforceExactCount, error?.code])
 
+  // [Joshen] One to revisit if we can consolidate this and the main return statement
   if (isForeignTableSelected) {
     return (
       <div className="flex items-center gap-x-2">
@@ -259,15 +260,13 @@ export const Pagination = ({ enableForeignRowsQuery = true }: PaginationProps) =
           min={1}
           max={isSuccess ? maxPages : undefined}
           value={value}
-          readOnly={isSuccess && !hasCountData}
           onChange={(e) => setValue(e.target.value)}
           onKeyDown={(e) => {
             const parsedValue = Number(value)
             if (
               (e.code === 'Enter' || e.code === 'NumpadEnter') &&
               !Number.isNaN(parsedValue) &&
-              parsedValue >= 1 &&
-              parsedValue <= maxPages
+              parsedValue >= 1
             ) {
               onPageChange(parsedValue)
             }
