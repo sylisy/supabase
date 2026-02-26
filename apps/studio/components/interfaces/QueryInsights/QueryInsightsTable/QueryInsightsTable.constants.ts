@@ -38,7 +38,7 @@ export const QUERY_INSIGHTS_EXPLORER_COLUMNS = [
   { id: 'rows_read', name: 'Rows processed', description: undefined, minWidth: 130 },
   { id: 'cache_hit_rate', name: 'Cache hit rate', description: undefined, minWidth: 130 },
   { id: 'rolname', name: 'Role', description: undefined, minWidth: 200 },
-  { id: 'application_name', name: 'Application', description: undefined, minWidth: 150 },
+  { id: 'application_name', name: 'Application', description: undefined, minWidth: 200 },
 ] as const
 
 export const NON_SORTABLE_COLUMNS = ['query'] as const
