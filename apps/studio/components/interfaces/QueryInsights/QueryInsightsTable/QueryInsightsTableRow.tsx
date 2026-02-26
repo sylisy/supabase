@@ -46,10 +46,15 @@ export const QueryInsightsTableRow = ({
         <p className="text-xs font-mono text-foreground line-clamp-1">
           <span className="text-foreground">{item.queryType ?? '–'}</span>
           {getTableName(item.query) && (
-            <> <span className="text-foreground-lighter">in</span> {getTableName(item.query)}</>
+            <>
+              {' '}
+              <span className="text-foreground-lighter">in</span> {getTableName(item.query)}
+            </>
           )}
           {getColumnName(item.query) && (
-            <><span className="text-foreground-lighter">,</span> {getColumnName(item.query)}</>
+            <>
+              <span className="text-foreground-lighter">,</span> {getColumnName(item.query)}
+            </>
           )}
         </p>
         <p
@@ -68,14 +73,22 @@ export const QueryInsightsTableRow = ({
         <Tooltip>
           <TooltipTrigger asChild>
             <div className="flex flex-col items-end pr-4 cursor-default">
-              <span className={cn('text-sm font-mono leading-snug', item.mean_time >= 1000 && 'text-destructive-600')}>
+              <span
+                className={cn(
+                  'text-sm font-mono leading-snug',
+                  item.mean_time >= 1000 && 'text-destructive-600'
+                )}
+              >
                 {formatDuration(item.mean_time)}
               </span>
-              <span className="text-[10px] text-foreground-muted uppercase tracking-wide leading-snug">avg</span>
+              <span className="text-[10px] text-foreground-muted uppercase tracking-wide leading-snug">
+                avg
+              </span>
             </div>
           </TooltipTrigger>
           <TooltipContent side="top" className="max-w-[220px] text-center">
-            Average execution time per call. High mean time means individual runs are slow — directly felt by users.
+            Average execution time per call. High mean time means individual runs are slow —
+            directly felt by users.
           </TooltipContent>
         </Tooltip>
 
@@ -85,11 +98,14 @@ export const QueryInsightsTableRow = ({
               <span className="text-sm font-mono leading-snug">
                 {item.prop_total_time.toFixed(1)}%
               </span>
-              <span className="text-[10px] text-foreground-muted uppercase tracking-wide leading-snug">of db</span>
+              <span className="text-[10px] text-foreground-muted uppercase tracking-wide leading-snug">
+                of db
+              </span>
             </div>
           </TooltipTrigger>
           <TooltipContent side="top" className="max-w-[220px] text-center">
-            Percentage of total database execution time. Fixing high-impact queries has the biggest overall effect on your database.
+            Percentage of total database execution time. Fixing high-impact queries has the biggest
+            overall effect on your database.
           </TooltipContent>
         </Tooltip>
 
@@ -97,7 +113,9 @@ export const QueryInsightsTableRow = ({
           <TooltipTrigger asChild>
             <div className="flex flex-col items-end pl-4 cursor-default">
               <span className="text-sm font-mono leading-snug">{item.calls.toLocaleString()}</span>
-              <span className="text-[10px] text-foreground-muted uppercase tracking-wide leading-snug">calls</span>
+              <span className="text-[10px] text-foreground-muted uppercase tracking-wide leading-snug">
+                calls
+              </span>
             </div>
           </TooltipTrigger>
           <TooltipContent side="top" className="max-w-[220px] text-center">

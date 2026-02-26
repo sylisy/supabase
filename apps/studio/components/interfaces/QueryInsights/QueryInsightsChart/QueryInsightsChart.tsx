@@ -1,5 +1,13 @@
 import { useMemo, useState } from 'react'
-import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import {
+  Area,
+  AreaChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts'
 import { Tabs_Shadcn_, TabsContent_Shadcn_, TabsList_Shadcn_, TabsTrigger_Shadcn_, cn } from 'ui'
 import { Loader2 } from 'lucide-react'
 import type { ChartDataPoint } from '../../QueryPerformance/QueryPerformance.types'
@@ -17,7 +25,11 @@ interface QueryInsightsChartProps {
   isLoading: boolean
 }
 
-export const QueryInsightsChart = ({ chartData, selectedChartData, isLoading }: QueryInsightsChartProps) => {
+export const QueryInsightsChart = ({
+  chartData,
+  selectedChartData,
+  isLoading,
+}: QueryInsightsChartProps) => {
   const [selectedMetric, setSelectedMetric] = useState('query_latency')
   const [hiddenSeries, setHiddenSeries] = useState<Set<string>>(new Set())
   const { resolvedTheme } = useTheme()
@@ -26,9 +38,7 @@ export const QueryInsightsChart = ({ chartData, selectedChartData, isLoading }: 
   const data = useMemo(() => {
     const normalize = (ts: number) => (ts > 1e13 ? Math.floor(ts / 1000) : ts)
 
-    const selByTime = new Map(
-      (selectedChartData ?? []).map((d) => [normalize(d.period_start), d])
-    )
+    const selByTime = new Map((selectedChartData ?? []).map((d) => [normalize(d.period_start), d]))
 
     return chartData.map((d) => {
       const t = normalize(d.period_start)
@@ -74,8 +84,7 @@ export const QueryInsightsChart = ({ chartData, selectedChartData, isLoading }: 
   const isSeriesVisible = (dataKey: string) => !hiddenSeries.has(dataKey)
 
   const hasSelection = !!selectedChartData && selectedChartData.length > 0
-  const selDataKey =
-    selectedMetric === 'query_latency' ? 'sel_p50' : `sel_${selectedMetric}`
+  const selDataKey = selectedMetric === 'query_latency' ? 'sel_p50' : `sel_${selectedMetric}`
 
   return (
     <div className="bg-surface-100 border-b min-h-[320px]">
@@ -163,7 +172,14 @@ export const QueryInsightsChart = ({ chartData, selectedChartData, isLoading }: 
                     >
                       <defs>
                         {LEGEND_ITEMS.query_latency?.map((item) => (
-                          <linearGradient key={`gradient-${item.dataKey}`} id={`gradient-${item.dataKey}`} x1="0" y1="0" x2="0" y2="1">
+                          <linearGradient
+                            key={`gradient-${item.dataKey}`}
+                            id={`gradient-${item.dataKey}`}
+                            x1="0"
+                            y1="0"
+                            x2="0"
+                            y2="1"
+                          >
                             <stop offset="0%" stopColor={item.color} stopOpacity={0.15} />
                             <stop offset="100%" stopColor={item.color} stopOpacity={0} />
                           </linearGradient>
@@ -330,8 +346,6 @@ export const QueryInsightsChart = ({ chartData, selectedChartData, isLoading }: 
                 <span>{formatTime(data[data.length - 1].time)}</span>
               </div>
             )}
-
-
           </div>
         </TabsContent_Shadcn_>
       </Tabs_Shadcn_>

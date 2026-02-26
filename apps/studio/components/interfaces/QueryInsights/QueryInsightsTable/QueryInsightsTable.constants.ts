@@ -1,7 +1,10 @@
 import { CircleAlert, Lightbulb } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
-export const ISSUE_DOT_COLORS: Record<string, { border: string; background: string; color: string }> = {
+export const ISSUE_DOT_COLORS: Record<
+  string,
+  { border: string; background: string; color: string }
+> = {
   error: {
     border: 'border-destructive-600',
     background: 'bg-destructive-600',

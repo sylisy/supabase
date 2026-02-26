@@ -34,7 +34,14 @@ describe('classifyQuery', () => {
   it('returns error when index_advisor_result has errors', () => {
     const row = {
       ...baseRow,
-      index_advisor_result: { errors: ['some error'], index_statements: [], startup_cost_before: 0, startup_cost_after: 0, total_cost_before: 0, total_cost_after: 0 },
+      index_advisor_result: {
+        errors: ['some error'],
+        index_statements: [],
+        startup_cost_before: 0,
+        startup_cost_after: 0,
+        total_cost_before: 0,
+        total_cost_after: 0,
+      },
     }
     const result = classifyQuery(row)
     expect(result.issueType).toBe('error')
@@ -45,7 +52,14 @@ describe('classifyQuery', () => {
     vi.mocked(hasIndexRecommendations).mockReturnValue(true)
     const row = {
       ...baseRow,
-      index_advisor_result: { errors: [], index_statements: ['CREATE INDEX ...'], startup_cost_before: 0, startup_cost_after: 0, total_cost_before: 0, total_cost_after: 0 },
+      index_advisor_result: {
+        errors: [],
+        index_statements: ['CREATE INDEX ...'],
+        startup_cost_before: 0,
+        startup_cost_after: 0,
+        total_cost_before: 0,
+        total_cost_after: 0,
+      },
     }
     const result = classifyQuery(row)
     expect(result.issueType).toBe('index')
@@ -75,7 +89,14 @@ describe('classifyQuery', () => {
     vi.mocked(hasIndexRecommendations).mockReturnValue(true)
     const row = {
       ...baseRow,
-      index_advisor_result: { errors: ['critical error'], index_statements: ['CREATE INDEX ...'], startup_cost_before: 0, startup_cost_after: 0, total_cost_before: 0, total_cost_after: 0 },
+      index_advisor_result: {
+        errors: ['critical error'],
+        index_statements: ['CREATE INDEX ...'],
+        startup_cost_before: 0,
+        startup_cost_after: 0,
+        total_cost_before: 0,
+        total_cost_after: 0,
+      },
     }
     const result = classifyQuery(row)
     expect(result.issueType).toBe('error')

@@ -84,7 +84,11 @@ export const QueryInsights = ({ dateRange, onDateRangeChange }: QueryInsightsPro
   return (
     <div className="flex flex-col flex-1 min-h-0">
       <QueryInsightsHealth data={aggregatedData} isLoading={isLoading} />
-      <QueryInsightsChart chartData={chartData} selectedChartData={selectedChartData} isLoading={isLoading} />
+      <QueryInsightsChart
+        chartData={chartData}
+        selectedChartData={selectedChartData}
+        isLoading={isLoading}
+      />
       <QueryInsightsTable
         data={aggregatedData}
         isLoading={isLoading}

@@ -1,5 +1,16 @@
 import { useMemo, useState, useRef, useCallback, useEffect } from 'react'
-import { Search, X, ArrowDown, ArrowUp, ChevronDown, TextSearch, ArrowRight, Loader2, Eye, EyeOff } from 'lucide-react'
+import {
+  Search,
+  X,
+  ArrowDown,
+  ArrowUp,
+  ChevronDown,
+  TextSearch,
+  ArrowRight,
+  Loader2,
+  Eye,
+  EyeOff,
+} from 'lucide-react'
 import { useRouter } from 'next/router'
 import { useParams } from 'common'
 import DataGrid, { Column, DataGridHandle, Row } from 'react-data-grid'
@@ -32,8 +43,18 @@ import { parseAsString, useQueryStates } from 'nuqs'
 import type { QueryPerformanceRow } from '../../QueryPerformance/QueryPerformance.types'
 import { useQueryInsightsIssues } from '../hooks/useQueryInsightsIssues'
 import type { Mode, IssueFilter } from './QueryInsightsTable.types'
-import { getQueryType, getTableName, getColumnName, formatDuration } from './QueryInsightsTable.utils'
-import { ISSUE_DOT_COLORS, ISSUE_ICONS, QUERY_INSIGHTS_EXPLORER_COLUMNS, NON_SORTABLE_COLUMNS } from './QueryInsightsTable.constants'
+import {
+  getQueryType,
+  getTableName,
+  getColumnName,
+  formatDuration,
+} from './QueryInsightsTable.utils'
+import {
+  ISSUE_DOT_COLORS,
+  ISSUE_ICONS,
+  QUERY_INSIGHTS_EXPLORER_COLUMNS,
+  NON_SORTABLE_COLUMNS,
+} from './QueryInsightsTable.constants'
 import { buildQueryInsightFixPrompt } from '../../QueryPerformance/QueryPerformance.ai'
 import { QUERY_PERFORMANCE_ROLE_DESCRIPTION } from '../../QueryPerformance/QueryPerformance.constants'
 import { useExecuteSqlMutation } from 'data/sql/execute-sql-mutation'
@@ -107,57 +128,52 @@ export const QueryInsightsTable = ({
 
   const triageItems = useMemo(() => classified.filter((q) => q.issueType !== null), [classified])
 
-  const filteredTriageItems = useMemo(
-    () => {
-      const filtered = filter === 'all' ? triageItems : triageItems.filter((q) => q.issueType === filter)
-      return filtered.map((item) => ({
-        ...item,
-        queryType: getQueryType(item.query),
-      }))
-    },
-    [triageItems, filter]
-  )
+  const filteredTriageItems = useMemo(() => {
+    const filtered =
+      filter === 'all' ? triageItems : triageItems.filter((q) => q.issueType === filter)
+    return filtered.map((item) => ({
+      ...item,
+      queryType: getQueryType(item.query),
+    }))
+  }, [triageItems, filter])
 
-  const explorerItems = useMemo(
-    () => {
-      let items = [...classified]
+  const explorerItems = useMemo(() => {
+    let items = [...classified]
 
-      if (searchQuery.trim()) {
-        const searchLower = searchQuery.toLowerCase()
-        items = items.filter((item) => {
-          const queryType = getQueryType(item.query) ?? ''
-          const tableName = getTableName(item.query) ?? ''
-          const columnName = getColumnName(item.query) ?? ''
-          const appName = item.application_name ?? ''
-          const query = item.query ?? ''
+    if (searchQuery.trim()) {
+      const searchLower = searchQuery.toLowerCase()
+      items = items.filter((item) => {
+        const queryType = getQueryType(item.query) ?? ''
+        const tableName = getTableName(item.query) ?? ''
+        const columnName = getColumnName(item.query) ?? ''
+        const appName = item.application_name ?? ''
+        const query = item.query ?? ''
 
-          return (
-            queryType.toLowerCase().includes(searchLower) ||
-            tableName.toLowerCase().includes(searchLower) ||
-            columnName.toLowerCase().includes(searchLower) ||
-            appName.toLowerCase().includes(searchLower) ||
-            query.toLowerCase().includes(searchLower)
-          )
-        })
-      }
+        return (
+          queryType.toLowerCase().includes(searchLower) ||
+          tableName.toLowerCase().includes(searchLower) ||
+          columnName.toLowerCase().includes(searchLower) ||
+          appName.toLowerCase().includes(searchLower) ||
+          query.toLowerCase().includes(searchLower)
+        )
+      })
+    }
 
-      if (sort) {
-        items.sort((a, b) => {
-          const aValue: unknown = a[sort.column as keyof typeof a]
-          const bValue: unknown = b[sort.column as keyof typeof b]
+    if (sort) {
+      items.sort((a, b) => {
+        const aValue: unknown = a[sort.column as keyof typeof a]
+        const bValue: unknown = b[sort.column as keyof typeof b]
 
-          if (typeof aValue === 'number' && typeof bValue === 'number') {
-            return sort.order === 'asc' ? aValue - bValue : bValue - aValue
-          }
+        if (typeof aValue === 'number' && typeof bValue === 'number') {
+          return sort.order === 'asc' ? aValue - bValue : bValue - aValue
+        }
 
-          return 0
-        })
-      }
+        return 0
+      })
+    }
 
-      return items
-    },
-    [classified, searchQuery, sort]
-  )
+    return items
+  }, [classified, searchQuery, sort])
 
   const activeSheetRow: ClassifiedQuery | undefined = useMemo(() => {
     if (mode === 'triage') {
@@ -200,7 +216,7 @@ export const QueryInsightsTable = ({
     if (sheetView === 'explain' && activeSheetRow?.query) {
       runExplain(activeSheetRow.query)
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sheetView, activeSheetRow?.query])
 
   const timeConsumedWidth = useMemo(() => {
@@ -226,7 +242,7 @@ export const QueryInsightsTable = ({
         name: col.name,
         cellClass: `column-${col.id}`,
         resizable: true,
-        minWidth: col.id === 'prop_total_time' ? timeConsumedWidth : (col.minWidth ?? 120),
+        minWidth: col.id === 'prop_total_time' ? timeConsumedWidth : col.minWidth ?? 120,
         sortable: isSortable,
         headerCellClass: 'first:pl-6 cursor-pointer',
         renderHeaderCell: () => {
@@ -345,11 +361,17 @@ export const QueryInsightsTable = ({
                 />
                 {percentage && totalTime ? (
                   <span className="flex items-center justify-end gap-x-1.5">
-                    <span className={cn(percentage.toFixed(1) === '0.0' && 'text-foreground-lighter')}>
+                    <span
+                      className={cn(percentage.toFixed(1) === '0.0' && 'text-foreground-lighter')}
+                    >
                       {percentage.toFixed(1)}%
                     </span>
                     <span className="text-muted">/</span>
-                    <span className={cn(formatDuration(totalTime) === '0ms' && 'text-foreground-lighter')}>
+                    <span
+                      className={cn(
+                        formatDuration(totalTime) === '0ms' && 'text-foreground-lighter'
+                      )}
+                    >
                       {formatDuration(totalTime)}
                     </span>
                   </span>
@@ -364,7 +386,9 @@ export const QueryInsightsTable = ({
             return (
               <div className="w-full flex flex-col justify-center text-xs text-right tabular-nums font-mono">
                 {typeof value === 'number' && !isNaN(value) && isFinite(value) ? (
-                  <p className={cn(value === 0 && 'text-foreground-lighter')}>{value.toLocaleString()}</p>
+                  <p className={cn(value === 0 && 'text-foreground-lighter')}>
+                    {value.toLocaleString()}
+                  </p>
                 ) : (
                   <p className="text-muted">&ndash;</p>
                 )}
@@ -390,7 +414,9 @@ export const QueryInsightsTable = ({
             return (
               <div className="w-full flex flex-col justify-center text-xs text-right tabular-nums font-mono">
                 {typeof value === 'number' && !isNaN(value) && isFinite(value) ? (
-                  <p className={cn(value === 0 && 'text-foreground-lighter')}>{value.toLocaleString()}</p>
+                  <p className={cn(value === 0 && 'text-foreground-lighter')}>
+                    {value.toLocaleString()}
+                  </p>
                 ) : (
                   <p className="text-muted">&ndash;</p>
                 )}
@@ -404,7 +430,11 @@ export const QueryInsightsTable = ({
               <div className="w-full flex flex-col justify-center text-xs text-right tabular-nums font-mono">
                 {typeof num === 'number' && !isNaN(num) && isFinite(num) ? (
                   <p className={cn(num.toFixed(2) === '0.00' && 'text-foreground-lighter')}>
-                    {num.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%
+                    {num.toLocaleString(undefined, {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
+                    %
                   </p>
                 ) : (
                   <p className="text-muted">&ndash;</p>
@@ -420,7 +450,10 @@ export const QueryInsightsTable = ({
                   <span className="flex items-center gap-x-1">
                     <p className="font-mono text-xs">{value}</p>
                     <InfoTooltip align="end" alignOffset={-12} className="w-56">
-                      {QUERY_PERFORMANCE_ROLE_DESCRIPTION.find((r) => r.name === value)?.description}
+                      {
+                        QUERY_PERFORMANCE_ROLE_DESCRIPTION.find((r) => r.name === value)
+                          ?.description
+                      }
                     </InfoTooltip>
                   </span>
                 ) : (
@@ -455,208 +488,232 @@ export const QueryInsightsTable = ({
     return Math.max(380, triageContainerWidth - fixed - 120)
   }, [triageContainerWidth, timeConsumedWidth])
 
-  const triageColumns = useMemo((): Column<ClassifiedQuery>[] => [
-    {
-      key: 'query',
-      name: 'Query',
-      minWidth: triageQueryColWidth,
-      width: triageQueryColWidth,
-      resizable: true,
-      headerCellClass: 'first:pl-6 cursor-default',
-      renderHeaderCell: () => (
-        <div className="flex items-center text-xs w-full">
-          <p className="!text-foreground font-medium">Query</p>
-        </div>
-      ),
-      renderCell: (props) => {
-        const row = props.row as ClassifiedQuery
-        const IssueIcon = row.issueType ? ISSUE_ICONS[row.issueType] : null
-        return (
-          <div className="w-full flex items-center gap-x-3 group">
-            <div className="flex-shrink-0 w-6">
-              {row.issueType && IssueIcon && (
-                <div
+  const triageColumns = useMemo(
+    (): Column<ClassifiedQuery>[] => [
+      {
+        key: 'query',
+        name: 'Query',
+        minWidth: triageQueryColWidth,
+        width: triageQueryColWidth,
+        resizable: true,
+        headerCellClass: 'first:pl-6 cursor-default',
+        renderHeaderCell: () => (
+          <div className="flex items-center text-xs w-full">
+            <p className="!text-foreground font-medium">Query</p>
+          </div>
+        ),
+        renderCell: (props) => {
+          const row = props.row as ClassifiedQuery
+          const IssueIcon = row.issueType ? ISSUE_ICONS[row.issueType] : null
+          return (
+            <div className="w-full flex items-center gap-x-3 group">
+              <div className="flex-shrink-0 w-6">
+                {row.issueType && IssueIcon && (
+                  <div
+                    className={cn(
+                      'h-6 w-6 rounded-full border flex items-center justify-center',
+                      ISSUE_DOT_COLORS[row.issueType]?.border,
+                      ISSUE_DOT_COLORS[row.issueType]?.background
+                    )}
+                  >
+                    <IssueIcon size={14} className={ISSUE_DOT_COLORS[row.issueType].color} />
+                  </div>
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-mono text-foreground truncate">
+                  {row.queryType ?? '–'}
+                  {getTableName(row.query) && (
+                    <>
+                      {' '}
+                      <span className="text-foreground-lighter">in</span> {getTableName(row.query)}
+                    </>
+                  )}
+                  {getColumnName(row.query) && (
+                    <>
+                      <span className="text-foreground-lighter">,</span> {getColumnName(row.query)}
+                    </>
+                  )}
+                </p>
+                <p
                   className={cn(
-                    'h-6 w-6 rounded-full border flex items-center justify-center',
-                    ISSUE_DOT_COLORS[row.issueType]?.border,
-                    ISSUE_DOT_COLORS[row.issueType]?.background
+                    'text-xs mt-0.5 font-mono truncate',
+                    row.issueType === 'error' && 'text-destructive-600',
+                    row.issueType === 'index' && 'text-warning-600',
+                    row.issueType === 'slow' && 'text-foreground-lighter'
                   )}
                 >
-                  <IssueIcon size={14} className={ISSUE_DOT_COLORS[row.issueType].color} />
-                </div>
+                  {row.hint}
+                </p>
+              </div>
+              <ButtonTooltip
+                tooltip={{ content: { text: 'Query details' } }}
+                icon={<ArrowRight size={14} />}
+                size="tiny"
+                type="default"
+                onClick={(e: React.MouseEvent) => {
+                  e.stopPropagation()
+                  setSelectedTriageRow(props.rowIdx)
+                  setSheetView('details')
+                }}
+                className="p-1 flex-shrink-0 group-hover:flex hidden"
+              />
+            </div>
+          )
+        },
+      },
+      {
+        key: 'prop_total_time',
+        name: 'Time consumed',
+        minWidth: timeConsumedWidth,
+        resizable: true,
+        cellClass: 'column-prop_total_time',
+        headerCellClass: 'cursor-default',
+        renderHeaderCell: () => (
+          <div className="flex items-center text-xs w-full">
+            <p className="!text-foreground font-medium">Time consumed</p>
+          </div>
+        ),
+        renderCell: (props) => {
+          const row = props.row as ClassifiedQuery
+          const percentage = row.prop_total_time || 0
+          const totalTime = row.total_time || 0
+          const fillWidth = Math.min(percentage, 100)
+          return (
+            <div className="w-full flex flex-col justify-center text-xs text-right tabular-nums font-mono">
+              <div
+                className="absolute inset-0 bg-foreground transition-all duration-200 z-0"
+                style={{ width: `${fillWidth}%`, opacity: 0.04 }}
+              />
+              {percentage && totalTime ? (
+                <span className="flex items-center justify-end gap-x-1.5">
+                  <span
+                    className={cn(percentage.toFixed(1) === '0.0' && 'text-foreground-lighter')}
+                  >
+                    {percentage.toFixed(1)}%
+                  </span>
+                  <span className="text-muted">/</span>
+                  <span
+                    className={cn(formatDuration(totalTime) === '0ms' && 'text-foreground-lighter')}
+                  >
+                    {formatDuration(totalTime)}
+                  </span>
+                </span>
+              ) : (
+                <p className="text-muted">&ndash;</p>
               )}
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-mono text-foreground truncate">
-                {row.queryType ?? '–'}
-                {getTableName(row.query) && (
-                  <> <span className="text-foreground-lighter">in</span> {getTableName(row.query)}</>
-                )}
-                {getColumnName(row.query) && (
-                  <><span className="text-foreground-lighter">,</span> {getColumnName(row.query)}</>
-                )}
-              </p>
-              <p
-                className={cn(
-                  'text-xs mt-0.5 font-mono truncate',
-                  row.issueType === 'error' && 'text-destructive-600',
-                  row.issueType === 'index' && 'text-warning-600',
-                  row.issueType === 'slow' && 'text-foreground-lighter'
-                )}
-              >
-                {row.hint}
-              </p>
+          )
+        },
+      },
+      {
+        key: 'calls',
+        name: 'Calls',
+        minWidth: 100,
+        resizable: true,
+        headerCellClass: 'cursor-default',
+        renderHeaderCell: () => (
+          <div className="flex items-center text-xs w-full">
+            <p className="!text-foreground font-medium">Calls</p>
+          </div>
+        ),
+        renderCell: (props) => {
+          const value = (props.row as ClassifiedQuery).calls
+          return (
+            <div className="w-full flex flex-col justify-center text-xs text-right tabular-nums font-mono">
+              {typeof value === 'number' && !isNaN(value) && isFinite(value) ? (
+                <p className={cn(value === 0 && 'text-foreground-lighter')}>
+                  {value.toLocaleString()}
+                </p>
+              ) : (
+                <p className="text-muted">&ndash;</p>
+              )}
             </div>
-            <ButtonTooltip
-              tooltip={{ content: { text: 'Query details' } }}
-              icon={<ArrowRight size={14} />}
-              size="tiny"
-              type="default"
-              onClick={(e: React.MouseEvent) => {
-                e.stopPropagation()
-                setSelectedTriageRow(props.rowIdx)
-                setSheetView('details')
-              }}
-              className="p-1 flex-shrink-0 group-hover:flex hidden"
-            />
-          </div>
-        )
+          )
+        },
       },
-    },
-    {
-      key: 'prop_total_time',
-      name: 'Time consumed',
-      minWidth: timeConsumedWidth,
-      resizable: true,
-      cellClass: 'column-prop_total_time',
-      headerCellClass: 'cursor-default',
-      renderHeaderCell: () => (
-        <div className="flex items-center text-xs w-full">
-          <p className="!text-foreground font-medium">Time consumed</p>
-        </div>
-      ),
-      renderCell: (props) => {
-        const row = props.row as ClassifiedQuery
-        const percentage = row.prop_total_time || 0
-        const totalTime = row.total_time || 0
-        const fillWidth = Math.min(percentage, 100)
-        return (
-          <div className="w-full flex flex-col justify-center text-xs text-right tabular-nums font-mono">
-            <div
-              className="absolute inset-0 bg-foreground transition-all duration-200 z-0"
-              style={{ width: `${fillWidth}%`, opacity: 0.04 }}
-            />
-            {percentage && totalTime ? (
-              <span className="flex items-center justify-end gap-x-1.5">
-                <span className={cn(percentage.toFixed(1) === '0.0' && 'text-foreground-lighter')}>
-                  {percentage.toFixed(1)}%
-                </span>
-                <span className="text-muted">/</span>
-                <span className={cn(formatDuration(totalTime) === '0ms' && 'text-foreground-lighter')}>
-                  {formatDuration(totalTime)}
-                </span>
-              </span>
-            ) : (
-              <p className="text-muted">&ndash;</p>
-            )}
+      {
+        key: 'actions',
+        name: 'Actions',
+        minWidth: 300,
+        resizable: false,
+        headerCellClass: 'cursor-default',
+        renderHeaderCell: () => (
+          <div className="flex items-center text-xs w-full">
+            <p className="!text-foreground font-medium">Actions</p>
           </div>
-        )
-      },
-    },
-    {
-      key: 'calls',
-      name: 'Calls',
-      minWidth: 100,
-      resizable: true,
-      headerCellClass: 'cursor-default',
-      renderHeaderCell: () => (
-        <div className="flex items-center text-xs w-full">
-          <p className="!text-foreground font-medium">Calls</p>
-        </div>
-      ),
-      renderCell: (props) => {
-        const value = (props.row as ClassifiedQuery).calls
-        return (
-          <div className="w-full flex flex-col justify-center text-xs text-right tabular-nums font-mono">
-            {typeof value === 'number' && !isNaN(value) && isFinite(value) ? (
-              <p className={cn(value === 0 && 'text-foreground-lighter')}>{value.toLocaleString()}</p>
-            ) : (
-              <p className="text-muted">&ndash;</p>
-            )}
-          </div>
-        )
-      },
-    },
-    {
-      key: 'actions',
-      name: 'Actions',
-      minWidth: 300,
-      resizable: false,
-      headerCellClass: 'cursor-default',
-      renderHeaderCell: () => (
-        <div className="flex items-center text-xs w-full">
-          <p className="!text-foreground font-medium">Actions</p>
-        </div>
-      ),
-      renderCell: (props) => {
-        const row = props.row as ClassifiedQuery
-        return (
-          <div className="flex items-center gap-2 justify-end w-full h-full">
-            <Button
-              type="default"
-              size="tiny"
-              onClick={(e: React.MouseEvent) => {
-                e.stopPropagation()
-                handleGoToLogs()
-              }}
-            >
-              Go to Logs
-            </Button>
-            {(row.issueType === 'index' || row.issueType === 'slow') && (
+        ),
+        renderCell: (props) => {
+          const row = props.row as ClassifiedQuery
+          return (
+            <div className="flex items-center gap-2 justify-end w-full h-full">
               <Button
                 type="default"
                 size="tiny"
-                icon={explainLoadingQuery === row.query ? <Loader2 size={12} className="animate-spin" /> : undefined}
                 onClick={(e: React.MouseEvent) => {
                   e.stopPropagation()
-                  setSelectedTriageRow(props.rowIdx)
-                  setSheetView('explain')
+                  handleGoToLogs()
                 }}
               >
-                Explain
+                Go to Logs
               </Button>
-            )}
-            {row.issueType === 'index' && (
-              <Button
-                type="primary"
-                size="tiny"
-                onClick={(e: React.MouseEvent) => {
-                  e.stopPropagation()
-                  setSelectedTriageRow(props.rowIdx)
-                  setSheetView('indexes')
-                }}
-              >
-                Create Index
-              </Button>
-            )}
-            {(row.issueType === 'error' || row.issueType === 'slow') && (
-              <Button
-                type="default"
-                size="tiny"
-                icon={<AiIconAnimation size={14} />}
-                onClick={(e: React.MouseEvent) => {
-                  e.stopPropagation()
-                  handleAiSuggestedFix(row)
-                }}
-              >
-                Fix with AI
-              </Button>
-            )}
-          </div>
-        )
+              {(row.issueType === 'index' || row.issueType === 'slow') && (
+                <Button
+                  type="default"
+                  size="tiny"
+                  icon={
+                    explainLoadingQuery === row.query ? (
+                      <Loader2 size={12} className="animate-spin" />
+                    ) : undefined
+                  }
+                  onClick={(e: React.MouseEvent) => {
+                    e.stopPropagation()
+                    setSelectedTriageRow(props.rowIdx)
+                    setSheetView('explain')
+                  }}
+                >
+                  Explain
+                </Button>
+              )}
+              {row.issueType === 'index' && (
+                <Button
+                  type="primary"
+                  size="tiny"
+                  onClick={(e: React.MouseEvent) => {
+                    e.stopPropagation()
+                    setSelectedTriageRow(props.rowIdx)
+                    setSheetView('indexes')
+                  }}
+                >
+                  Create Index
+                </Button>
+              )}
+              {(row.issueType === 'error' || row.issueType === 'slow') && (
+                <Button
+                  type="default"
+                  size="tiny"
+                  icon={<AiIconAnimation size={14} />}
+                  onClick={(e: React.MouseEvent) => {
+                    e.stopPropagation()
+                    handleAiSuggestedFix(row)
+                  }}
+                >
+                  Fix with AI
+                </Button>
+              )}
+            </div>
+          )
+        },
       },
-    },
-  ], [triageQueryColWidth, timeConsumedWidth, explainLoadingQuery, handleGoToLogs, handleAiSuggestedFix])
+    ],
+    [
+      triageQueryColWidth,
+      timeConsumedWidth,
+      explainLoadingQuery,
+      handleGoToLogs,
+      handleAiSuggestedFix,
+    ]
+  )
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
@@ -724,82 +781,89 @@ export const QueryInsightsTable = ({
   return (
     <div className="flex flex-col flex-1 min-h-0">
       <div className="overflow-x-auto flex-shrink-0 bg-surface-100 border-b">
-      <div className="flex items-center justify-between px-6 h-10 min-w-max">
-        <div className="flex items-center">
-          {mode === 'triage' ? (
-            <Tabs_Shadcn_ value={filter} onValueChange={(v) => setFilter(v as IssueFilter)}>
-              <TabsList_Shadcn_ className="flex gap-x-4 rounded-none !mt-0 pt-0 !border-none">
-                <TabsTrigger_Shadcn_
-                  value="all"
-                  className="text-xs py-3 border-b-[1px] font-mono uppercase"
-                >
-                  All{triageItems.length > 0 && ` (${triageItems.length})`}
-                </TabsTrigger_Shadcn_>
-                <TabsTrigger_Shadcn_
-                  value="error"
-                  className="text-xs py-3 border-b-[1px] font-mono uppercase"
-                >
-                  Errors{errorCount > 0 && ` (${errorCount})`}
-                </TabsTrigger_Shadcn_>
-                <TabsTrigger_Shadcn_
-                  value="index"
-                  className="text-xs py-3 border-b-[1px] font-mono uppercase"
-                >
-                  Index{indexCount > 0 && ` (${indexCount})`}
-                </TabsTrigger_Shadcn_>
-                <TabsTrigger_Shadcn_
-                  value="slow"
-                  className="text-xs py-3 border-b-[1px] font-mono uppercase"
-                >
-                  Slow{slowCount > 0 && ` (${slowCount})`}
-                </TabsTrigger_Shadcn_>
-              </TabsList_Shadcn_>
-            </Tabs_Shadcn_>
-          ) : (
-            <Input
-              size="tiny"
-              autoComplete="off"
-              icon={<Search className="h-4 w-4" />}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              name="search"
-              id="search"
-              placeholder="Search queries..."
-              className="w-64"
-              actions={[
-                searchQuery && (
-                  <Button
-                    key="clear"
-                    size="tiny"
-                    type="text"
-                    icon={<X className="h-4 w-4" />}
-                    onClick={() => setSearchQuery('')}
-                    className="p-0 h-5 w-5"
-                  />
-                ),
-              ]}
-            />
-          )}
-        </div>
+        <div className="flex items-center justify-between px-6 h-10 min-w-max">
+          <div className="flex items-center">
+            {mode === 'triage' ? (
+              <Tabs_Shadcn_ value={filter} onValueChange={(v) => setFilter(v as IssueFilter)}>
+                <TabsList_Shadcn_ className="flex gap-x-4 rounded-none !mt-0 pt-0 !border-none">
+                  <TabsTrigger_Shadcn_
+                    value="all"
+                    className="text-xs py-3 border-b-[1px] font-mono uppercase"
+                  >
+                    All{triageItems.length > 0 && ` (${triageItems.length})`}
+                  </TabsTrigger_Shadcn_>
+                  <TabsTrigger_Shadcn_
+                    value="error"
+                    className="text-xs py-3 border-b-[1px] font-mono uppercase"
+                  >
+                    Errors{errorCount > 0 && ` (${errorCount})`}
+                  </TabsTrigger_Shadcn_>
+                  <TabsTrigger_Shadcn_
+                    value="index"
+                    className="text-xs py-3 border-b-[1px] font-mono uppercase"
+                  >
+                    Index{indexCount > 0 && ` (${indexCount})`}
+                  </TabsTrigger_Shadcn_>
+                  <TabsTrigger_Shadcn_
+                    value="slow"
+                    className="text-xs py-3 border-b-[1px] font-mono uppercase"
+                  >
+                    Slow{slowCount > 0 && ` (${slowCount})`}
+                  </TabsTrigger_Shadcn_>
+                </TabsList_Shadcn_>
+              </Tabs_Shadcn_>
+            ) : (
+              <Input
+                size="tiny"
+                autoComplete="off"
+                icon={<Search className="h-4 w-4" />}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                name="search"
+                id="search"
+                placeholder="Search queries..."
+                className="w-64"
+                actions={[
+                  searchQuery && (
+                    <Button
+                      key="clear"
+                      size="tiny"
+                      type="text"
+                      icon={<X className="h-4 w-4" />}
+                      onClick={() => setSearchQuery('')}
+                      className="p-0 h-5 w-5"
+                    />
+                  ),
+                ]}
+              />
+            )}
+          </div>
 
-        <div className="flex items-center gap-x-1.5">
-          <ButtonTooltip
-            tooltip={{ content: { text: showIntrospection ? 'Hide system queries' : 'Show system queries' } }}
-            type={showIntrospection ? 'default' : 'outline'}
-            size="tiny"
-            className={cn('w-[26px] h-[26px] !p-0', showIntrospection ? 'bg-surface-300' : 'border-dashed')}
-            icon={showIntrospection ? <Eye size={14} /> : <EyeOff size={14} />}
-            onClick={onToggleIntrospection}
-          />
-          <TwoOptionToggle
-            width={75}
-            options={['explorer', 'triage']}
-            activeOption={mode}
-            borderOverride="border"
-            onClickOption={setMode}
-          />
+          <div className="flex items-center gap-x-1.5">
+            <ButtonTooltip
+              tooltip={{
+                content: {
+                  text: showIntrospection ? 'Hide system queries' : 'Show system queries',
+                },
+              }}
+              type={showIntrospection ? 'default' : 'outline'}
+              size="tiny"
+              className={cn(
+                'w-[26px] h-[26px] !p-0',
+                showIntrospection ? 'bg-surface-300' : 'border-dashed'
+              )}
+              icon={showIntrospection ? <Eye size={14} /> : <EyeOff size={14} />}
+              onClick={onToggleIntrospection}
+            />
+            <TwoOptionToggle
+              width={75}
+              options={['explorer', 'triage']}
+              activeOption={mode}
+              borderOverride="border"
+              onClickOption={setMode}
+            />
+          </div>
         </div>
-      </div>
       </div>
 
       <div ref={scrollContainerRef} className="flex-1 min-h-0 flex flex-col overflow-hidden">
