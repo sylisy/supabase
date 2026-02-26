@@ -7,7 +7,7 @@ import { toast } from 'sonner'
 import * as z from 'zod'
 
 import { useParams } from 'common'
-import DiscardChangesConfirmationDialog from 'components/ui-patterns/Dialogs/DiscardChangesConfirmationDialog'
+import { DiscardChangesConfirmationDialog } from 'components/ui-patterns/Dialogs/DiscardChangesConfirmationDialog'
 import { ButtonTooltip } from 'components/ui/ButtonTooltip'
 import { OrganizationProjectSelector } from 'components/ui/OrganizationProjectSelector'
 import { UpgradePlanButton } from 'components/ui/UpgradePlanButton'

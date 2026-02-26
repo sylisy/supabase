@@ -5,7 +5,7 @@ import { toast } from 'sonner'
 import z from 'zod'
 
 import { useParams } from 'common'
-import DiscardChangesConfirmationDialog from 'components/ui-patterns/Dialogs/DiscardChangesConfirmationDialog'
+import { DiscardChangesConfirmationDialog } from 'components/ui-patterns/Dialogs/DiscardChangesConfirmationDialog'
 import { useSecretsCreateMutation } from 'data/secrets/secrets-create-mutation'
 import { ProjectSecret } from 'data/secrets/secrets-query'
 import { useConfirmOnClose } from 'hooks/ui/useConfirmOnClose'

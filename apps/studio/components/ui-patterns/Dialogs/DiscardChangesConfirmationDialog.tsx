@@ -76,5 +76,3 @@ export const DiscardChangesConfirmationDialog = ({
     </AlertDialog>
   )
 }
-
-export default DiscardChangesConfirmationDialog

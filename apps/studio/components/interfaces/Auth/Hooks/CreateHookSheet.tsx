@@ -6,7 +6,7 @@ import { toast } from 'sonner'
 import * as z from 'zod'
 
 import { useParams } from 'common'
-import DiscardChangesConfirmationDialog from 'components/ui-patterns/Dialogs/DiscardChangesConfirmationDialog'
+import { DiscardChangesConfirmationDialog } from 'components/ui-patterns/Dialogs/DiscardChangesConfirmationDialog'
 import { convertArgumentTypes } from 'components/interfaces/Database/Functions/Functions.utils'
 import CodeEditor from 'components/ui/CodeEditor/CodeEditor'
 import { DocsButton } from 'components/ui/DocsButton'
