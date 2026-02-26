@@ -22,6 +22,14 @@ import { useConfirmOnClose } from 'hooks/ui/useConfirmOnClose'
 import { DOCS_URL } from 'lib/constants'
 import { useProfile } from 'lib/profile'
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
   Button,
   Dialog,
   DialogContent,
@@ -34,6 +42,7 @@ import {
   ExpandingTextArea,
   FormControl_Shadcn_,
   FormField_Shadcn_,
+  DialogFooter,
   Form_Shadcn_,
   SelectContent_Shadcn_,
   SelectGroup_Shadcn_,
@@ -65,6 +74,7 @@ export const InviteMemberButton = () => {
   ])
 
   const [isOpen, setIsOpen] = useState(false)
+  const [isDiscardConfirmOpen, setIsDiscardConfirmOpen] = useState(false)
   const [projectDropdownOpen, setProjectDropdownOpen] = useState(false)
 
   const { data: members } = useOrganizationMembersQuery({ slug })
