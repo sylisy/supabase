@@ -217,7 +217,7 @@ export const ConnectionPooling = () => {
                 description="Please start a new project to enable this feature"
               />
             )}
-            {isSuccessPgbouncerConfig && (
+            {isSuccessPgbouncerConfig && !connectionPoolingUnavailable && (
               <>
                 <div className="flex flex-row gap-2 justify-between w-full">
                   <div className="flex flex-col text-sm">
