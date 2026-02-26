@@ -4,7 +4,7 @@ import { DocsButton } from 'components/ui/DocsButton'
 import { InlineLink } from 'components/ui/InlineLink'
 import dayjs from 'dayjs'
 import { DOCS_URL } from 'lib/constants'
-import { EllipsisVertical, Pencil, Trash2, UserPlus } from 'lucide-react'
+import { EllipsisVertical, Pencil, Plus, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
 import { toast } from 'sonner'
@@ -372,8 +372,9 @@ function RoleRuleEditor({
     <div className={`${grant.enabled ? 'bg-surface-100' : 'bg-background'}`}>
       <label
         htmlFor={checkboxId}
-        className={`grid w-full grid-cols-[16px_minmax(0,1fr)] items-start gap-x-3 px-4 py-3 cursor-pointer select-none transition-colors ${grant.enabled ? 'hover:bg-surface-200/40' : 'hover:bg-surface-100/50'
-          }`}
+        className={`grid w-full grid-cols-[16px_minmax(0,1fr)] items-start gap-x-3 px-4 py-3 cursor-pointer select-none transition-colors ${
+          grant.enabled ? 'hover:bg-surface-200/40' : 'hover:bg-surface-100/50'
+        }`}
       >
         <Checkbox_Shadcn_
           id={checkboxId}
@@ -597,9 +598,9 @@ export const JITAccess = () => {
   const inlineValidation = useMemo(
     () => ({
       member: !draft.memberId
-        ? 'Select a user to grant JIT access.'
+        ? 'Select a member for this JIT access rule.'
         : isDuplicateSelectedMember
-          ? 'This user already has a JIT access rule. Edit their existing rule from the list.'
+          ? 'This member already has a JIT access rule. Edit their existing rule from the list.'
           : undefined,
       roles: enabledRoleCount > 0 ? undefined : 'Select at least one role.',
     }),
@@ -629,8 +630,9 @@ export const JITAccess = () => {
       setEnabled(false)
       toast.success(
         activeRuleCount > 0
-          ? `JIT access disabled. ${activeRuleCount} configured user${activeRuleCount === 1 ? '' : 's'
-          } can no longer request temporary database access.`
+          ? `JIT access disabled. ${activeRuleCount} configured member${
+              activeRuleCount === 1 ? '' : 's'
+            } can no longer request temporary database access.`
           : 'JIT access disabled.'
       )
       return
@@ -722,8 +724,8 @@ export const JITAccess = () => {
           <CardContent className="space-y-4">
             <FormLayout
               layout="flex-row-reverse"
-              label="Allow JIT access"
-              description="Allow time-limited database access to specific project members."
+              label="Enable JIT access"
+              description="Allow configured project members to request temporary database access."
             >
               <div className="flex items-center justify-end w-fit flex-shrink-0">
                 <Tooltip>
@@ -738,7 +740,9 @@ export const JITAccess = () => {
                     </div>
                   </TooltipTrigger>
                   {isPostgresVersionOutdated && (
-                    <TooltipContent side="bottom">Upgrade Postgres to use JIT</TooltipContent>
+                    <TooltipContent side="bottom">
+                      Upgrade Postgres to enable JIT access
+                    </TooltipContent>
                   )}
                 </Tooltip>
               </div>
@@ -750,7 +754,7 @@ export const JITAccess = () => {
               type="note"
               layout="responsive"
               title="Postgres upgrade required"
-              description="Just-in-time access requires a newer Postgres version. Upgrade your project to enable JIT."
+              description="Just-in-time access requires a newer Postgres version. Upgrade your project to enable JIT access."
               className="mb-0 rounded-none border-0"
               actions={
                 projectRef ? (
@@ -770,13 +774,13 @@ export const JITAccess = () => {
             <CardContent className="space-y-4 p-0">
               <div className="flex items-center justify-between pt-6 pb-2 px-4">
                 <div>
-                  <h3 className="text-foreground text-sm">User rules</h3>
+                  <h3 className="text-foreground text-sm">JIT access rules</h3>
                   <p className="text-foreground-light text-sm">
-                    Define which members can receive temporary database access.
+                    Configure which members can request temporary database access.
                   </p>
                 </div>
-                <Button type="default" icon={<UserPlus size={14} />} onClick={openAddUserSheet}>
-                  Grant access
+                <Button type="default" icon={<Plus size={14} />} onClick={openAddUserSheet}>
+                  Add rule
                 </Button>
               </div>
               <Table className="border-t">
@@ -794,8 +798,10 @@ export const JITAccess = () => {
                   {users.length === 0 ? (
                     <TableRow className="[&>td]:hover:bg-inherit">
                       <TableCell colSpan={4}>
-                        <p className="text-sm text-foreground">No user rules yet</p>
-                        <p className="text-sm text-foreground-lighter">Grant JIT access above</p>
+                        <p className="text-sm text-foreground">No JIT access rules</p>
+                        <p className="text-sm text-foreground-lighter">
+                          Add your first JIT access rule above
+                        </p>
                       </TableCell>
                     </TableRow>
                   ) : (
@@ -891,16 +897,16 @@ export const JITAccess = () => {
           >
             <SheetHeader>
               <SheetTitle>
-                {sheetMode === 'edit' ? 'Edit JIT access' : 'Grant JIT access'}
+                {sheetMode === 'edit' ? 'Edit JIT access rule' : 'New JIT access rule'}
               </SheetTitle>
               <SheetDescription className="sr-only">
-                Configure user role grants and restrictions for JIT database access.
+                Configure which database roles a user can request with JIT access.
               </SheetDescription>
             </SheetHeader>
 
             <ScrollArea className="flex-1 max-h-[calc(100vh-116px)]">
               <div className="px-5 sm:px-6 py-6 space-y-8">
-                <FormItemLayout layout="vertical" isReactForm={false} label="User">
+                <FormItemLayout layout="vertical" isReactForm={false} label="Member">
                   <Select_Shadcn_
                     value={draft.memberId}
                     disabled={
@@ -932,7 +938,7 @@ export const JITAccess = () => {
 
                   {sheetMode === 'edit' && (
                     <p className="mt-2 text-xs text-foreground-lighter">
-                      The user cannot be changed when editing an existing JIT access rule.
+                      The member cannot be changed when editing an existing JIT access rule.
                     </p>
                   )}
 
@@ -975,7 +981,8 @@ export const JITAccess = () => {
                     >
                       custom Postgres roles
                     </InlineLink>{' '}
-                    before granting JIT access. Narrow roles limit the impact of direct access.
+                    before creating a JIT access rule. Narrow roles limit the impact of direct
+                    database access.
                   </p>
 
                   {showInlineValidation && inlineValidation.roles && (
@@ -988,10 +995,7 @@ export const JITAccess = () => {
             <SheetFooter className="w-full mt-auto py-4 border-t">
               {sheetMode === 'edit' && editingUser && (
                 <div className="mr-auto">
-                  <Button
-                    type="danger"
-                    onClick={() => openDeleteDialog(editingUser)}
-                  >
+                  <Button type="danger" onClick={() => openDeleteDialog(editingUser)}>
                     Delete rule
                   </Button>
                 </div>
@@ -1000,7 +1004,7 @@ export const JITAccess = () => {
                 Cancel
               </Button>
               <Button type="primary" onClick={handleSave}>
-                {sheetMode === 'edit' ? 'Update access' : 'Grant access'}
+                {sheetMode === 'edit' ? 'Save rule' : 'Create rule'}
               </Button>
             </SheetFooter>
           </SheetContent>
@@ -1044,10 +1048,9 @@ export const JITAccess = () => {
               <AlertDialogDescription asChild>
                 <div className="text-sm">
                   <p>
-                    Enabling JIT will immediately activate {activeRuleCount} existing user rule
-                    {activeRuleCount === 1 ? '' : 's'}, allowing{' '}
-                    {activeRuleCount === 1 ? 'that user' : 'those users'} to request temporary
-                    database access.
+                    Enabling JIT will allow {activeRuleCount} configured member
+                    {activeRuleCount === 1 ? '' : 's'} to request temporary database access
+                    immediately.
                   </p>
                 </div>
               </AlertDialogDescription>
