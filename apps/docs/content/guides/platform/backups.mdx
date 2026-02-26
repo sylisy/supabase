@@ -104,8 +104,6 @@ Projects that want to use PITR must also use at least a Small compute add-on to 
 
 If you enable PITR, we will no longer take Daily Backups. PITR provides finer granularity than Daily Backups, so running both is unnecessary.
 
-If you disabled PITR, logical backups remain available until they pass the backup retention period for your plan. After that window passes, we will only show physical backups.
-
 </Admonition>
 
 ### Backup process
@@ -137,47 +135,3 @@ When you disable PITR, we still take all new backups as physical backups only. Y
 ## Restore to a new project
 
 See the [Duplicate Project docs](/docs/guides/platform/clone-project).
-
-## Troubleshooting
-
-### Logical backups
-
-#### `search_path` issues
-
-During the `pg_restore` process, the restore process sets the `search_path` to an empty string for predictability and security. Using unqualified references to functions or relations can cause logical backup restorations to fail, because the database cannot locate the referenced function or relation. This can happen even when the database functions without issues during normal operations, since Postgres usually sets the `search_path` to include several schemas during normal operations. Always use schema-qualified names in your SQL code.
-
-You can refer to [an example PR](https://github.com/supabase/supabase/pull/28393/files) on how to update SQL code to use schema-qualified names.
-
-#### Invalid check constraints
-
-Postgres requires that [check constraints](https://www.postgresql.org/docs/current/ddl-constraints.html#DDL-CONSTRAINTS-CHECK-CONSTRAINTS) be:
-
-1. immutable
-1. not reference table data other than the new or updated row being checked
-
-Violating these requirements can result in numerous failure scenarios, including during logical restorations.
-
-Common examples of check constraints that can cause such failures include:
-
-- validating against the current time, e.g. that the row being inserted references a future event
-- validating the contents of a row against the contents of another table
-
-#### Views that reference themselves
-
-Views that directly or indirectly reference themselves will cause logical restores to fail due to cyclic dependency errors. These views are also invalid and unusable in Postgres—any query against them will result in a runtime error.
-
-**Example:**
-
-```
--- Direct self-reference
-CREATE VIEW my_view AS
-  SELECT * FROM my_view;
-
--- Indirect circular reference
-CREATE VIEW v1 AS SELECT * FROM v2;
-CREATE VIEW v2 AS SELECT * FROM v1;
-```
-
-Drop the offending view from your database, or delete it from the logical backup to make it restorable.
-
-Postgres documentation [views](https://www.postgresql.org/docs/current/sql-createview.html)
