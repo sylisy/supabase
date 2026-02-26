@@ -20,6 +20,14 @@ import { useSelectedOrganizationQuery } from 'hooks/misc/useSelectedOrganization
 import { DOCS_URL } from 'lib/constants'
 import { useProfile } from 'lib/profile'
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
   Button,
   Dialog,
   DialogContent,
@@ -63,6 +71,7 @@ export const InviteMemberButton = () => {
   ])
 
   const [isOpen, setIsOpen] = useState(false)
+  const [isDiscardConfirmOpen, setIsDiscardConfirmOpen] = useState(false)
   const [projectDropdownOpen, setProjectDropdownOpen] = useState(false)
 
   const { data: members } = useOrganizationMembersQuery({ slug })
@@ -222,22 +231,48 @@ export const InviteMemberButton = () => {
   useEffect(() => {
     if (isSuccess && isOpen) {
       const developerRole = orgScopedRoles.find((role) => role.name === 'Developer')
-      if (developerRole !== undefined) form.setValue('role', developerRole.id.toString())
+      if (developerRole !== undefined) {
+        form.reset({
+          ...form.getValues(),
+          role: developerRole.id.toString(),
+        })
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSuccess, isOpen])
 
+  const hasUnsavedChanges = form.formState.isDirty
+
   const handleOpenChange = (open: boolean) => {
-    setIsOpen(open)
+    if (!open && hasUnsavedChanges) {
+      setIsDiscardConfirmOpen(true)
+    } else {
+      setIsOpen(open)
+    }
   }
 
   const handleCancel = () => {
+    if (hasUnsavedChanges) {
+      setIsDiscardConfirmOpen(true)
+    } else {
+      form.reset({
+        email: '',
+        role: '',
+        applyToOrg: true,
+        projectRef: '',
+      })
+      setIsOpen(false)
+    }
+  }
+
+  const handleDiscardConfirm = () => {
     form.reset({
       email: '',
       role: '',
       applyToOrg: true,
       projectRef: '',
     })
+    setIsDiscardConfirmOpen(false)
     setIsOpen(false)
   }
 
@@ -416,6 +451,22 @@ export const InviteMemberButton = () => {
           </form>
         </Form_Shadcn_>
       </DialogContent>
+      <AlertDialog open={isDiscardConfirmOpen} onOpenChange={setIsDiscardConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Discard changes?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to discard your changes? Your invitation will not be sent.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep editing</AlertDialogCancel>
+            <AlertDialogAction variant="danger" onClick={handleDiscardConfirm}>
+              Discard changes
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Dialog>
   )
 }
