@@ -7,6 +7,7 @@ import { DOCS_URL } from 'lib/constants'
 import { EllipsisVertical, Pencil, Trash2, UserPlus } from 'lucide-react'
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
+import { toast } from 'sonner'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -352,7 +353,6 @@ const MOCK_USERS: JITUserRule[] = [
     ]),
     MOCK_MEMBERS
   ),
-  createRuleFromMember('rule-5', 'member-5', createEmptyGrants(), MOCK_MEMBERS),
 ]
 
 function RoleRuleEditor({
@@ -575,6 +575,7 @@ export const JITAccess = () => {
   const [draft, setDraft] = useState<JITUserRuleDraft>(() => createDraft())
   const [showInlineValidation, setShowInlineValidation] = useState(false)
   const [userPendingDelete, setUserPendingDelete] = useState<JITUserRule | null>(null)
+  const [showEnableJitDialog, setShowEnableJitDialog] = useState(false)
 
   const membersWithRules = useMemo(() => new Set(users.map((user) => user.memberId)), [users])
   const availableMembersForAdd = useMemo(
@@ -588,6 +589,10 @@ export const JITAccess = () => {
   const enabledRoleCount = useMemo(
     () => draft.grants.filter((grant) => grant.enabled).length,
     [draft.grants]
+  )
+  const activeRuleCount = useMemo(
+    () => users.filter((user) => user.status.active > 0).length,
+    [users]
   )
   const inlineValidation = useMemo(
     () => ({
@@ -603,6 +608,35 @@ export const JITAccess = () => {
 
   const closeSheet = () => {
     setSheetOpen(false)
+  }
+
+  const closeEnableJitDialog = () => {
+    setShowEnableJitDialog(false)
+  }
+
+  const handleConfirmEnableJit = () => {
+    setEnabled(true)
+    closeEnableJitDialog()
+  }
+
+  const handleJitToggleChange = (checked: boolean) => {
+    if (checked && !enabled && activeRuleCount > 0) {
+      setShowEnableJitDialog(true)
+      return
+    }
+
+    if (!checked && enabled) {
+      setEnabled(false)
+      toast.success(
+        activeRuleCount > 0
+          ? `JIT access disabled. ${activeRuleCount} configured user${activeRuleCount === 1 ? '' : 's'
+          } can no longer request temporary database access.`
+          : 'JIT access disabled.'
+      )
+      return
+    }
+
+    setEnabled(checked)
   }
 
   const openAddUserSheet = () => {
@@ -694,7 +728,7 @@ export const JITAccess = () => {
                       <Switch
                         size="large"
                         checked={enabled}
-                        onCheckedChange={(checked) => setEnabled(checked)}
+                        onCheckedChange={handleJitToggleChange}
                         disabled={isPostgresVersionOutdated}
                       />
                     </div>
@@ -707,10 +741,10 @@ export const JITAccess = () => {
             </FormLayout>
           </CardContent>
 
-          {!enabled && !users?.length && isPostgresVersionOutdated && (
+          {!enabled && isPostgresVersionOutdated && (
             <Admonition
               type="note"
-              layout="horizontal"
+              layout="responsive"
               title="Postgres upgrade required"
               description="Just-in-time access requires a newer Postgres version. Upgrade your project to enable JIT."
               className="mb-0 rounded-none border-0"
@@ -849,6 +883,7 @@ export const JITAccess = () => {
 
         <Sheet open={sheetOpen} onOpenChange={(open) => !open && closeSheet()}>
           <SheetContent
+            showClose={false}
             size="default"
             className="w-full max-w-full sm:!w-[560px] sm:max-w-[560px] flex flex-col h-full gap-0"
           >
@@ -972,7 +1007,8 @@ export const JITAccess = () => {
                     Remove the JIT access rule for <strong>{deleteUserDisplayName}</strong>?
                   </p>
                   <p>
-                    This only removes the rule from the list. The project member will not be deleted from the project.
+                    This only removes the rule from the list. The project member will not be deleted
+                    from the project.
                   </p>
                 </div>
               </AlertDialogDescription>
@@ -981,6 +1017,33 @@ export const JITAccess = () => {
               <AlertDialogCancel>Cancel</AlertDialogCancel>
               <AlertDialogAction variant="warning" onClick={handleConfirmDelete}>
                 Delete rule
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        <AlertDialog
+          open={showEnableJitDialog}
+          onOpenChange={(open) => !open && closeEnableJitDialog()}
+        >
+          <AlertDialogContent size="small">
+            <AlertDialogHeader>
+              <AlertDialogTitle>JIT access will activate existing rules</AlertDialogTitle>
+              <AlertDialogDescription asChild>
+                <div className="text-sm">
+                  <p>
+                    Enabling JIT will immediately activate {activeRuleCount} existing user rule
+                    {activeRuleCount === 1 ? '' : 's'}, allowing{' '}
+                    {activeRuleCount === 1 ? 'that user' : 'those users'} to request temporary
+                    database access.
+                  </p>
+                </div>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction variant="warning" onClick={handleConfirmEnableJit}>
+                Enable JIT access
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
