@@ -12,11 +12,10 @@ import {
   correctnessScorer,
   docsFaithfulnessScorer,
   goalCompletionScorer,
-  sqlIdentifierQuotingScorer,
-  sqlSyntaxScorer,
   toolUsageScorer,
   urlValidityScorer,
 } from './scorer'
+import { sqlIdentifierQuotingScorer, sqlSyntaxScorer } from './scorer-wasm'
 
 assert(process.env.BRAINTRUST_PROJECT_ID, 'BRAINTRUST_PROJECT_ID is not set')
 assert(process.env.OPENAI_API_KEY, 'OPENAI_API_KEY is not set')
