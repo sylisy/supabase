@@ -1,5 +1,5 @@
 import { Loader2 } from 'lucide-react'
-import { AiIconAnimation, Button, cn } from 'ui'
+import { AiIconAnimation, Button, cn, Tooltip, TooltipContent, TooltipTrigger } from 'ui'
 import type { ClassifiedQuery } from '../QueryInsightsHealth/QueryInsightsHealth.types'
 import { ISSUE_DOT_COLORS, ISSUE_ICONS } from './QueryInsightsTable.constants'
 import { formatDuration, getTableName, getColumnName } from './QueryInsightsTable.utils'
@@ -66,15 +66,46 @@ export const QueryInsightsTableRow = ({
       </div>
 
       {/* Stats */}
-      <div className="flex flex-col items-end flex-shrink-0 tabular-nums w-[72px]">
-        <span
-          className={cn('text-sm font-mono', item.mean_time >= 1000 && 'text-destructive-600')}
-        >
-          {formatDuration(item.mean_time)}
-        </span>
-        <span className="text-xs text-foreground-lighter">
-          {item.calls} {item.calls === 1 ? 'call' : 'calls'}
-        </span>
+      <div className="flex items-stretch divide-x divide-border flex-shrink-0 tabular-nums">
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="flex flex-col items-end pr-4 cursor-default">
+              <span className={cn('text-sm font-mono leading-snug', item.mean_time >= 1000 && 'text-destructive-600')}>
+                {formatDuration(item.mean_time)}
+              </span>
+              <span className="text-[10px] text-foreground-muted uppercase tracking-wide leading-snug">avg</span>
+            </div>
+          </TooltipTrigger>
+          <TooltipContent side="top" className="max-w-[220px] text-center">
+            Average execution time per call. High mean time means individual runs are slow — directly felt by users.
+          </TooltipContent>
+        </Tooltip>
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="flex flex-col items-end px-4 cursor-default">
+              <span className="text-sm font-mono leading-snug">
+                {item.prop_total_time.toFixed(1)}%
+              </span>
+              <span className="text-[10px] text-foreground-muted uppercase tracking-wide leading-snug">of db</span>
+            </div>
+          </TooltipTrigger>
+          <TooltipContent side="top" className="max-w-[220px] text-center">
+            Percentage of total database execution time. Fixing high-impact queries has the biggest overall effect on your database.
+          </TooltipContent>
+        </Tooltip>
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="flex flex-col items-end pl-4 cursor-default">
+              <span className="text-sm font-mono leading-snug">{item.calls.toLocaleString()}</span>
+              <span className="text-[10px] text-foreground-muted uppercase tracking-wide leading-snug">calls</span>
+            </div>
+          </TooltipTrigger>
+          <TooltipContent side="top" className="max-w-[220px] text-center">
+            Number of times this query ran in the selected time window.
+          </TooltipContent>
+        </Tooltip>
       </div>
 
       {/* Actions — fixed width so stats column never shifts */}
