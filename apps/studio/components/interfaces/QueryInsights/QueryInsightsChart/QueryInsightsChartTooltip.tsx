@@ -1,5 +1,5 @@
 import dayjs from 'dayjs'
-import type { TooltipProps, Payload } from 'recharts'
+import type { TooltipProps } from 'recharts'
 import { formatDuration } from '../QueryInsightsTable/QueryInsightsTable.utils'
 import { isTimeMetric } from './QueryInsightsChart.utils'
 
@@ -14,7 +14,7 @@ export const QueryInsightsChartTooltip = ({ active, payload }: TooltipProps<numb
       <p className="text-foreground-light text-xs">{localTimeZone}</p>
       <p className="font-medium">{dayjs(time).format('MMM D, hh:mm:ssa')}</p>
       <div className="grid gap-0">
-        {payload.map((entry: Payload<number, string>, index: number) => (
+        {payload.map((entry, index) => (
           <div key={`${entry.name}-${index}`} className="flex items-center w-full">
             <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
               <circle cx="5" cy="5" r="3" fill={entry.color} />

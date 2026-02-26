@@ -425,7 +425,7 @@ export const QueryInsightsTable = ({
           }
 
           if (col.id === 'cache_hit_rate') {
-            const num = typeof value === 'number' ? value : parseFloat(value)
+            const num = typeof value === 'number' ? value : parseFloat(value ?? '0')
             return (
               <div className="w-full flex flex-col justify-center text-xs text-right tabular-nums font-mono">
                 {typeof num === 'number' && !isNaN(num) && isFinite(num) ? (

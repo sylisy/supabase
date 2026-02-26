@@ -9,7 +9,6 @@ vi.mock('../../QueryPerformance/IndexAdvisor/index-advisor.utils', () => ({
 import { hasIndexRecommendations } from '../../QueryPerformance/IndexAdvisor/index-advisor.utils'
 
 const baseRow: QueryPerformanceRow = {
-  queryid: '1',
   query: 'SELECT * FROM users',
   calls: 10,
   mean_time: 50,
@@ -17,11 +16,7 @@ const baseRow: QueryPerformanceRow = {
   max_time: 200,
   total_time: 500,
   prop_total_time: 5,
-  rows: 100,
   rows_read: 100,
-  rows_written: 0,
-  shared_blks_hit: 0,
-  shared_blks_read: 0,
   cache_hit_rate: 1,
   rolname: 'postgres',
   application_name: 'test',
