@@ -1,5 +1,6 @@
 'use client'
 
+import React from 'react'
 import { usePathname } from 'next/navigation'
 import { isFeatureEnabled } from 'common'
 import { cn } from 'ui'
@@ -15,7 +16,15 @@ interface TOCHeader {
   level: number
 }
 
-const GuidesTableOfContents = ({ className, video }: { className?: string; video?: string }) => {
+const GuidesTableOfContents = ({
+  className,
+  video,
+  children,
+}: {
+  className?: string
+  video?: string
+  children?: React.ReactNode
+}) => {
   const pathname = usePathname()
   const { toc } = useTocAnchors()
 
@@ -46,6 +55,7 @@ const GuidesTableOfContents = ({ className, video }: { className?: string; video
             </TOCScrollArea>
           </Toc>
         )}
+        {children && <div className="pl-5">{children}</div>}
       </div>
     </div>
   )

@@ -6,9 +6,11 @@ import { cn } from 'ui'
 
 import Breadcrumbs from '~/components/Breadcrumbs'
 import GuidesTableOfContents from '~/components/GuidesTableOfContents'
+import { CopyMarkdownButton } from '~/features/docs/CopyMarkdownButton.client'
 import { TocAnchorsProvider } from '~/features/docs/GuidesMdx.client'
 import { MDXRemoteBase } from '~/features/docs/MdxBase'
 import type { WithRequired } from '~/features/helpers.types'
+import { BASE_PATH } from '~/lib/constants'
 import { type GuideFrontmatter } from '~/lib/docs'
 import { SerializeOptions } from '~/types/next-mdx-remote-serialize'
 
@@ -54,13 +56,28 @@ interface BaseGuideTemplateProps {
   children?: ReactNode
   editLink: EditLink
   mdxOptions?: SerializeOptions
+  /**
+   * The pathname of the guide page (e.g. `/guides/auth/users`).
+   * When provided, a "Copy as Markdown" button is rendered below the TOC
+   * (or in the article footer when the TOC is hidden).
+   * `getGuidesMarkdown` always returns this, so it will be set for all
+   * standard guide pages.
+   */
+  pathname?: `/${string}`
 }
 
 type GuideTemplateProps =
   | WithRequired<BaseGuideTemplateProps, 'children'>
   | WithRequired<BaseGuideTemplateProps, 'content'>
 
-const GuideTemplate = ({ meta, content, children, editLink, mdxOptions }: GuideTemplateProps) => {
+const GuideTemplate = ({
+  meta,
+  content,
+  children,
+  editLink,
+  mdxOptions,
+  pathname,
+}: GuideTemplateProps) => {
   const hideToc = meta?.hideToc || meta?.hide_table_of_contents
 
   return (
@@ -95,7 +112,14 @@ const GuideTemplate = ({ meta, content, children, editLink, mdxOptions }: GuideT
             )}
             {children}
 
-            <footer className="mt-16 not-prose">
+            <footer className="mt-16 not-prose flex items-center gap-4">
+              {/*
+               * Show the copy button in the article footer only when the TOC
+               * column is hidden — otherwise it lives below the TOC (right column).
+               */}
+              {pathname && hideToc && (
+                <CopyMarkdownButton markdownUrl={`${BASE_PATH}${pathname}.mdx`} />
+              )}
               <a
                 href={
                   editLink.includesProtocol ? editLink.link : `https://github.com/${editLink.link}`
@@ -115,22 +139,21 @@ const GuideTemplate = ({ meta, content, children, editLink, mdxOptions }: GuideT
           </article>
         </div>
         {!hideToc && (
-          <GuidesTableOfContents
-            video={meta?.tocVideo}
+          <div
             className={cn(
               'hidden md:flex',
               'col-span-3 self-start',
               'sticky',
-              /**
-               * --header-height: height of nav
-               * 1px: height of nav border
-               * 2rem: content padding
-               */
               'top-[calc(var(--header-height)+1px+2rem)]',
-              // 3rem accounts for 2rem of top padding + 1rem of extra breathing room
               'max-h-[calc(100vh-var(--header-height)-3rem)]'
             )}
-          />
+          >
+            <GuidesTableOfContents video={meta?.tocVideo} className="flex-1 overflow-y-auto">
+              {pathname && (
+                <CopyMarkdownButton markdownUrl={`${BASE_PATH}${pathname}.mdx`} />
+              )}
+            </GuidesTableOfContents>
+          </div>
         )}
       </div>
     </TocAnchorsProvider>

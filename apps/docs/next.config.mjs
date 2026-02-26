@@ -60,6 +60,7 @@ const nextConfig = {
   ],
   outputFileTracingIncludes: {
     '/api/crawlers': ['./features/docs/generated/**/*', './docs/ref/**/*'],
+    '/api/guides/raw/**': ['./content/guides/**/*', './content/_partials/**/*', './examples/**/*'],
     '/guides/**/*': ['./content/guides/**/*', './content/troubleshooting/**/*', './examples/**/*'],
     '/reference/**/*': ['./features/docs/generated/**/*', './docs/ref/**/*'],
   },
@@ -115,6 +116,17 @@ const nextConfig = {
       {
         source: '/favicon/:slug*',
         headers: [{ key: 'cache-control', value: 'public, max-age=86400' }],
+      },
+    ]
+  },
+
+  async rewrites() {
+    return [
+      {
+        // Appending .mdx to any guide URL returns the preprocessed markdown source.
+        // e.g. /guides/auth/users.mdx → /api/guides/raw/auth/users
+        source: '/guides/:path*.mdx',
+        destination: '/api/guides/raw/:path*',
       },
     ]
   },
