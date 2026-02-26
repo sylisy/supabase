@@ -6,6 +6,7 @@ import { toast } from 'sonner'
 import * as z from 'zod'
 
 import { useParams } from 'common'
+import DiscardChangesConfirmationDialog from 'components/ui-patterns/Dialogs/DiscardChangesConfirmationDialog'
 import { convertArgumentTypes } from 'components/interfaces/Database/Functions/Functions.utils'
 import CodeEditor from 'components/ui/CodeEditor/CodeEditor'
 import { DocsButton } from 'components/ui/DocsButton'
@@ -15,6 +16,7 @@ import { AuthConfigResponse } from 'data/auth/auth-config-query'
 import { useAuthHooksUpdateMutation } from 'data/auth/auth-hooks-update-mutation'
 import { executeSql } from 'data/sql/execute-sql-query'
 import { useSelectedProjectQuery } from 'hooks/misc/useSelectedProject'
+import { useConfirmOnClose } from 'hooks/ui/useConfirmOnClose'
 import { DOCS_URL } from 'lib/constants'
 import {
   Button,
@@ -156,7 +158,16 @@ export const CreateHookSheet = ({
     },
   })
 
+  const isDirty = form.formState.isDirty
   const values = form.watch()
+  const {
+    confirmOnClose,
+    handleOpenChange,
+    modalProps: discardChangesModalProps,
+  } = useConfirmOnClose({
+    checkIsDirty: () => isDirty,
+    onClose,
+  })
 
   const statements = useMemo(() => {
     let permissionChanges: string[] = []
@@ -270,7 +281,7 @@ export const CreateHookSheet = ({
   }, [authConfig, title, visible, definition])
 
   return (
-    <Sheet open={visible} onOpenChange={() => onClose()}>
+    <Sheet open={visible} onOpenChange={handleOpenChange}>
       <SheetContent
         aria-describedby={undefined}
         size="lg"
@@ -470,7 +481,9 @@ export const CreateHookSheet = ({
                               className="rounded-l-none text-xs"
                               onClick={() => {
                                 const authHookSecret = generateAuthHookSecret()
-                                form.setValue('httpsValues.secret', authHookSecret)
+                                form.setValue('httpsValues.secret', authHookSecret, {
+                                  shouldDirty: true,
+                                })
                               }}
                             >
                               Generate secret
@@ -494,7 +507,7 @@ export const CreateHookSheet = ({
             </div>
           )}
 
-          <Button disabled={isUpdatingAuthHooks} type="default" onClick={() => onClose()}>
+          <Button disabled={isUpdatingAuthHooks} type="default" onClick={confirmOnClose}>
             Cancel
           </Button>
           <Button
@@ -507,6 +520,7 @@ export const CreateHookSheet = ({
           </Button>
         </SheetFooter>
       </SheetContent>
+      <DiscardChangesConfirmationDialog {...discardChangesModalProps} />
     </Sheet>
   )
 }
