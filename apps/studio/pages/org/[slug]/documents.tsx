@@ -6,6 +6,14 @@ import OrganizationSettingsLayout from 'components/layouts/ProjectLayout/Organiz
 import { UnknownInterface } from 'components/ui/UnknownInterface'
 import { useIsFeatureEnabled } from 'hooks/misc/useIsFeatureEnabled'
 import type { NextPageWithLayout } from 'types'
+import { PageContainer } from 'ui-patterns/PageContainer'
+import {
+  PageHeader,
+  PageHeaderDescription,
+  PageHeaderMeta,
+  PageHeaderSummary,
+  PageHeaderTitle,
+} from 'ui-patterns/PageHeader'
 
 const OrgDocuments: NextPageWithLayout = () => {
   const { slug } = useParams()
@@ -16,7 +24,23 @@ const OrgDocuments: NextPageWithLayout = () => {
     return <UnknownInterface urlBack={`/org/${slug}`} />
   }
 
-  return <Documents />
+  return (
+    <>
+      <PageHeader size="default">
+        <PageHeaderMeta>
+          <PageHeaderSummary>
+            <PageHeaderTitle>Legal Documents</PageHeaderTitle>
+            <PageHeaderDescription>
+              Compliance documentation and legal agreements
+            </PageHeaderDescription>
+          </PageHeaderSummary>
+        </PageHeaderMeta>
+      </PageHeader>
+      <PageContainer size="default">
+        <Documents />
+      </PageContainer>
+    </>
+  )
 }
 
 OrgDocuments.getLayout = (page) => (

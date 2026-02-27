@@ -6,6 +6,14 @@ import OrganizationSettingsLayout from 'components/layouts/ProjectLayout/Organiz
 import { UnknownInterface } from 'components/ui/UnknownInterface'
 import { useIsFeatureEnabled } from 'hooks/misc/useIsFeatureEnabled'
 import type { NextPageWithLayout } from 'types'
+import { PageContainer } from 'ui-patterns/PageContainer'
+import {
+  PageHeader,
+  PageHeaderDescription,
+  PageHeaderMeta,
+  PageHeaderSummary,
+  PageHeaderTitle,
+} from 'ui-patterns/PageHeader'
 
 const OrgSecuritySettings: NextPageWithLayout = () => {
   const { slug } = useParams()
@@ -15,7 +23,23 @@ const OrgSecuritySettings: NextPageWithLayout = () => {
     return <UnknownInterface urlBack={`/org/${slug}`} />
   }
 
-  return <SecuritySettings />
+  return (
+    <>
+      <PageHeader size="default">
+        <PageHeaderMeta>
+          <PageHeaderSummary>
+            <PageHeaderTitle>Security</PageHeaderTitle>
+            <PageHeaderDescription>
+              Organization-wide security controls and MFA enforcement
+            </PageHeaderDescription>
+          </PageHeaderSummary>
+        </PageHeaderMeta>
+      </PageHeader>
+      <PageContainer size="default">
+        <SecuritySettings />
+      </PageContainer>
+    </>
+  )
 }
 
 OrgSecuritySettings.getLayout = (page) => (

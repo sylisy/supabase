@@ -409,7 +409,7 @@ const OrganizationLinks = () => {
         ]
       : []),
     {
-      label: 'Organization settings',
+      label: 'Organization Settings',
       href: `/org/${organizationSlug}/general`,
       key: 'settings',
       icon: <Settings size={ICON_SIZE} strokeWidth={ICON_STROKE_WIDTH} />,

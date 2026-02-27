@@ -6,6 +6,14 @@ import OrganizationSettingsLayout from 'components/layouts/ProjectLayout/Organiz
 import { UnknownInterface } from 'components/ui/UnknownInterface'
 import { useIsFeatureEnabled } from 'hooks/misc/useIsFeatureEnabled'
 import type { NextPageWithLayout } from 'types'
+import { PageContainer } from 'ui-patterns/PageContainer'
+import {
+  PageHeader,
+  PageHeaderDescription,
+  PageHeaderMeta,
+  PageHeaderSummary,
+  PageHeaderTitle,
+} from 'ui-patterns/PageHeader'
 
 const OrgSSO: NextPageWithLayout = () => {
   const { slug } = useParams()
@@ -15,7 +23,23 @@ const OrgSSO: NextPageWithLayout = () => {
     return <UnknownInterface urlBack={`/org/${slug}/general`} />
   }
 
-  return <SSOConfig />
+  return (
+    <>
+      <PageHeader size="default">
+        <PageHeaderMeta>
+          <PageHeaderSummary>
+            <PageHeaderTitle>Single Sign-On</PageHeaderTitle>
+            <PageHeaderDescription>
+              SAML SSO configuration and domain access controls
+            </PageHeaderDescription>
+          </PageHeaderSummary>
+        </PageHeaderMeta>
+      </PageHeader>
+      <PageContainer size="default">
+        <SSOConfig />
+      </PageContainer>
+    </>
+  )
 }
 
 OrgSSO.getLayout = (page) => (

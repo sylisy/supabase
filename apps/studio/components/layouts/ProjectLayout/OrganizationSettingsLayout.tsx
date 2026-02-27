@@ -34,7 +34,7 @@ export const generateOrganizationSettingsSections = ({
   showSsoSettings = true,
   showLegalDocuments = true,
 }: OrganizationSettingsSectionsProps): SidebarSection[] => {
-  const links = [
+  const configurationLinks = [
     {
       key: 'general',
       label: 'General',
@@ -49,11 +49,6 @@ export const generateOrganizationSettingsSections = ({
           },
         ]
       : []),
-    {
-      key: 'apps',
-      label: 'OAuth Apps',
-      href: `/org/${slug}/apps`,
-    },
     ...(showSsoSettings
       ? [
           {
@@ -63,6 +58,17 @@ export const generateOrganizationSettingsSections = ({
           },
         ]
       : []),
+  ]
+
+  const connectionsLinks = [
+    {
+      key: 'apps',
+      label: 'OAuth Apps',
+      href: `/org/${slug}/apps`,
+    },
+  ]
+
+  const complianceLinks = [
     {
       key: 'audit',
       label: 'Audit Logs',
@@ -81,9 +87,25 @@ export const generateOrganizationSettingsSections = ({
 
   return [
     {
-      key: 'organization-settings',
-      heading: 'Organization Settings',
-      links: links.map((item) => ({
+      key: 'configuration',
+      heading: 'Configuration',
+      links: configurationLinks.map((item) => ({
+        ...item,
+        isActive: currentPath === item.href,
+      })),
+    },
+    {
+      key: 'connections',
+      heading: 'Connections',
+      links: connectionsLinks.map((item) => ({
+        ...item,
+        isActive: currentPath === item.href,
+      })),
+    },
+    {
+      key: 'compliance',
+      heading: 'Compliance',
+      links: complianceLinks.map((item) => ({
         ...item,
         isActive: currentPath === item.href,
       })),
