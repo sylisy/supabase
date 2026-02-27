@@ -1,6 +1,5 @@
 import type { ChangeEvent } from 'react'
 import type { UseFormReturn } from 'react-hook-form'
-
 import {
   Accordion_Shadcn_,
   AccordionContent_Shadcn_,
@@ -11,12 +10,13 @@ import {
   FormField_Shadcn_,
   Input_Shadcn_,
   PrePostTab,
+  Select_Shadcn_,
   SelectContent_Shadcn_,
   SelectItem_Shadcn_,
-  Select_Shadcn_,
   SelectTrigger_Shadcn_,
 } from 'ui'
 import { FormItemLayout } from 'ui-patterns/form/FormItemLayout/FormItemLayout'
+
 import { DestinationType } from '../DestinationPanel.types'
 import { type DestinationPanelSchemaType } from './DestinationForm.schema'
 
@@ -154,23 +154,26 @@ export const AdvancedSettings = ({
                 <FormItemLayout
                   label="Invalidated slot behavior"
                   layout="horizontal"
-                  description={
-                    <>
-                      <p>Behavior when the replication slot is invalidated.</p>
-                      <p>
-                        <strong>Options:</strong> <code>error</code> blocks startup for manual
-                        recovery. <code>recreate</code> rebuilds the slot and restarts replication
-                        from scratch.
-                      </p>
-                    </>
-                  }
+                  description="Behavior when the replication slot is invalidated"
                 >
                   <FormControl_Shadcn_>
                     <Select_Shadcn_ value={field.value ?? 'error'} onValueChange={field.onChange}>
-                      <SelectTrigger_Shadcn_>{field.value ?? 'error'}</SelectTrigger_Shadcn_>
+                      <SelectTrigger_Shadcn_ className="capitalize">
+                        {field.value ?? 'error'}
+                      </SelectTrigger_Shadcn_>
                       <SelectContent_Shadcn_>
-                        <SelectItem_Shadcn_ value="error">error</SelectItem_Shadcn_>
-                        <SelectItem_Shadcn_ value="recreate">recreate</SelectItem_Shadcn_>
+                        <SelectItem_Shadcn_ value="error" className="[&>span]:top-2.5">
+                          <p>Error</p>
+                          <p className="text-foreground-lighter">
+                            Blocks startup for manual recovery
+                          </p>
+                        </SelectItem_Shadcn_>
+                        <SelectItem_Shadcn_ value="recreate" className="[&>span]:top-2.5">
+                          <p>Recreate</p>
+                          <p className="text-foreground-lighter">
+                            Rebuilds the slot and restarts replication from scratch
+                          </p>
+                        </SelectItem_Shadcn_>
                       </SelectContent_Shadcn_>
                     </Select_Shadcn_>
                   </FormControl_Shadcn_>
