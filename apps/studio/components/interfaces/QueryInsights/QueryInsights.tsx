@@ -16,6 +16,7 @@ import {
 import { QueryInsightsHealth } from './QueryInsightsHealth/QueryInsightsHealth'
 import { QueryInsightsChart } from './QueryInsightsChart/QueryInsightsChart'
 import { QueryInsightsTable } from './QueryInsightsTable/QueryInsightsTable'
+import { useSupamonitorIndexAdvisor } from './hooks/useSupamonitorIndexAdvisor'
 
 dayjs.extend(utc)
 
@@ -80,17 +81,18 @@ export const QueryInsights = ({ dateRange, onDateRangeChange }: QueryInsightsPro
     [filteredLogs, selectedQuery]
   )
   const aggregatedData = useMemo(() => aggregateLogsByQuery(filteredLogs), [filteredLogs])
+  const enrichedData = useSupamonitorIndexAdvisor(aggregatedData)
 
   return (
     <div className="flex flex-col flex-1 min-h-0">
-      <QueryInsightsHealth data={aggregatedData} isLoading={isLoading} />
+      <QueryInsightsHealth data={enrichedData} isLoading={isLoading} />
       <QueryInsightsChart
         chartData={chartData}
         selectedChartData={selectedChartData}
         isLoading={isLoading}
       />
       <QueryInsightsTable
-        data={aggregatedData}
+        data={enrichedData}
         isLoading={isLoading}
         currentSelectedQuery={selectedQuery}
         onCurrentSelectQuery={setSelectedQuery}

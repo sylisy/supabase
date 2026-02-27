@@ -6,13 +6,13 @@ export const ISSUE_DOT_COLORS: Record<
   { border: string; background: string; color: string }
 > = {
   error: {
-    border: 'border-destructive-600',
-    background: 'bg-destructive-600',
+    border: 'border-destructive-500',
+    background: 'bg-destructive-200',
     color: 'text-destructive-600',
   },
   index: {
-    border: 'border-warning-600',
-    background: 'bg-warning-600',
+    border: 'border-warning-500',
+    background: 'bg-warning-200',
     color: 'text-warning-600',
   },
   slow: {
