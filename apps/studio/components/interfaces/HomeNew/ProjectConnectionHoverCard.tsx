@@ -2,7 +2,6 @@ import { PermissionAction } from '@supabase/shared-types/out/constants'
 import { Label } from '@ui/components/shadcn/ui/label'
 import { getConnectionStrings } from 'components/interfaces/Connect/DatabaseSettings.utils'
 import { getKeys, useAPIKeysQuery } from 'data/api-keys/api-keys-query'
-import { useProjectSettingsV2Query } from 'data/config/project-settings-v2-query'
 import { useReadReplicasQuery } from 'data/read-replicas/replicas-query'
 import { useAsyncCheckPermissions } from 'hooks/misc/useCheckPermissions'
 import { pluckObjectFields } from 'lib/helpers'
@@ -12,7 +11,7 @@ import { useMemo, useState, type ReactNode } from 'react'
 import { Button, HoverCard, HoverCardContent, HoverCardTrigger } from 'ui'
 import { Input } from 'ui-patterns/DataInputs/Input'
 
-import { useCustomDomainsQuery } from '@/data/custom-domains/custom-domains-query'
+import { useProjectApiUrl } from '@/hooks/misc/useProjectApiUrl'
 
 const DB_FIELDS = ['db_host', 'db_name', 'db_port', 'db_user'] as const
 const EMPTY_CONNECTION_INFO = {
@@ -39,37 +38,23 @@ export const ProjectConnectionHoverCard = ({ projectRef }: ProjectConnectionHove
   const [open, setOpen] = useState(false)
   const [, setShowConnect] = useQueryState('showConnect', parseAsBoolean.withDefault(false))
 
-  const { data: customDomainData } = useCustomDomainsQuery({ projectRef })
-  const isCustomDomainsActive = customDomainData?.customDomain?.status === 'active'
-
-  const { data: settings, isPending: isLoadingSettings } = useProjectSettingsV2Query(
-    { projectRef },
-    { enabled: !!projectRef }
-  )
-
-  const protocol = settings?.app_config?.protocol ?? 'https'
-  const hostEndpoint = settings?.app_config?.endpoint
-  const projectUrl = isCustomDomainsActive
-    ? `https://${customDomainData.customDomain?.hostname}`
-    : `${protocol}://${hostEndpoint}`
-
   const { isLoading: isLoadingPermissions, can: canReadAPIKeys } = useAsyncCheckPermissions(
     PermissionAction.READ,
     'service_api_keys'
   )
 
+  const { data: projectUrl, isPending: isLoadingApiUrl } = useProjectApiUrl({ projectRef })
+
   const { data: apiKeys, isLoading: isLoadingKeys } = useAPIKeysQuery(
     { projectRef },
     { enabled: open && canReadAPIKeys }
   )
-
   const { publishableKey } = canReadAPIKeys ? getKeys(apiKeys) : { publishableKey: null }
 
   const { data: databases, isLoading: isLoadingDatabases } = useReadReplicasQuery(
     { projectRef },
     { enabled: open && !!projectRef }
   )
-
   const primaryDatabase = databases?.find((db) => db.identifier === projectRef)
 
   const directConnectionString = useMemo(() => {
@@ -89,7 +74,7 @@ export const ProjectConnectionHoverCard = ({ projectRef }: ProjectConnectionHove
   }, [primaryDatabase, projectRef])
 
   const projectUrlLabel =
-    projectUrl ?? (isLoadingSettings ? 'Loading project URL...' : 'Project URL unavailable')
+    projectUrl ?? (isLoadingApiUrl ? 'Loading project URL...' : 'Project URL unavailable')
 
   return (
     <HoverCard openDelay={250} closeDelay={100} open={open} onOpenChange={setOpen}>

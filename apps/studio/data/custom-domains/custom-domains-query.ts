@@ -73,15 +73,6 @@ export async function getCustomDomains(
   })
 
   if (_error) {
-    return {
-      customDomain: {
-        status: 'active',
-        hostname: 'test.joshen.me',
-        ssl: { status: '5_services_reconfigured' },
-      },
-      status: '5_services_reconfigured',
-    }
-
     const error = _error as ResponseError
     // not allowed error and no hostname configured error are
     // valid steps in the process of setting up a custom domain
