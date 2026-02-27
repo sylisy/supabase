@@ -178,7 +178,7 @@ const data: () => {
           ),
           heading: 'Native MCP from day one.',
           subheading:
-            'Supabase includes an MCP server that supports both read and write operations. Your agents can query schemas, insert records, and manage data through a standardized protocol.',
+            "Most data platforms let agents read. Supabase lets them write too—so agents can store outputs, log decisions, and feed downstream systems, not just surface information. The MCP server is built for production workflows and straightforward to integrate.",
         },
       ],
     },
