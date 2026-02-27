@@ -22,6 +22,8 @@ jobs:
       matrix:
         shardIndex: [1, 2]
         shardTotal: [2]
+    outputs:
+      tests_ran: ${{ steps.filter.outputs.studio == 'true' }}
 
     env:
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
@@ -96,7 +98,7 @@ jobs:
 
   merge-reports:
     # Merge reports after playwright-tests, even if some shards have failed
-    if: ${{ !cancelled() }}
+    if: ${{ !cancelled() && needs.test.outputs.tests_ran == 'true' }}
     needs: [test]
     runs-on: blacksmith-4vcpu-ubuntu-2404
     steps:
