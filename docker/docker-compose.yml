@@ -157,6 +157,30 @@ services:
       GOTRUE_EXTERNAL_PHONE_ENABLED: ${ENABLE_PHONE_SIGNUP}
       GOTRUE_SMS_AUTOCONFIRM: ${ENABLE_PHONE_AUTOCONFIRM}
 
+      # Uncomment to configure SMS delivery (phone auth and phone MFA).
+      # Also uncomment and fill in the matching variables in .env.
+      # GOTRUE_SMS_PROVIDER: ${SMS_PROVIDER}
+      # GOTRUE_SMS_OTP_EXP: ${SMS_OTP_EXP}
+      # GOTRUE_SMS_OTP_LENGTH: ${SMS_OTP_LENGTH}
+      # GOTRUE_SMS_MAX_FREQUENCY: ${SMS_MAX_FREQUENCY}
+      # GOTRUE_SMS_TEMPLATE: ${SMS_TEMPLATE}
+      ## Twilio credentials (when SMS_PROVIDER=twilio)
+      # GOTRUE_SMS_TWILIO_ACCOUNT_SID: ${SMS_TWILIO_ACCOUNT_SID}
+      # GOTRUE_SMS_TWILIO_AUTH_TOKEN: ${SMS_TWILIO_AUTH_TOKEN}
+      # GOTRUE_SMS_TWILIO_MESSAGE_SERVICE_SID: ${SMS_TWILIO_MESSAGE_SERVICE_SID}
+      ## Test OTP mappings for development
+      # GOTRUE_SMS_TEST_OTP: ${SMS_TEST_OTP}
+
+      # Uncomment to configure multi-factor authentication (MFA).
+      # Also uncomment and fill in the matching variables in .env.
+      # GOTRUE_MFA_TOTP_ENROLL_ENABLED: ${MFA_TOTP_ENROLL_ENABLED}
+      # GOTRUE_MFA_TOTP_VERIFY_ENABLED: ${MFA_TOTP_VERIFY_ENABLED}
+      # GOTRUE_MFA_PHONE_ENROLL_ENABLED: ${MFA_PHONE_ENROLL_ENABLED}
+      # GOTRUE_MFA_PHONE_VERIFY_ENABLED: ${MFA_PHONE_VERIFY_ENABLED}
+      # GOTRUE_MFA_WEB_AUTHN_ENROLL_ENABLED: ${MFA_WEB_AUTHN_ENROLL_ENABLED}
+      # GOTRUE_MFA_WEB_AUTHN_VERIFY_ENABLED: ${MFA_WEB_AUTHN_VERIFY_ENABLED}
+      # GOTRUE_MFA_MAX_ENROLLED_FACTORS: ${MFA_MAX_ENROLLED_FACTORS}
+
       # Uncomment to enable OAuth / social login providers.
       # Also uncomment and fill in the matching variables in .env.
       # Documentation: https://supabase.com/docs/guides/self-hosting/docker-oauth
@@ -183,11 +207,21 @@ services:
       ## Optional: uncomment for tenant-specific Azure login
       # GOTRUE_EXTERNAL_AZURE_URL: ${AZURE_URL}
 
-      # Uncomment to enable custom access token hook. Please see: https://supabase.com/docs/guides/auth/auth-hooks for full list of hooks and additional details about custom_access_token_hook
+      # Uncomment to enable auth hooks.
+      # Also uncomment and fill in the matching variables in .env.
+      # Documentation: https://supabase.com/docs/guides/self-hosting/docker-auth-hooks
 
       # GOTRUE_HOOK_CUSTOM_ACCESS_TOKEN_ENABLED: "true"
-      # GOTRUE_HOOK_CUSTOM_ACCESS_TOKEN_URI: "pg-functions://postgres/public/custom_access_token_hook"
-      # GOTRUE_HOOK_CUSTOM_ACCESS_TOKEN_SECRETS: "<standard-base64-secret>"
+      # GOTRUE_HOOK_CUSTOM_ACCESS_TOKEN_URI: ${HOOK_CUSTOM_ACCESS_TOKEN_URI}
+      # GOTRUE_HOOK_CUSTOM_ACCESS_TOKEN_SECRETS: ${HOOK_CUSTOM_ACCESS_TOKEN_SECRETS}
+
+      # GOTRUE_HOOK_SEND_SMS_ENABLED: "true"
+      # GOTRUE_HOOK_SEND_SMS_URI: ${HOOK_SEND_SMS_URI}
+      # GOTRUE_HOOK_SEND_SMS_SECRETS: ${HOOK_SEND_SMS_SECRETS}
+
+      # GOTRUE_HOOK_SEND_EMAIL_ENABLED: "true"
+      # GOTRUE_HOOK_SEND_EMAIL_URI: ${HOOK_SEND_EMAIL_URI}
+      # GOTRUE_HOOK_SEND_EMAIL_SECRETS: ${HOOK_SEND_EMAIL_SECRETS}
 
       # GOTRUE_HOOK_MFA_VERIFICATION_ATTEMPT_ENABLED: "true"
       # GOTRUE_HOOK_MFA_VERIFICATION_ATTEMPT_URI: "pg-functions://postgres/public/mfa_verification_attempt"
@@ -195,13 +229,11 @@ services:
       # GOTRUE_HOOK_PASSWORD_VERIFICATION_ATTEMPT_ENABLED: "true"
       # GOTRUE_HOOK_PASSWORD_VERIFICATION_ATTEMPT_URI: "pg-functions://postgres/public/password_verification_attempt"
 
-      # GOTRUE_HOOK_SEND_SMS_ENABLED: "false"
-      # GOTRUE_HOOK_SEND_SMS_URI: "pg-functions://postgres/public/custom_access_token_hook"
-      # GOTRUE_HOOK_SEND_SMS_SECRETS: "v1,whsec_VGhpcyBpcyBhbiBleGFtcGxlIG9mIGEgc2hvcnRlciBCYXNlNjQgc3RyaW5n"
+      # GOTRUE_HOOK_BEFORE_USER_CREATED_ENABLED: "true"
+      # GOTRUE_HOOK_BEFORE_USER_CREATED_URI: "pg-functions://postgres/public/before_user_created"
 
-      # GOTRUE_HOOK_SEND_EMAIL_ENABLED: "false"
-      # GOTRUE_HOOK_SEND_EMAIL_URI: "http://host.docker.internal:54321/functions/v1/email_sender"
-      # GOTRUE_HOOK_SEND_EMAIL_SECRETS: "v1,whsec_VGhpcyBpcyBhbiBleGFtcGxlIG9mIGEgc2hvcnRlciBCYXNlNjQgc3RyaW5n"
+      # GOTRUE_HOOK_AFTER_USER_CREATED_ENABLED: "true"
+      # GOTRUE_HOOK_AFTER_USER_CREATED_URI: "pg-functions://postgres/public/after_user_created"
 
   rest:
     container_name: supabase-rest
