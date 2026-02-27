@@ -9,6 +9,7 @@ export interface QueryPerformanceRow {
   mean_time: number
   min_time: number
   rows_read: number
+  p95_time?: number
   cache_hit_rate: number
   rolname: string
   application_name?: string

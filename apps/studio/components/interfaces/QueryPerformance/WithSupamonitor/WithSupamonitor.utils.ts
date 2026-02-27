@@ -112,6 +112,8 @@ export function aggregateLogsByQuery(parsedLogs: ParsedLogEntry[]): QueryPerform
     let totalCalls = 0
     let totalExecTime = 0
     let totalPlanTime = 0
+    let p95Sum = 0
+    let p95Count = 0
     let minTime = Infinity
     let maxTime = -Infinity
     const rolname = logs[0]?.user_name || ''
@@ -122,12 +124,18 @@ export function aggregateLogsByQuery(parsedLogs: ParsedLogEntry[]): QueryPerform
       totalCalls += logCalls
       totalExecTime += parseFloat(String(log.total_exec_time ?? 0))
       totalPlanTime += parseFloat(String(log.total_plan_time ?? 0))
+      const logP95 = (log.p95_exec_time ?? 0) + (log.p95_plan_time ?? 0)
+      if (logP95 > 0) {
+        p95Sum += logP95
+        p95Count++
+      }
       minTime = Math.min(minTime, (log.min_exec_time ?? 0) + (log.min_plan_time ?? 0))
       maxTime = Math.max(maxTime, (log.max_exec_time ?? 0) + (log.max_plan_time ?? 0))
     })
 
     const totalTime = totalExecTime + totalPlanTime
     const avgMeanTime = totalCalls > 0 ? totalTime / totalCalls : 0
+    const avgP95Time = p95Count > 0 ? p95Sum / p95Count : 0
     const finalMinTime = minTime === Infinity ? 0 : minTime
     const finalMaxTime = maxTime === -Infinity ? 0 : maxTime
 
@@ -139,6 +147,7 @@ export function aggregateLogsByQuery(parsedLogs: ParsedLogEntry[]): QueryPerform
       applicationName,
       count,
       avgMeanTime,
+      avgP95Time,
       minTime: finalMinTime,
       maxTime: finalMaxTime,
       totalCalls,
@@ -155,6 +164,7 @@ export function aggregateLogsByQuery(parsedLogs: ParsedLogEntry[]): QueryPerform
       application_name: stats.applicationName,
       calls: stats.totalCalls,
       mean_time: stats.avgMeanTime,
+      p95_time: stats.avgP95Time,
       min_time: stats.minTime,
       max_time: stats.maxTime,
       total_time: stats.totalTime,

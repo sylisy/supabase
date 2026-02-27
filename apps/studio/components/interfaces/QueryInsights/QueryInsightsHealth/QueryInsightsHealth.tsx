@@ -18,10 +18,9 @@ export const QueryInsightsHealth = ({ data, isLoading }: QueryInsightsHealthProp
   const label = HEALTH_LEVELS[level].label
 
   const avgP95 = useMemo(() => {
-    const totalCalls = data.reduce((sum, r) => sum + r.calls, 0)
-    const weightedMean =
-      totalCalls > 0 ? data.reduce((sum, r) => sum + r.mean_time * r.calls, 0) / totalCalls : 0
-    return Math.round(weightedMean)
+    const rows = data.filter((r) => (r.p95_time ?? 0) > 0)
+    if (rows.length === 0) return 0
+    return Math.round(rows.reduce((sum, r) => sum + (r.p95_time ?? 0), 0) / rows.length)
   }, [data])
 
   const totalCalls = useMemo(() => data.reduce((sum, r) => sum + r.calls, 0), [data])
