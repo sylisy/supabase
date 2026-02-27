@@ -1,17 +1,89 @@
-import Link from 'next/link'
 import { PropsWithChildren } from 'react'
 
 import { useParams } from 'common'
+import type { SidebarSection } from 'components/layouts/AccountLayout/AccountLayout.types'
+import { WithSidebar } from 'components/layouts/AccountLayout/WithSidebar'
 import { useCurrentPath } from 'hooks/misc/useCurrentPath'
 import { useIsFeatureEnabled } from 'hooks/misc/useIsFeatureEnabled'
-import { NavMenu, NavMenuItem } from 'ui'
-import { ScaffoldContainerLegacy, ScaffoldTitle } from '../Scaffold'
+
+interface OrganizationSettingsSectionsProps {
+  slug?: string
+  currentPath: string
+  showSecuritySettings?: boolean
+  showSsoSettings?: boolean
+  showLegalDocuments?: boolean
+}
+
+export const normalizeOrganizationSettingsPath = (path: string) => path.split('#')[0]
+
+export const generateOrganizationSettingsSections = ({
+  slug,
+  currentPath,
+  showSecuritySettings = true,
+  showSsoSettings = true,
+  showLegalDocuments = true,
+}: OrganizationSettingsSectionsProps): SidebarSection[] => {
+  const links = [
+    {
+      key: 'general',
+      label: 'General',
+      href: `/org/${slug}/general`,
+    },
+    ...(showSecuritySettings
+      ? [
+          {
+            key: 'security',
+            label: 'Security',
+            href: `/org/${slug}/security`,
+          },
+        ]
+      : []),
+    {
+      key: 'apps',
+      label: 'OAuth Apps',
+      href: `/org/${slug}/apps`,
+    },
+    ...(showSsoSettings
+      ? [
+          {
+            key: 'sso',
+            label: 'SSO',
+            href: `/org/${slug}/sso`,
+          },
+        ]
+      : []),
+    {
+      key: 'audit',
+      label: 'Audit Logs',
+      href: `/org/${slug}/audit`,
+    },
+    ...(showLegalDocuments
+      ? [
+          {
+            key: 'documents',
+            label: 'Legal Documents',
+            href: `/org/${slug}/documents`,
+          },
+        ]
+      : []),
+  ]
+
+  return [
+    {
+      key: 'organization-settings',
+      heading: 'Organization Settings',
+      links: links.map((item) => ({
+        ...item,
+        isActive: currentPath === item.href,
+      })),
+    },
+  ]
+}
 
 function OrganizationSettingsLayout({ children }: PropsWithChildren) {
   const { slug } = useParams()
-  // Get the path without any hash values
   const fullCurrentPath = useCurrentPath()
-  const [currentPath] = fullCurrentPath.split('#')
+  const currentPath = normalizeOrganizationSettingsPath(fullCurrentPath)
 
   const {
     organizationShowSsoSettings: showSsoSettings,
@@ -23,60 +95,18 @@ function OrganizationSettingsLayout({ children }: PropsWithChildren) {
     'organization:show_legal_documents',
   ])
 
-  const navMenuItems = [
-    {
-      label: 'General',
-      href: `/org/${slug}/general`,
-    },
-    ...(showSecuritySettings
-      ? [
-          {
-            label: 'Security',
-            href: `/org/${slug}/security`,
-          },
-        ]
-      : []),
-    {
-      label: 'OAuth Apps',
-      href: `/org/${slug}/apps`,
-    },
-    ...(showSsoSettings
-      ? [
-          {
-            label: 'SSO',
-            href: `/org/${slug}/sso`,
-          },
-        ]
-      : []),
-
-    {
-      label: 'Audit Logs',
-      href: `/org/${slug}/audit`,
-    },
-    ...(showLegalDocuments
-      ? [
-          {
-            label: 'Legal Documents',
-            href: `/org/${slug}/documents`,
-          },
-        ]
-      : []),
-  ]
+  const sections = generateOrganizationSettingsSections({
+    slug,
+    currentPath,
+    showSecuritySettings,
+    showSsoSettings,
+    showLegalDocuments,
+  })
 
   return (
-    <>
-      <ScaffoldContainerLegacy className="mb-0">
-        <ScaffoldTitle>Organization Settings</ScaffoldTitle>
-        <NavMenu className="overflow-x-auto" aria-label="Organization menu navigation">
-          {(navMenuItems.filter(Boolean) as { label: string; href: string }[]).map((item) => (
-            <NavMenuItem key={item.label} active={currentPath === item.href}>
-              <Link href={item.href}>{item.label}</Link>
-            </NavMenuItem>
-          ))}
-        </NavMenu>
-      </ScaffoldContainerLegacy>
-      <div className="h-full w-full overflow-y-auto">{children}</div>
-    </>
+    <WithSidebar title="Organization Settings" breadcrumbs={[]} sections={sections}>
+      {children}
+    </WithSidebar>
   )
 }
 
