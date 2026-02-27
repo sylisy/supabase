@@ -57,12 +57,12 @@ export const AdvancedSettings = ({
                   description={
                     <>
                       <p>
-                        Maximum time the pipeline waits to collect additional changes before
-                        flushing a batch.
+                        Maximum time pipeline waits to collect additional changes before flushing a
+                        batch.
                       </p>
                       <p>
-                        Lower values reduce replication latency, while higher values improve
-                        batching efficiency.
+                        Lower values reduce replication latency, higher values improve batching
+                        efficiency.
                       </p>
                     </>
                   }
@@ -126,7 +126,7 @@ export const AdvancedSettings = ({
                         Number of parallel connections each table copy can use during initial sync.
                       </p>
                       <p>
-                        More connections can copy large tables faster, but consume more database
+                        More connections speed up large table copies, but use more database
                         connections.
                       </p>
                     </>
@@ -181,86 +181,84 @@ export const AdvancedSettings = ({
               )}
             />
 
-            {/* BigQuery-specific: Max staleness */}
             {type === 'BigQuery' && (
-              <FormField_Shadcn_
-                control={form.control}
-                name="connectionPoolSize"
-                render={({ field }) => (
-                  <FormItemLayout
-                    label={
-                      <div className="flex flex-col gap-y-2">
-                        <span>Connection pool size</span>
-                        <Badge className="w-min">BigQuery only</Badge>
-                      </div>
-                    }
-                    layout="horizontal"
-                    description={
-                      <>
-                        <p>Size of the BigQuery Storage Write API connection pool.</p>
-                        <p>
-                          More connections allow more parallel writes, but consume more resources.
-                        </p>
-                      </>
-                    }
-                  >
-                    <FormControl_Shadcn_>
-                      <PrePostTab postTab="connections">
-                        <Input_Shadcn_
-                          {...field}
-                          type="number"
-                          value={field.value ?? ''}
-                          onChange={handleNumberChange(field)}
-                          placeholder="Default: 4"
-                        />
-                      </PrePostTab>
-                    </FormControl_Shadcn_>
-                  </FormItemLayout>
-                )}
-              />
-            )}
+              <>
+                <FormField_Shadcn_
+                  control={form.control}
+                  name="connectionPoolSize"
+                  render={({ field }) => (
+                    <FormItemLayout
+                      label={
+                        <div className="flex flex-col gap-y-2">
+                          <span>Connection pool size</span>
+                          <Badge className="w-min">BigQuery only</Badge>
+                        </div>
+                      }
+                      layout="horizontal"
+                      description={
+                        <>
+                          <p>Size of the BigQuery Storage Write API connection pool.</p>
+                          <p>
+                            More connections allow more parallel writes, but consume more resources.
+                          </p>
+                        </>
+                      }
+                    >
+                      <FormControl_Shadcn_>
+                        <PrePostTab postTab="connections">
+                          <Input_Shadcn_
+                            {...field}
+                            type="number"
+                            value={field.value ?? ''}
+                            onChange={handleNumberChange(field)}
+                            placeholder="Default: 4"
+                          />
+                        </PrePostTab>
+                      </FormControl_Shadcn_>
+                    </FormItemLayout>
+                  )}
+                />
 
-            {/* BigQuery-specific: Max staleness */}
-            {type === 'BigQuery' && (
-              <FormField_Shadcn_
-                control={form.control}
-                name="maxStalenessMins"
-                render={({ field }) => (
-                  <FormItemLayout
-                    label={
-                      <div className="flex flex-col gap-y-2">
-                        <span>Maximum staleness</span>
-                        <Badge className="w-min">BigQuery only</Badge>
-                      </div>
-                    }
-                    layout="horizontal"
-                    description={
-                      <>
-                        <p>
-                          Maximum allowed age for BigQuery cached metadata before reading base
-                          tables.
-                        </p>
-                        <p>
-                          Lower values improve freshness, while higher values can reduce query cost
-                          and latency.
-                        </p>
-                      </>
-                    }
-                  >
-                    <FormControl_Shadcn_>
-                      <PrePostTab postTab="minutes">
-                        <Input_Shadcn_
-                          {...field}
-                          type="number"
-                          value={field.value ?? ''}
-                          onChange={handleNumberChange(field)}
-                          placeholder="Default: None (No staleness limit)"
-                        />
-                      </PrePostTab>
-                    </FormControl_Shadcn_>
-                  </FormItemLayout>
-                )}
-              />
+                <FormField_Shadcn_
+                  control={form.control}
+                  name="maxStalenessMins"
+                  render={({ field }) => (
+                    <FormItemLayout
+                      label={
+                        <div className="flex flex-col gap-y-2">
+                          <span>Maximum staleness</span>
+                          <Badge className="w-min">BigQuery only</Badge>
+                        </div>
+                      }
+                      layout="horizontal"
+                      description={
+                        <>
+                          <p>
+                            Maximum allowed age for BigQuery cached metadata before reading base
+                            tables.
+                          </p>
+                          <p>
+                            Lower values improve freshness, higher values can reduce query cost and
+                            latency.
+                          </p>
+                        </>
+                      }
+                    >
+                      <FormControl_Shadcn_>
+                        <PrePostTab postTab="minutes">
+                          <Input_Shadcn_
+                            {...field}
+                            type="number"
+                            value={field.value ?? ''}
+                            onChange={handleNumberChange(field)}
+                            placeholder="Default: None (No staleness limit)"
+                          />
+                        </PrePostTab>
+                      </FormControl_Shadcn_>
+                    </FormItemLayout>
+                  )}
+                />
+              </>
             )}
           </AccordionContent_Shadcn_>
         </AccordionItem_Shadcn_>
