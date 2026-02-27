@@ -9,6 +9,8 @@ export function MobileSheetNavLayout() {
 
   return (
     <MobileSheetNav
+      shouldCloseOnRouteChange={false}
+      shouldCloseOnWindowResize={false}
       open={mobileSheetContent !== null}
       onOpenChange={(open: boolean) => {
         if (!open) {
