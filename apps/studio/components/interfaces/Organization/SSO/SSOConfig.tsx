@@ -153,7 +153,7 @@ export const SSOConfig = () => {
   }, [ssoConfig, form])
 
   return (
-    <ScaffoldContainer size="small">
+    <ScaffoldContainer size="small" className="px-6 xl:px-10">
       <ScaffoldSection isFullWidth>
         {isLoadingEntitlement || (hasAccessToSso && isLoadingSSOConfig) ? (
           <Card>
