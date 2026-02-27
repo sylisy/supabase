@@ -1,10 +1,14 @@
 import { useProjectSettingsV2Query } from '@/data/config/project-settings-v2-query'
 import { useCustomDomainsQuery } from '@/data/custom-domains/custom-domains-query'
+import { useProjectAddonsQuery } from '@/data/subscriptions/project-addons-query'
 
 export const useProjectApiUrl = (
   { projectRef }: { projectRef?: string },
   { enabled = true }: { enabled?: boolean } = {}
 ) => {
+  const { data } = useProjectAddonsQuery({ projectRef })
+  const hasCustomDomainsAddon = !!data?.selected_addons.find((x) => x.type === 'custom_domain')
+
   const {
     data: customDomainData,
     error: customDomainsError,
@@ -13,9 +17,10 @@ export const useProjectApiUrl = (
     isError: isErrorCustomDomains,
   } = useCustomDomainsQuery({ projectRef }, { enabled })
   const isCustomDomainsActive = customDomainData?.customDomain?.status === 'active'
-  const customEndpoint = isCustomDomainsActive
-    ? `https://${customDomainData?.customDomain?.hostname}`
-    : undefined
+  const customEndpoint =
+    hasCustomDomainsAddon && isCustomDomainsActive
+      ? `https://${customDomainData?.customDomain?.hostname}`
+      : undefined
 
   const {
     data: settings,
@@ -34,9 +39,9 @@ export const useProjectApiUrl = (
     data: resolvedEndpoint,
     customEndpoint,
     hostEndpoint,
-    error: projectSettingsError || customDomainsError,
-    isPending: isLoadingProjectSettings || isLoadingCustomDomains,
-    isSuccess: isSuccessProjectSettings && isSuccessCustomDomains,
-    isError: isErrorProjectSettings || isErrorCustomDomains,
+    error: projectSettingsError || (hasCustomDomainsAddon ? customDomainsError : undefined),
+    isPending: isLoadingProjectSettings || (hasCustomDomainsAddon && isLoadingCustomDomains),
+    isSuccess: isSuccessProjectSettings && hasCustomDomainsAddon && isSuccessCustomDomains,
+    isError: isErrorProjectSettings || (hasCustomDomainsAddon && isErrorCustomDomains),
   }
 }
