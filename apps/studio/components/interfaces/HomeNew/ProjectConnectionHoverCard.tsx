@@ -9,6 +9,7 @@ import { Plug } from 'lucide-react'
 import { parseAsBoolean, useQueryState } from 'nuqs'
 import { useMemo, useState, type ReactNode } from 'react'
 import { Button, HoverCard, HoverCardContent, HoverCardTrigger } from 'ui'
+import { ShimmeringLoader } from 'ui-patterns'
 import { Input } from 'ui-patterns/DataInputs/Input'
 
 import { useProjectApiUrl } from '@/hooks/misc/useProjectApiUrl'
@@ -73,9 +74,6 @@ export const ProjectConnectionHoverCard = ({ projectRef }: ProjectConnectionHove
     }).direct.uri
   }, [primaryDatabase, projectRef])
 
-  const projectUrlLabel =
-    projectUrl ?? (isLoadingApiUrl ? 'Loading project URL...' : 'Project URL unavailable')
-
   return (
     <HoverCard openDelay={250} closeDelay={100} open={open} onOpenChange={setOpen}>
       <HoverCardTrigger asChild>
@@ -83,9 +81,13 @@ export const ProjectConnectionHoverCard = ({ projectRef }: ProjectConnectionHove
           <div className=" transition w-8 h-8 rounded-md bg-surface-75 group-hover:bg-muted border flex items-center justify-center">
             <Plug strokeWidth={1.5} size={16} className="text-foreground-light rotate-90" />
           </div>
-          <span className="transition text-foreground-light group-hover:text-foreground underline decoration-dotted decoration-foreground-muted underline-offset-4 max-w-[320px] text-left">
-            {projectUrlLabel}
-          </span>
+          {isLoadingApiUrl ? (
+            <ShimmeringLoader className="w-32" />
+          ) : (
+            <span className="transition text-foreground-light group-hover:text-foreground underline decoration-dotted decoration-foreground-muted underline-offset-4 max-w-[320px] text-left">
+              {projectUrl ?? 'Project URL unavailable'}
+            </span>
+          )}
         </button>
       </HoverCardTrigger>
       <HoverCardContent side="bottom" align="start" className="w-[420px] p-0">
