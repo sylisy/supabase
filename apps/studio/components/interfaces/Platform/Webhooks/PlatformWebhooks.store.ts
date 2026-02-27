@@ -55,9 +55,11 @@ export const createWebhookEndpoint = (
   input: UpsertWebhookEndpointInput,
   options?: CreateEndpointOptions
 ): { state: PlatformWebhooksState; endpoint: WebhookEndpoint } => {
+  const endpointId = options?.endpointId ?? randomId('endpoint')
+  const internalName = input.name.trim().length > 0 ? input.name.trim() : endpointId
   const endpoint: WebhookEndpoint = {
-    id: options?.endpointId ?? randomId('endpoint'),
-    name: input.name.trim(),
+    id: endpointId,
+    name: internalName,
     url: input.url.trim(),
     description: input.description.trim(),
     enabled: input.enabled,
@@ -89,7 +91,7 @@ export const updateWebhookEndpoint = (
       endpoint.id === endpointId
         ? {
             ...endpoint,
-            name: input.name.trim(),
+            name: input.name.trim().length > 0 ? input.name.trim() : endpoint.name,
             url: input.url.trim(),
             description: input.description.trim(),
             enabled: input.enabled,

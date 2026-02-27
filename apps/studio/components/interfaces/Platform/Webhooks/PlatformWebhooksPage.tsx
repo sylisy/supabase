@@ -1,15 +1,36 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { MoreVertical, Plus, Search, Trash2 } from 'lucide-react'
+import { ChevronRight, MoreVertical, Pencil, Plus, Power, Search, Trash2 } from 'lucide-react'
+import Link from 'next/link'
+import { useRouter } from 'next/router'
 import { parseAsString, parseAsStringLiteral, useQueryState } from 'nuqs'
 import { useEffect, useMemo, useState } from 'react'
 import { useFieldArray, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import * as z from 'zod'
 
+import { useParams } from 'common'
 import { TextConfirmModal } from 'components/ui/TextConfirmModalWrapper'
+import { createNavigationHandler } from 'lib/navigation'
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
   Badge,
+  BreadcrumbItem_Shadcn_ as BreadcrumbItem,
+  BreadcrumbLink_Shadcn_ as BreadcrumbLink,
+  BreadcrumbList_Shadcn_ as BreadcrumbList,
+  BreadcrumbPage_Shadcn_ as BreadcrumbPage,
+  BreadcrumbSeparator_Shadcn_ as BreadcrumbSeparator,
   Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
   Checkbox_Shadcn_ as Checkbox,
   DropdownMenu,
   DropdownMenuContent,
@@ -40,12 +61,12 @@ import {
   copyToClipboard,
 } from 'ui'
 import { EmptyStatePresentational } from 'ui-patterns'
-import ConfirmationModal from 'ui-patterns/Dialogs/ConfirmationModal'
 import { FormItemLayout } from 'ui-patterns/form/FormItemLayout/FormItemLayout'
 import { PageContainer } from 'ui-patterns/PageContainer'
 import {
   PageHeader,
   PageHeaderAside,
+  PageHeaderBreadcrumb,
   PageHeaderDescription,
   PageHeaderMeta,
   PageHeaderSummary,
@@ -69,7 +90,6 @@ const PANEL_VALUES = ['create', 'edit'] as const
 
 const endpointFormSchema = z
   .object({
-    name: z.string().trim().min(1, 'Endpoint name is required'),
     url: z.string().trim().url('Please enter a valid URL'),
     description: z.string().trim().max(512, 'Description cannot exceed 512 characters'),
     enabled: z.boolean().default(true),
@@ -111,7 +131,7 @@ const formatDate = (value: string) =>
 const toEventTypes = (values: EndpointFormValues) => (values.subscribeAll ? ['*'] : values.eventTypes)
 
 const toEndpointPayload = (values: EndpointFormValues): UpsertWebhookEndpointInput => ({
-  name: values.name,
+  name: '',
   url: values.url,
   description: values.description,
   enabled: values.enabled,
@@ -138,7 +158,6 @@ const EndpointSheet = ({ visible, mode, endpoint, eventTypes, onClose, onSubmit 
   const form = useForm<EndpointFormValues>({
     resolver: zodResolver(endpointFormSchema),
     defaultValues: {
-      name: '',
       url: '',
       description: '',
       enabled: true,
@@ -161,7 +180,6 @@ const EndpointSheet = ({ visible, mode, endpoint, eventTypes, onClose, onSubmit 
 
     if (!endpoint) {
       form.reset({
-        name: '',
         url: '',
         description: '',
         enabled: true,
@@ -173,7 +191,6 @@ const EndpointSheet = ({ visible, mode, endpoint, eventTypes, onClose, onSubmit 
     }
 
     form.reset({
-      name: endpoint.name,
       url: endpoint.url,
       description: endpoint.description,
       enabled: endpoint.enabled,
@@ -200,18 +217,6 @@ const EndpointSheet = ({ visible, mode, endpoint, eventTypes, onClose, onSubmit 
               <div className="px-5 space-y-5">
                 <FormField_Shadcn_
                   control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItemLayout label="Endpoint name" layout="vertical" className="gap-1">
-                      <FormControl_Shadcn_>
-                        <InputField {...field} />
-                      </FormControl_Shadcn_>
-                    </FormItemLayout>
-                  )}
-                />
-
-                <FormField_Shadcn_
-                  control={form.control}
                   name="url"
                   render={({ field }) => (
                     <FormItemLayout label="Endpoint URL" layout="vertical" className="gap-1">
@@ -234,21 +239,23 @@ const EndpointSheet = ({ visible, mode, endpoint, eventTypes, onClose, onSubmit 
                   )}
                 />
 
-                <FormField_Shadcn_
-                  control={form.control}
-                  name="enabled"
-                  render={({ field }) => (
-                    <FormItemLayout
-                      label="Enable endpoint"
-                      description="Disabled endpoints won’t receive deliveries."
-                      layout="flex"
-                    >
-                      <FormControl_Shadcn_>
-                        <Switch checked={field.value} onCheckedChange={field.onChange} />
-                      </FormControl_Shadcn_>
-                    </FormItemLayout>
-                  )}
-                />
+                {mode === 'edit' && (
+                  <FormField_Shadcn_
+                    control={form.control}
+                    name="enabled"
+                    render={({ field }) => (
+                      <FormItemLayout
+                        label="Enable endpoint"
+                        description="Disabled endpoints won’t receive deliveries."
+                        layout="flex"
+                      >
+                        <FormControl_Shadcn_>
+                          <Switch checked={field.value} onCheckedChange={field.onChange} />
+                        </FormControl_Shadcn_>
+                      </FormItemLayout>
+                    )}
+                  />
+                )}
               </div>
 
               <Separator />
@@ -358,6 +365,8 @@ const EndpointSheet = ({ visible, mode, endpoint, eventTypes, onClose, onSubmit 
 }
 
 export const PlatformWebhooksPage = ({ scope }: PlatformWebhooksPageProps) => {
+  const router = useRouter()
+  const { slug, ref } = useParams()
   const { endpoints, deliveries, createEndpoint, updateEndpoint, deleteEndpoint, toggleEndpoint, regenerateSecret } =
     usePlatformWebhooksMockStore(scope)
   const [endpointId, setEndpointId] = useQueryState('endpointId', parseAsString)
@@ -377,10 +386,12 @@ export const PlatformWebhooksPage = ({ scope }: PlatformWebhooksPageProps) => {
   const scopeLabel = scope === 'organization' ? 'Platform Webhooks' : 'Project Webhooks'
   const scopeDescription =
     scope === 'organization'
-      ? 'Manage organization-level webhook endpoints and deliveries.'
-      : 'Manage webhook endpoints scoped to this project.'
+      ? 'Manage organization-level webhook endpoints and deliveries'
+      : 'Manage webhook endpoints scoped to this project'
 
   const eventTypeOptions = PLATFORM_WEBHOOKS_MOCK_DATA[scope].eventTypes
+  const webhooksHref =
+    scope === 'organization' ? `/org/${slug}/webhooks` : `/project/${ref}/settings/webhooks`
 
   const selectedEndpoint = useMemo(
     () => endpoints.find((endpoint) => endpoint.id === endpointId) ?? null,
@@ -416,7 +427,7 @@ export const PlatformWebhooksPage = ({ scope }: PlatformWebhooksPageProps) => {
       setDeliverySearch('')
     }
     setEndpointIdPendingDelete(null)
-    toast.success(`Deleted endpoint "${endpointPendingDelete.name}"`)
+    toast.success(`Deleted endpoint "${endpointPendingDelete.url}"`)
   }
 
   const handleUpsertEndpoint = (values: EndpointFormValues) => {
@@ -446,7 +457,22 @@ export const PlatformWebhooksPage = ({ scope }: PlatformWebhooksPageProps) => {
 
   return (
     <>
-      <PageHeader size="small">
+      <PageHeader size="full" className="pb-6">
+        {selectedEndpoint && (
+          <PageHeaderBreadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link href={webhooksHref}>Webhooks</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Endpoint details</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </PageHeaderBreadcrumb>
+        )}
         <PageHeaderMeta>
           <PageHeaderSummary>
             <PageHeaderTitle>{scopeLabel}</PageHeaderTitle>
@@ -471,7 +497,7 @@ export const PlatformWebhooksPage = ({ scope }: PlatformWebhooksPageProps) => {
         </PageHeaderMeta>
       </PageHeader>
 
-      <PageContainer size="large">
+      <PageContainer size="full">
         <PageSection>
           <PageSectionContent>
             {!selectedEndpoint ? (
@@ -495,84 +521,113 @@ export const PlatformWebhooksPage = ({ scope }: PlatformWebhooksPageProps) => {
                     </Button>
                   </EmptyStatePresentational>
                 ) : (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Name</TableHead>
-                        <TableHead>URL</TableHead>
-                        <TableHead className="hidden xl:table-cell">Event types</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead className="hidden lg:table-cell">Created</TableHead>
-                        <TableHead className="w-20"></TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredEndpoints.map((endpoint) => (
-                        <TableRow key={endpoint.id}>
-                          <TableCell>
-                            <Button type="text" onClick={() => setEndpointId(endpoint.id)} className="!px-0">
-                              {endpoint.name}
-                            </Button>
-                          </TableCell>
-                          <TableCell className="truncate max-w-[360px]">{endpoint.url}</TableCell>
-                          <TableCell className="hidden xl:table-cell truncate max-w-[280px]">
-                            {formatEvents(endpoint.eventTypes)}
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant={endpoint.enabled ? 'success' : 'default'}>
-                              {endpoint.enabled ? 'Enabled' : 'Disabled'}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="hidden lg:table-cell">{formatDate(endpoint.createdAt)}</TableCell>
-                          <TableCell className="text-right">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button type="text" icon={<MoreVertical />} />
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent side="left">
-                                <DropdownMenuItem
-                                  onClick={() => {
-                                    setEndpointId(endpoint.id)
-                                    setPanel('edit')
-                                  }}
-                                >
-                                  Edit endpoint
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => toggleEndpoint(endpoint.id)}>
-                                  {endpoint.enabled ? 'Disable endpoint' : 'Enable endpoint'}
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem onClick={() => setEndpointIdPendingDelete(endpoint.id)}>
-                                  Delete endpoint
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </TableCell>
+                  <Card className="overflow-hidden">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>URL</TableHead>
+                          <TableHead className="hidden xl:table-cell">Event types</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead className="hidden lg:table-cell">Created</TableHead>
+                          <TableHead className="w-20"></TableHead>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                      </TableHeader>
+                      <TableBody>
+                        {filteredEndpoints.map((endpoint) => (
+                          <TableRow
+                            key={endpoint.id}
+                            className="relative cursor-pointer inset-focus"
+                            onClick={createNavigationHandler(
+                              `${webhooksHref}?endpointId=${encodeURIComponent(endpoint.id)}`,
+                              router
+                            )}
+                            onAuxClick={createNavigationHandler(
+                              `${webhooksHref}?endpointId=${encodeURIComponent(endpoint.id)}`,
+                              router
+                            )}
+                            onKeyDown={createNavigationHandler(
+                              `${webhooksHref}?endpointId=${encodeURIComponent(endpoint.id)}`,
+                              router
+                            )}
+                            tabIndex={0}
+                          >
+                            <TableCell className="truncate max-w-[420px]">{endpoint.url}</TableCell>
+                            <TableCell className="hidden xl:table-cell truncate max-w-[280px]">
+                              {formatEvents(endpoint.eventTypes)}
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant={endpoint.enabled ? 'success' : 'default'}>
+                                {endpoint.enabled ? 'Enabled' : 'Disabled'}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="hidden lg:table-cell">{formatDate(endpoint.createdAt)}</TableCell>
+                            <TableCell className="text-right">
+                              <div
+                                className="flex justify-end items-center h-full gap-3"
+                                onClick={(event) => event.stopPropagation()}
+                                onKeyDown={(event) => event.stopPropagation()}
+                              >
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button type="default" icon={<MoreVertical />} className="w-7" />
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent side="left">
+                                    <DropdownMenuItem
+                                      className="gap-x-2"
+                                      onClick={() => {
+                                        setEndpointId(endpoint.id)
+                                        setPanel('edit')
+                                      }}
+                                    >
+                                      <Pencil size={14} />
+                                      <span>Edit endpoint</span>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                      className="gap-x-2"
+                                      onClick={() => toggleEndpoint(endpoint.id)}
+                                    >
+                                      <Power size={14} />
+                                      <span>
+                                        {endpoint.enabled ? 'Disable endpoint' : 'Enable endpoint'}
+                                      </span>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem
+                                      className="gap-x-2"
+                                      onClick={() => setEndpointIdPendingDelete(endpoint.id)}
+                                    >
+                                      <Trash2 size={14} />
+                                      <span>Delete endpoint</span>
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                                <ChevronRight aria-hidden={true} size={14} className="text-foreground-muted/60" />
+                                <button tabIndex={-1} className="sr-only">
+                                  Go to endpoint details
+                                </button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </Card>
                 )}
               </div>
             ) : (
               <div className="space-y-6">
-                <div className="flex items-center justify-between gap-2">
-                  <Button type="text" className="!px-0" onClick={() => setEndpointId(null)}>
-                    Back to endpoints
+                <div className="flex items-center justify-end gap-2">
+                  <Button type="default" onClick={() => copyToClipboard(selectedEndpoint.url)}>
+                    Copy URL
                   </Button>
-                  <div className="flex items-center gap-2">
-                    <Button type="default" onClick={() => copyToClipboard(selectedEndpoint.url)}>
-                      Copy URL
-                    </Button>
-                    <Button type="danger" onClick={() => setEndpointIdPendingDelete(selectedEndpoint.id)}>
-                      Delete
-                    </Button>
-                  </div>
+                  <Button type="danger" onClick={() => setEndpointIdPendingDelete(selectedEndpoint.id)}>
+                    Delete
+                  </Button>
                 </div>
 
                 <div className="space-y-3">
                   <div className="flex items-center gap-2">
-                    <h3 className="text-foreground text-2xl">{selectedEndpoint.name}</h3>
+                    <h3 className="text-foreground text-2xl">Endpoint</h3>
                     <Badge variant={selectedEndpoint.enabled ? 'success' : 'default'}>
                       {selectedEndpoint.enabled ? 'Enabled' : 'Disabled'}
                     </Badge>
@@ -581,8 +636,10 @@ export const PlatformWebhooksPage = ({ scope }: PlatformWebhooksPageProps) => {
                 </div>
 
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-                  <div className="space-y-3">
-                    <h4 className="text-foreground">Overview</h4>
+                  <Card className="overflow-hidden">
+                    <CardHeader>
+                      <CardTitle>Overview</CardTitle>
+                    </CardHeader>
                     <Table>
                       <TableBody>
                         <TableRow>
@@ -603,10 +660,10 @@ export const PlatformWebhooksPage = ({ scope }: PlatformWebhooksPageProps) => {
                             {selectedEndpoint.customHeaders.length === 0
                               ? '-'
                               : selectedEndpoint.customHeaders.map((header) => (
-                                  <div key={header.id}>
-                                    <code className="text-code-inline">{header.key}</code>: {header.value}
-                                  </div>
-                                ))}
+                                <div key={header.id}>
+                                  <code className="text-code-inline">{header.key}</code>: {header.value}
+                                </div>
+                              ))}
                           </TableCell>
                         </TableRow>
                         <TableRow>
@@ -619,27 +676,31 @@ export const PlatformWebhooksPage = ({ scope }: PlatformWebhooksPageProps) => {
                         </TableRow>
                       </TableBody>
                     </Table>
-                  </div>
+                  </Card>
 
-                  <div className="space-y-3">
-                    <h4 className="text-foreground">Signing secret</h4>
-                    <Table>
-                      <TableBody>
-                        <TableRow>
-                          <TableHead className="w-44">Secret</TableHead>
-                          <TableCell>{selectedEndpoint.signingSecret}</TableCell>
-                        </TableRow>
-                      </TableBody>
-                    </Table>
-                    <div className="flex items-center gap-2">
-                      <Button type="default" onClick={() => copyToClipboard(selectedEndpoint.signingSecret)}>
-                        Copy secret
-                      </Button>
-                      <Button type="warning" onClick={() => setShowRegenerateSecretConfirm(true)}>
-                        Regenerate secret
-                      </Button>
-                    </div>
-                  </div>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Signing secret</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <Table>
+                        <TableBody>
+                          <TableRow>
+                            <TableHead className="w-44">Secret</TableHead>
+                            <TableCell>{selectedEndpoint.signingSecret}</TableCell>
+                          </TableRow>
+                        </TableBody>
+                      </Table>
+                      <div className="flex items-center gap-2">
+                        <Button type="default" onClick={() => copyToClipboard(selectedEndpoint.signingSecret)}>
+                          Copy secret
+                        </Button>
+                        <Button type="warning" onClick={() => setShowRegenerateSecretConfirm(true)}>
+                          Regenerate secret
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
                 </div>
 
                 <div className="space-y-4">
@@ -655,34 +716,36 @@ export const PlatformWebhooksPage = ({ scope }: PlatformWebhooksPageProps) => {
                     className="w-full lg:w-80"
                     onChange={(event) => setDeliverySearch(event.target.value)}
                   />
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Event type</TableHead>
-                        <TableHead>Response</TableHead>
-                        <TableHead>Attempt at</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredDeliveries.length > 0 ? (
-                        filteredDeliveries.map((delivery) => (
-                          <TableRow key={delivery.id}>
-                            <TableCell>
-                              <Badge variant={statusBadgeVariant[delivery.status]}>{delivery.status}</Badge>
-                            </TableCell>
-                            <TableCell>{delivery.eventType}</TableCell>
-                            <TableCell>{delivery.responseCode ?? '-'}</TableCell>
-                            <TableCell>{formatDate(delivery.attemptAt)}</TableCell>
-                          </TableRow>
-                        ))
-                      ) : (
+                  <Card className="overflow-hidden">
+                    <Table>
+                      <TableHeader>
                         <TableRow>
-                          <TableCell colSpan={4}>No deliveries found.</TableCell>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Event type</TableHead>
+                          <TableHead>Response</TableHead>
+                          <TableHead>Attempt at</TableHead>
                         </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
+                      </TableHeader>
+                      <TableBody>
+                        {filteredDeliveries.length > 0 ? (
+                          filteredDeliveries.map((delivery) => (
+                            <TableRow key={delivery.id}>
+                              <TableCell>
+                                <Badge variant={statusBadgeVariant[delivery.status]}>{delivery.status}</Badge>
+                              </TableCell>
+                              <TableCell>{delivery.eventType}</TableCell>
+                              <TableCell>{delivery.responseCode ?? '-'}</TableCell>
+                              <TableCell>{formatDate(delivery.attemptAt)}</TableCell>
+                            </TableRow>
+                          ))
+                        ) : (
+                          <TableRow>
+                            <TableCell colSpan={4}>No deliveries found.</TableCell>
+                          </TableRow>
+                        )}
+                      </TableBody>
+                    </Table>
+                  </Card>
                 </div>
               </div>
             )}
@@ -706,30 +769,36 @@ export const PlatformWebhooksPage = ({ scope }: PlatformWebhooksPageProps) => {
         title="Delete endpoint"
         onCancel={() => setEndpointIdPendingDelete(null)}
         onConfirm={handleDeleteEndpoint}
-        confirmLabel={endpointPendingDelete ? `Delete ${endpointPendingDelete.name}` : 'Delete endpoint'}
-        confirmPlaceholder="Type in endpoint name"
-        confirmString={endpointPendingDelete?.name ?? ''}
+        confirmLabel="Delete endpoint"
+        confirmPlaceholder="Type in endpoint URL"
+        confirmString={endpointPendingDelete?.url ?? ''}
         text={
           endpointPendingDelete ? (
             <>
-              This will delete endpoint <span className="text-bold text-foreground">{endpointPendingDelete.name}</span>
-              .
+              This will delete endpoint{' '}
+              <span className="text-bold text-foreground">{endpointPendingDelete.url}</span>.
             </>
           ) : undefined
         }
         alert={{ title: 'You cannot recover this endpoint once deleted.' }}
       />
 
-      <ConfirmationModal
-        visible={showRegenerateSecretConfirm}
-        title="Regenerate signing secret"
-        description="This will rotate the current signing secret used for webhook signature verification."
-        variant="warning"
-        confirmLabel="Regenerate secret"
-        confirmLabelLoading="Regenerating"
-        onCancel={() => setShowRegenerateSecretConfirm(false)}
-        onConfirm={handleRegenerateSecret}
-      />
+      <AlertDialog open={showRegenerateSecretConfirm} onOpenChange={setShowRegenerateSecretConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Regenerate signing secret</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will rotate the current signing secret used for webhook signature verification.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction variant="warning" onClick={handleRegenerateSecret}>
+              Regenerate secret
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   )
 }

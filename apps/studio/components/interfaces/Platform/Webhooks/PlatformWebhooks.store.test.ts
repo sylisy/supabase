@@ -24,7 +24,7 @@ describe('PlatformWebhooks.store', () => {
     const { state: next, endpoint } = createWebhookEndpoint(
       state,
       {
-        name: 'New endpoint',
+        name: '',
         url: 'https://example.com/webhooks',
         description: 'Test endpoint',
         enabled: true,
@@ -40,6 +40,7 @@ describe('PlatformWebhooks.store', () => {
     )
 
     expect(endpoint.id).toBe('endpoint-fixed')
+    expect(endpoint.name).toBe('endpoint-fixed')
     expect(endpoint.eventTypes).toEqual(['*'])
     expect(endpoint.signingSecret).toBe('whsec_fixed')
     expect(next.endpoints[0].id).toBe('endpoint-fixed')
