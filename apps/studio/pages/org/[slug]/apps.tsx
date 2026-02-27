@@ -11,7 +11,7 @@ const OrgOAuthApps: NextPageWithLayout = () => {
 OrgOAuthApps.getLayout = (page) => (
   <DefaultLayout>
     <OrganizationLayout>
-      <OrganizationSettingsLayout>{page}</OrganizationSettingsLayout>
+      <OrganizationSettingsLayout pageTitle="OAuth Apps">{page}</OrganizationSettingsLayout>
     </OrganizationLayout>
   </DefaultLayout>
 )

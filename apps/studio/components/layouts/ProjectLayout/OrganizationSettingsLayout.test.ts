@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import {
   generateOrganizationSettingsSections,
+  getOrganizationSettingsDocumentTitle,
   normalizeOrganizationSettingsPath,
 } from './OrganizationSettingsLayout'
 
@@ -36,11 +37,7 @@ describe('OrganizationSettingsLayout helpers', () => {
       showLegalDocuments: false,
     })
 
-    expect(section.links.map((item) => item.label)).toEqual([
-      'General',
-      'OAuth Apps',
-      'Audit Logs',
-    ])
+    expect(section.links.map((item) => item.label)).toEqual(['General', 'OAuth Apps', 'Audit Logs'])
   })
 
   it('normalizes hash paths for active state checks', () => {
@@ -54,5 +51,13 @@ describe('OrganizationSettingsLayout helpers', () => {
     })
 
     expect(section.links.find((item) => item.label === 'Security')?.isActive).toBe(true)
+  })
+
+  it('uses settings as default document title when page title is not provided', () => {
+    expect(getOrganizationSettingsDocumentTitle(undefined, 'Supabase')).toBe('Settings | Supabase')
+  })
+
+  it('uses page title for document title when provided', () => {
+    expect(getOrganizationSettingsDocumentTitle('General', 'Supabase')).toBe('General | Supabase')
   })
 })

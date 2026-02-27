@@ -21,7 +21,7 @@ const OrgSecuritySettings: NextPageWithLayout = () => {
 OrgSecuritySettings.getLayout = (page) => (
   <DefaultLayout>
     <OrganizationLayout>
-      <OrganizationSettingsLayout>{page}</OrganizationSettingsLayout>
+      <OrganizationSettingsLayout pageTitle="Security">{page}</OrganizationSettingsLayout>
     </OrganizationLayout>
   </DefaultLayout>
 )

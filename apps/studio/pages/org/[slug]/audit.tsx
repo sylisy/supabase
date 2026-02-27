@@ -21,7 +21,7 @@ const OrgAuditLogs: NextPageWithLayout = () => {
 OrgAuditLogs.getLayout = (page) => (
   <DefaultLayout>
     <OrganizationLayout>
-      <OrganizationSettingsLayout>{page}</OrganizationSettingsLayout>
+      <OrganizationSettingsLayout pageTitle="Audit Logs">{page}</OrganizationSettingsLayout>
     </OrganizationLayout>
   </DefaultLayout>
 )

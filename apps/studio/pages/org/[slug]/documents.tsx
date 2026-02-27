@@ -22,7 +22,7 @@ const OrgDocuments: NextPageWithLayout = () => {
 OrgDocuments.getLayout = (page) => (
   <DefaultLayout>
     <OrganizationLayout>
-      <OrganizationSettingsLayout>{page}</OrganizationSettingsLayout>
+      <OrganizationSettingsLayout pageTitle="Legal Documents">{page}</OrganizationSettingsLayout>
     </OrganizationLayout>
   </DefaultLayout>
 )
