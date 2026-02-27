@@ -132,14 +132,14 @@ export const generateSettingsMenu = (
       items: [
         ...(billingEnabled
           ? [
-            {
-              name: 'Subscription',
-              key: 'subscription',
-              url: `/org/${organization?.slug}/billing`,
-              items: [],
-              rightIcon: <ArrowUpRight strokeWidth={1} className="h-4 w-4" />,
-            },
-          ]
+              {
+                name: 'Subscription',
+                key: 'subscription',
+                url: `/org/${organization?.slug}/billing`,
+                items: [],
+                rightIcon: <ArrowUpRight strokeWidth={1} className="h-4 w-4" />,
+              },
+            ]
           : []),
         {
           name: 'Usage',
