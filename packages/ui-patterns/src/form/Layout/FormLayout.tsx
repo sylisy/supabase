@@ -30,7 +30,7 @@ type Props = {
 const ContainerVariants = cva('relative grid gap-10', {
   variants: {
     size: {
-      tiny: 'text-xs',
+      tiny: 'text-base md:text-xs',
       small: 'text-base md:text-sm leading-4',
       medium: 'text-base md:text-sm',
       large: 'text-base',
