@@ -37,7 +37,7 @@ const defaults = {
     // buttons, inputs, input labels use these sizes
     // text-base on mobile (below md) to avoid zoom on focus
     text: {
-      tiny: 'text-base md:text-xs',
+      tiny: 'text-xs',
       small: 'text-base md:text-sm leading-4',
       medium: 'text-base md:text-sm',
       large: 'text-base',
@@ -1064,7 +1064,7 @@ export default {
     },
     size: {
       tiny: 'text-xs',
-      small: 'text-base md:text-base md:text-sm leading-4',
+      small: 'text-base md:text-sm leading-4',
       medium: 'text-base md:text-sm',
       large: 'text-base',
       xlarge: 'text-base',
