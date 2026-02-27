@@ -149,7 +149,7 @@ export const generateDatabaseMenu = (
         ...(!!pgNetExtensionExists
           ? [
               {
-                name: 'Webhooks',
+                name: 'Database Webhooks',
                 key: 'hooks',
                 url: `/project/${ref}/integrations/webhooks/overview`,
                 rightIcon: <ArrowUpRight strokeWidth={1} className="h-4 w-4" />,

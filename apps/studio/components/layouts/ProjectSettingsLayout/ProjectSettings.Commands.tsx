@@ -45,7 +45,7 @@ export function useProjectSettingsGotoCommands(options?: CommandOptions) {
       },
       {
         id: 'nav-project-settings-webhooks',
-        name: 'Webhooks',
+        name: 'Project Webhooks',
         route: `/project/${ref}/settings/webhooks`,
         defaultHidden: true,
       },

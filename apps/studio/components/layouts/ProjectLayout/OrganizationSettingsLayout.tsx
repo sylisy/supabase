@@ -55,7 +55,7 @@ export const generateOrganizationSettingsMenuItems = ({
     : []),
   {
     key: 'webhooks',
-    label: 'Platform Webhooks',
+    label: 'Webhooks',
     href: `/org/${slug}/webhooks`,
   },
   {

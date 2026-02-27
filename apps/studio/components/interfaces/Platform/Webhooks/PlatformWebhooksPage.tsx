@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ChevronRight, MoreVertical, Pencil, Plus, Power, Search, Trash2 } from 'lucide-react'
+import { ChevronRight, Copy, Eye, MoreVertical, Plus, Power, Search, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { parseAsString, parseAsStringLiteral, useQueryState } from 'nuqs'
@@ -9,6 +9,7 @@ import { toast } from 'sonner'
 import * as z from 'zod'
 
 import { useParams } from 'common'
+import { DocsButton } from 'components/ui/DocsButton'
 import { TextConfirmModal } from 'components/ui/TextConfirmModalWrapper'
 import { createNavigationHandler } from 'lib/navigation'
 import {
@@ -57,6 +58,10 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  Tabs_Shadcn_ as Tabs,
+  TabsContent_Shadcn_ as TabsContent,
+  TabsList_Shadcn_ as TabsList,
+  TabsTrigger_Shadcn_ as TabsTrigger,
   TextArea_Shadcn_ as Textarea,
   copyToClipboard,
 } from 'ui'
@@ -140,6 +145,15 @@ const toEndpointPayload = (values: EndpointFormValues): UpsertWebhookEndpointInp
 })
 
 const formatEvents = (eventTypes: string[]) => (eventTypes.includes('*') ? 'All events (*)' : eventTypes.join(', '))
+const formatDeliveryStatus = (status: WebhookDeliveryStatus) =>
+  `${status.charAt(0).toUpperCase()}${status.slice(1)}`
+
+const responseCodeBadgeVariant = (responseCode?: number): 'default' | 'success' | 'destructive' => {
+  if (!responseCode) return 'default'
+  if (responseCode >= 200 && responseCode < 300) return 'success'
+  if (responseCode >= 400) return 'destructive'
+  return 'default'
+}
 
 interface PlatformWebhooksPageProps {
   scope: WebhookScope
@@ -149,12 +163,21 @@ interface EndpointSheetProps {
   visible: boolean
   mode: 'create' | 'edit'
   endpoint?: WebhookEndpoint
+  enabledOverride?: boolean | null
   eventTypes: string[]
   onClose: () => void
   onSubmit: (values: EndpointFormValues) => void
 }
 
-const EndpointSheet = ({ visible, mode, endpoint, eventTypes, onClose, onSubmit }: EndpointSheetProps) => {
+const EndpointSheet = ({
+  visible,
+  mode,
+  endpoint,
+  enabledOverride,
+  eventTypes,
+  onClose,
+  onSubmit,
+}: EndpointSheetProps) => {
   const form = useForm<EndpointFormValues>({
     resolver: zodResolver(endpointFormSchema),
     defaultValues: {
@@ -193,12 +216,12 @@ const EndpointSheet = ({ visible, mode, endpoint, eventTypes, onClose, onSubmit 
     form.reset({
       url: endpoint.url,
       description: endpoint.description,
-      enabled: endpoint.enabled,
+      enabled: enabledOverride ?? endpoint.enabled,
       subscribeAll: endpoint.eventTypes.includes('*'),
       eventTypes: endpoint.eventTypes.includes('*') ? [] : endpoint.eventTypes,
       customHeaders: endpoint.customHeaders.map((header) => ({ key: header.key, value: header.value })),
     })
-  }, [endpoint, form, visible])
+  }, [enabledOverride, endpoint, form, visible])
 
   return (
     <Sheet open={visible} onOpenChange={onClose}>
@@ -367,9 +390,10 @@ const EndpointSheet = ({ visible, mode, endpoint, eventTypes, onClose, onSubmit 
 export const PlatformWebhooksPage = ({ scope }: PlatformWebhooksPageProps) => {
   const router = useRouter()
   const { slug, ref } = useParams()
-  const { endpoints, deliveries, createEndpoint, updateEndpoint, deleteEndpoint, toggleEndpoint, regenerateSecret } =
+  const { endpoints, deliveries, createEndpoint, updateEndpoint, deleteEndpoint, regenerateSecret } =
     usePlatformWebhooksMockStore(scope)
   const [endpointId, setEndpointId] = useQueryState('endpointId', parseAsString)
+  const [deliveryId, setDeliveryId] = useQueryState('deliveryId', parseAsString)
   const [panel, setPanel] = useQueryState('panel', parseAsStringLiteral(PANEL_VALUES))
   const [search, setSearch] = useQueryState(
     'search',
@@ -382,8 +406,10 @@ export const PlatformWebhooksPage = ({ scope }: PlatformWebhooksPageProps) => {
 
   const [endpointIdPendingDelete, setEndpointIdPendingDelete] = useState<string | null>(null)
   const [showRegenerateSecretConfirm, setShowRegenerateSecretConfirm] = useState(false)
+  const [editEnabledOverride, setEditEnabledOverride] = useState<boolean | null>(null)
+  const [deliveryDetailsTab, setDeliveryDetailsTab] = useState<'event' | 'response'>('event')
 
-  const scopeLabel = scope === 'organization' ? 'Platform Webhooks' : 'Project Webhooks'
+  const scopeLabel = scope === 'organization' ? 'Organization Webhooks' : 'Project Webhooks'
   const scopeDescription =
     scope === 'organization'
       ? 'Manage organization-level webhook endpoints and deliveries'
@@ -419,6 +445,53 @@ export const PlatformWebhooksPage = ({ scope }: PlatformWebhooksPageProps) => {
     return filterWebhookDeliveries(deliveries, selectedEndpoint.id, deliverySearch)
   }, [deliveries, deliverySearch, selectedEndpoint])
 
+  const selectedDelivery = useMemo(() => {
+    if (!selectedEndpoint || !deliveryId) return null
+    return (
+      deliveries.find((delivery) => delivery.id === deliveryId && delivery.endpointId === selectedEndpoint.id) ??
+      null
+    )
+  }, [deliveries, deliveryId, selectedEndpoint])
+
+  const deliveryAttempt = useMemo(() => {
+    if (!selectedEndpoint || !selectedDelivery) return null
+    const endpointDeliveries = deliveries
+      .filter((delivery) => delivery.endpointId === selectedEndpoint.id)
+      .sort((a, b) => new Date(b.attemptAt).getTime() - new Date(a.attemptAt).getTime())
+    const index = endpointDeliveries.findIndex((delivery) => delivery.id === selectedDelivery.id)
+    return index >= 0 ? index + 1 : null
+  }, [deliveries, selectedDelivery, selectedEndpoint])
+
+  const deliveryEventPayload = useMemo(() => {
+    if (!selectedEndpoint || !selectedDelivery) return ''
+    return JSON.stringify(
+      {
+        endpoint_id: selectedEndpoint.id,
+        endpoint_url: selectedEndpoint.url,
+        event_type: selectedDelivery.eventType,
+        event_id: selectedDelivery.id,
+        attempted_at: selectedDelivery.attemptAt,
+        scope,
+      },
+      null,
+      2
+    )
+  }, [scope, selectedDelivery, selectedEndpoint])
+
+  const deliveryResponsePayload = useMemo(() => {
+    if (!selectedEndpoint || !selectedDelivery) return ''
+    return JSON.stringify(
+      {
+        endpoint_id: selectedEndpoint.id,
+        delivery_id: selectedDelivery.id,
+        status: selectedDelivery.status,
+        response_code: selectedDelivery.responseCode ?? null,
+      },
+      null,
+      2
+    )
+  }, [selectedDelivery, selectedEndpoint])
+
   const handleDeleteEndpoint = () => {
     if (!endpointPendingDelete) return
     deleteEndpoint(endpointPendingDelete.id)
@@ -435,6 +508,7 @@ export const PlatformWebhooksPage = ({ scope }: PlatformWebhooksPageProps) => {
       const createdEndpointId = createEndpoint(toEndpointPayload(values))
       setEndpointId(createdEndpointId)
       setPanel(null)
+      setEditEnabledOverride(null)
       toast.success('Endpoint created')
       return
     }
@@ -442,6 +516,7 @@ export const PlatformWebhooksPage = ({ scope }: PlatformWebhooksPageProps) => {
     if (panel === 'edit' && selectedEndpoint) {
       updateEndpoint(selectedEndpoint.id, toEndpointPayload(values))
       setPanel(null)
+      setEditEnabledOverride(null)
       toast.success('Endpoint updated')
     }
   }
@@ -453,7 +528,24 @@ export const PlatformWebhooksPage = ({ scope }: PlatformWebhooksPageProps) => {
     toast.success('Signing secret regenerated')
   }
 
+  const handleCopy = (value: string, label: string) => {
+    copyToClipboard(value)
+    toast.success(`Copied ${label}`)
+  }
+
   const isEndpointSheetOpen = panel === 'create' || (panel === 'edit' && !!selectedEndpoint)
+
+  useEffect(() => {
+    if (!selectedEndpoint && !!deliveryId) {
+      setDeliveryId(null)
+    }
+  }, [deliveryId, selectedEndpoint, setDeliveryId])
+
+  useEffect(() => {
+    if (!!deliveryId && !selectedDelivery) {
+      setDeliveryId(null)
+    }
+  }, [deliveryId, selectedDelivery, setDeliveryId])
 
   return (
     <>
@@ -479,20 +571,12 @@ export const PlatformWebhooksPage = ({ scope }: PlatformWebhooksPageProps) => {
             <PageHeaderDescription>{scopeDescription}</PageHeaderDescription>
           </PageHeaderSummary>
           <PageHeaderAside>
-            {!selectedEndpoint ? (
-              <Button type="primary" icon={<Plus />} onClick={() => setPanel('create')}>
-                New endpoint
-              </Button>
-            ) : (
-              <div className="flex items-center gap-2">
-                <Button type="default" onClick={() => setPanel('edit')}>
-                  Edit
-                </Button>
-                <Button type="default" onClick={() => toggleEndpoint(selectedEndpoint.id)}>
-                  {selectedEndpoint.enabled ? 'Disable' : 'Enable'}
-                </Button>
-              </div>
-            )}
+            <DocsButton href="https://supabase.com/docs" />
+            <Button asChild type="default">
+              <a target="_blank" rel="noopener noreferrer" href="https://supabase.com">
+                Leave Feedback
+              </a>
+            </Button>
           </PageHeaderAside>
         </PageHeaderMeta>
       </PageHeader>
@@ -502,6 +586,12 @@ export const PlatformWebhooksPage = ({ scope }: PlatformWebhooksPageProps) => {
           <PageSectionContent>
             {!selectedEndpoint ? (
               <div className="space-y-4">
+                <div className="flex items-center justify-between gap-2">
+                  <h4 className="text-foreground">Endpoints</h4>
+                  <Button type="primary" icon={<Plus />} onClick={() => setPanel('create')}>
+                    New endpoint
+                  </Button>
+                </div>
                 <Input
                   placeholder="Search endpoints"
                   size="tiny"
@@ -576,20 +666,23 @@ export const PlatformWebhooksPage = ({ scope }: PlatformWebhooksPageProps) => {
                                       className="gap-x-2"
                                       onClick={() => {
                                         setEndpointId(endpoint.id)
-                                        setPanel('edit')
+                                        setPanel(null)
                                       }}
                                     >
-                                      <Pencil size={14} />
-                                      <span>Edit endpoint</span>
+                                      <Eye size={14} />
+                                      <span>View details</span>
                                     </DropdownMenuItem>
                                     <DropdownMenuItem
                                       className="gap-x-2"
-                                      onClick={() => toggleEndpoint(endpoint.id)}
+                                      disabled={!endpoint.enabled}
+                                      onClick={() => {
+                                        setEndpointId(endpoint.id)
+                                        setEditEnabledOverride(false)
+                                        setPanel('edit')
+                                      }}
                                     >
                                       <Power size={14} />
-                                      <span>
-                                        {endpoint.enabled ? 'Disable endpoint' : 'Enable endpoint'}
-                                      </span>
+                                      <span>Disable</span>
                                     </DropdownMenuItem>
                                     <DropdownMenuSeparator />
                                     <DropdownMenuItem
@@ -617,7 +710,16 @@ export const PlatformWebhooksPage = ({ scope }: PlatformWebhooksPageProps) => {
             ) : (
               <div className="space-y-6">
                 <div className="flex items-center justify-end gap-2">
-                  <Button type="default" onClick={() => copyToClipboard(selectedEndpoint.url)}>
+                  <Button
+                    type="default"
+                    onClick={() => {
+                      setEditEnabledOverride(null)
+                      setPanel('edit')
+                    }}
+                  >
+                    Edit
+                  </Button>
+                  <Button type="default" onClick={() => handleCopy(selectedEndpoint.url, 'URL')}>
                     Copy URL
                   </Button>
                   <Button type="danger" onClick={() => setEndpointIdPendingDelete(selectedEndpoint.id)}>
@@ -692,7 +794,10 @@ export const PlatformWebhooksPage = ({ scope }: PlatformWebhooksPageProps) => {
                         </TableBody>
                       </Table>
                       <div className="flex items-center gap-2">
-                        <Button type="default" onClick={() => copyToClipboard(selectedEndpoint.signingSecret)}>
+                        <Button
+                          type="default"
+                          onClick={() => handleCopy(selectedEndpoint.signingSecret, 'signing secret')}
+                        >
                           Copy secret
                         </Button>
                         <Button type="warning" onClick={() => setShowRegenerateSecretConfirm(true)}>
@@ -729,7 +834,22 @@ export const PlatformWebhooksPage = ({ scope }: PlatformWebhooksPageProps) => {
                       <TableBody>
                         {filteredDeliveries.length > 0 ? (
                           filteredDeliveries.map((delivery) => (
-                            <TableRow key={delivery.id}>
+                            <TableRow
+                              key={delivery.id}
+                              className="cursor-pointer inset-focus"
+                              onClick={() => {
+                                setDeliveryDetailsTab('event')
+                                setDeliveryId(delivery.id)
+                              }}
+                              onKeyDown={(event) => {
+                                if (event.key === 'Enter' || event.key === ' ') {
+                                  event.preventDefault()
+                                  setDeliveryDetailsTab('event')
+                                  setDeliveryId(delivery.id)
+                                }
+                              }}
+                              tabIndex={0}
+                            >
                               <TableCell>
                                 <Badge variant={statusBadgeVariant[delivery.status]}>{delivery.status}</Badge>
                               </TableCell>
@@ -753,12 +873,132 @@ export const PlatformWebhooksPage = ({ scope }: PlatformWebhooksPageProps) => {
         </PageSection>
       </PageContainer>
 
+      <Sheet open={!!selectedDelivery} onOpenChange={(open) => !open && setDeliveryId(null)}>
+        <SheetContent size="default" className="flex flex-col gap-0">
+          <SheetHeader>
+            <div className="flex items-center gap-2">
+              <SheetTitle>Delivery details</SheetTitle>
+              {selectedDelivery && (
+                <Badge variant={statusBadgeVariant[selectedDelivery.status]}>
+                  {formatDeliveryStatus(selectedDelivery.status)}
+                </Badge>
+              )}
+            </div>
+          </SheetHeader>
+          <Separator />
+
+          {selectedDelivery && (
+            <SheetSection className="overflow-auto flex-grow px-0 py-0">
+              <div className="space-y-6 p-5">
+                <Card>
+                  <CardContent className="grid grid-cols-1 gap-4 p-4 @md:grid-cols-2">
+                    <div className="space-y-1">
+                      <p className="text-sm text-foreground-light">Delivery ID</p>
+                      <code className="text-code-inline">{selectedDelivery.id}</code>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-sm text-foreground-light">Attempt</p>
+                      <p className="text-sm text-foreground">{deliveryAttempt ? `#${deliveryAttempt}` : '-'}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-sm text-foreground-light">Timestamp</p>
+                      <p className="text-sm text-foreground">{formatDate(selectedDelivery.attemptAt)}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-sm text-foreground-light">Response code</p>
+                      <Badge variant={responseCodeBadgeVariant(selectedDelivery.responseCode)}>
+                        {selectedDelivery.responseCode ?? '-'}
+                      </Badge>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Tabs value={deliveryDetailsTab} onValueChange={(value) => setDeliveryDetailsTab(value as 'event' | 'response')}>
+                  <TabsList className="w-full">
+                    <TabsTrigger value="event" className="flex-1">
+                      Event
+                    </TabsTrigger>
+                    <TabsTrigger value="response" className="flex-1">
+                      Response
+                    </TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="event" className="space-y-4 pt-4">
+                    <div className="space-y-1">
+                      <p className="text-sm text-foreground-light">Event type</p>
+                      <code className="text-code-inline">{selectedDelivery.eventType}</code>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-sm text-foreground-light">Event ID</p>
+                      <code className="text-code-inline">{selectedDelivery.id}</code>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-sm text-foreground-light">Event timestamp</p>
+                      <p className="text-sm text-foreground">{formatDate(selectedDelivery.attemptAt)}</p>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-sm text-foreground-light">Payload</p>
+                        <Button
+                          type="text"
+                          icon={<Copy size={14} />}
+                          onClick={() => handleCopy(deliveryEventPayload, 'event payload')}
+                        >
+                          Copy
+                        </Button>
+                      </div>
+                      <div className="rounded-md border border-default bg-surface-200 p-3">
+                        <pre className="whitespace-pre-wrap text-xs text-foreground">{deliveryEventPayload}</pre>
+                      </div>
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="response" className="space-y-4 pt-4">
+                    <div className="space-y-1">
+                      <p className="text-sm text-foreground-light">Status</p>
+                      <Badge variant={statusBadgeVariant[selectedDelivery.status]}>
+                        {formatDeliveryStatus(selectedDelivery.status)}
+                      </Badge>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-sm text-foreground-light">Response code</p>
+                      <Badge variant={responseCodeBadgeVariant(selectedDelivery.responseCode)}>
+                        {selectedDelivery.responseCode ?? '-'}
+                      </Badge>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-sm text-foreground-light">Response payload</p>
+                        <Button
+                          type="text"
+                          icon={<Copy size={14} />}
+                          onClick={() => handleCopy(deliveryResponsePayload, 'response payload')}
+                        >
+                          Copy
+                        </Button>
+                      </div>
+                      <div className="rounded-md border border-default bg-surface-200 p-3">
+                        <pre className="whitespace-pre-wrap text-xs text-foreground">{deliveryResponsePayload}</pre>
+                      </div>
+                    </div>
+                  </TabsContent>
+                </Tabs>
+              </div>
+            </SheetSection>
+          )}
+        </SheetContent>
+      </Sheet>
+
       <EndpointSheet
         visible={isEndpointSheetOpen}
         mode={panel === 'create' ? 'create' : 'edit'}
         endpoint={panel === 'edit' ? selectedEndpoint ?? undefined : undefined}
+        enabledOverride={panel === 'edit' ? editEnabledOverride : null}
         eventTypes={eventTypeOptions}
-        onClose={() => setPanel(null)}
+        onClose={() => {
+          setPanel(null)
+          setEditEnabledOverride(null)
+        }}
         onSubmit={handleUpsertEndpoint}
       />
 

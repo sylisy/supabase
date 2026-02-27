@@ -7,7 +7,7 @@ import {
 } from './OrganizationSettingsLayout'
 
 describe('generateOrganizationSettingsMenuItems', () => {
-  it('includes platform webhooks entry for organization settings nav', () => {
+  it('includes webhooks entry for organization settings nav', () => {
     const items = generateOrganizationSettingsMenuItems({
       slug: 'my-org',
       showSecuritySettings: true,
@@ -15,7 +15,7 @@ describe('generateOrganizationSettingsMenuItems', () => {
       showLegalDocuments: true,
     })
 
-    expect(items.some((item) => item.label === 'Platform Webhooks')).toBe(true)
+    expect(items.some((item) => item.label === 'Webhooks')).toBe(true)
     expect(items.some((item) => item.href === '/org/my-org/webhooks')).toBe(true)
   })
 })
@@ -36,7 +36,7 @@ describe('OrganizationSettingsLayout helpers', () => {
       'Security',
       'OAuth Apps',
       'SSO',
-      'Platform Webhooks',
+      'Webhooks',
       'Audit Logs',
       'Legal Documents',
     ])
@@ -55,7 +55,7 @@ describe('OrganizationSettingsLayout helpers', () => {
     expect(section.links.map((item) => item.label)).toEqual([
       'General',
       'OAuth Apps',
-      'Platform Webhooks',
+      'Webhooks',
       'Audit Logs',
     ])
   })
