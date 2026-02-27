@@ -3,7 +3,6 @@ import DefaultLayout from 'components/layouts/DefaultLayout'
 import OrganizationLayout from 'components/layouts/OrganizationLayout'
 import OrganizationSettingsLayout from 'components/layouts/ProjectLayout/OrganizationSettingsLayout'
 import type { NextPageWithLayout } from 'types'
-import { PageContainer } from 'ui-patterns/PageContainer'
 import {
   PageHeader,
   PageHeaderDescription,
@@ -25,9 +24,7 @@ const OrgOAuthApps: NextPageWithLayout = () => {
           </PageHeaderSummary>
         </PageHeaderMeta>
       </PageHeader>
-      <PageContainer size="default">
-        <OAuthApps />
-      </PageContainer>
+      <OAuthApps />
     </>
   )
 }

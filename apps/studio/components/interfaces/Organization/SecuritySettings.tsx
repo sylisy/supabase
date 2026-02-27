@@ -105,7 +105,7 @@ export const SecuritySettings = () => {
   }
 
   return (
-    <ScaffoldContainer>
+    <ScaffoldContainer size="small">
       <ScaffoldSection isFullWidth>
         {!isPaidPlan ? (
           <UpgradeToPro

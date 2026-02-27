@@ -6,7 +6,6 @@ import OrganizationSettingsLayout from 'components/layouts/ProjectLayout/Organiz
 import { UnknownInterface } from 'components/ui/UnknownInterface'
 import { useIsFeatureEnabled } from 'hooks/misc/useIsFeatureEnabled'
 import type { NextPageWithLayout } from 'types'
-import { PageContainer } from 'ui-patterns/PageContainer'
 import {
   PageHeader,
   PageHeaderDescription,
@@ -25,7 +24,7 @@ const OrgSecuritySettings: NextPageWithLayout = () => {
 
   return (
     <>
-      <PageHeader size="default">
+      <PageHeader size="small">
         <PageHeaderMeta>
           <PageHeaderSummary>
             <PageHeaderTitle>Security</PageHeaderTitle>
@@ -35,9 +34,7 @@ const OrgSecuritySettings: NextPageWithLayout = () => {
           </PageHeaderSummary>
         </PageHeaderMeta>
       </PageHeader>
-      <PageContainer size="default">
-        <SecuritySettings />
-      </PageContainer>
+      <SecuritySettings />
     </>
   )
 }

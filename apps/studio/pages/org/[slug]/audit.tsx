@@ -5,7 +5,6 @@ import OrganizationSettingsLayout from 'components/layouts/ProjectLayout/Organiz
 import { usePermissionsQuery } from 'data/permissions/permissions-query'
 import { useSelectedOrganizationQuery } from 'hooks/misc/useSelectedOrganization'
 import type { NextPageWithLayout } from 'types'
-import { PageContainer } from 'ui-patterns/PageContainer'
 import {
   PageHeader,
   PageHeaderDescription,
@@ -31,13 +30,7 @@ const OrgAuditLogs: NextPageWithLayout = () => {
           </PageHeaderSummary>
         </PageHeaderMeta>
       </PageHeader>
-      <PageContainer size="default">
-        {selectedOrganization === undefined && isLoadingPermissions ? (
-          <LogoLoader />
-        ) : (
-          <AuditLogs />
-        )}
-      </PageContainer>
+      {selectedOrganization === undefined && isLoadingPermissions ? <LogoLoader /> : <AuditLogs />}
     </>
   )
 }

@@ -3,17 +3,15 @@ import { Documents } from 'components/interfaces/Organization/Documents/Document
 import DefaultLayout from 'components/layouts/DefaultLayout'
 import OrganizationLayout from 'components/layouts/OrganizationLayout'
 import OrganizationSettingsLayout from 'components/layouts/ProjectLayout/OrganizationSettingsLayout'
+import {
+  ScaffoldContainer,
+  ScaffoldDescription,
+  ScaffoldHeader,
+  ScaffoldTitle,
+} from 'components/layouts/Scaffold'
 import { UnknownInterface } from 'components/ui/UnknownInterface'
 import { useIsFeatureEnabled } from 'hooks/misc/useIsFeatureEnabled'
 import type { NextPageWithLayout } from 'types'
-import { PageContainer } from 'ui-patterns/PageContainer'
-import {
-  PageHeader,
-  PageHeaderDescription,
-  PageHeaderMeta,
-  PageHeaderSummary,
-  PageHeaderTitle,
-} from 'ui-patterns/PageHeader'
 
 const OrgDocuments: NextPageWithLayout = () => {
   const { slug } = useParams()
@@ -26,19 +24,13 @@ const OrgDocuments: NextPageWithLayout = () => {
 
   return (
     <>
-      <PageHeader size="default">
-        <PageHeaderMeta>
-          <PageHeaderSummary>
-            <PageHeaderTitle>Legal Documents</PageHeaderTitle>
-            <PageHeaderDescription>
-              Compliance documentation and legal agreements
-            </PageHeaderDescription>
-          </PageHeaderSummary>
-        </PageHeaderMeta>
-      </PageHeader>
-      <PageContainer size="default">
-        <Documents />
-      </PageContainer>
+      <ScaffoldContainer>
+        <ScaffoldHeader>
+          <ScaffoldTitle>Legal documents</ScaffoldTitle>
+          <ScaffoldDescription>Compliance documentation and legal agreements</ScaffoldDescription>
+        </ScaffoldHeader>
+      </ScaffoldContainer>
+      <Documents />
     </>
   )
 }
