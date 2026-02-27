@@ -27,13 +27,13 @@ Database backups do not include objects you store via the Storage API, as the da
 
 ## Backup and restore process
 
-You can access daily backups in the [**Database** > **Backups**](/dashboard/project/_/database/backups/scheduled) section of the Dashboard and restore a project to any one of the backups.
+You can access daily backups in the [**Database** > **Backups**](/dashboard/project/_/database/backups/scheduled) section of the Dashboard and restore a project to any of the backups.
 
-You can restore your project to any of these backups. To generate a logical backup yourself, use the [Supabase CLI `db dump` command](/docs/reference/cli/supabase-db-dump).
+You can restore your project to any of the backups. To generate a logical backup yourself, use the [Supabase CLI `db dump` command](/docs/reference/cli/supabase-db-dump).
 
 ## Managing backups programmatically
 
-You can also manage backups programmatically using the Management API:
+You can also manage backups programmatically [using the Management API](/docs/reference/api/v1-list-all-backups):
 
 ```bash
 # Get your access token from https://supabase.com/dashboard/account/tokens
